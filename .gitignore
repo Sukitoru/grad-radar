@@ -32,5 +32,4 @@ lerna-debug.log*
 *.sln
 *.sw?
 
-/generated/prisma
-
+/api/src/generated/prisma/

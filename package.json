@@ -1,0 +1,39 @@
+{
+  "name": "grad-radar",
+  "private": true,
+  "packageManager": "yarn@4.18.0",
+  "engines": {
+    "node": "24.18.0",
+    "yarn": "4.18.0"
+  },
+  "workspaces": [
+    "api",
+    "client"
+  ],
+  "scripts": {
+    "dev": "yarn workspace client dev",
+    "build": "yarn workspace client build",
+    "preview": "yarn workspace client preview",
+    "test": "yarn workspace client test.unit",
+    "test:e2e": "cross-env ELECTRON_RUN_AS_NODE= start-test dev http://localhost:5173 \"yarn workspace client test.e2e\"",
+    "lint": "yarn workspace client lint",
+    "ionic": "cd client && ionic",
+    "prisma:format": "yarn workspace grad-radar-api prisma:format",
+    "prisma:validate": "yarn workspace grad-radar-api prisma:validate",
+    "prisma:generate": "yarn workspace grad-radar-api prisma:generate",
+    "db:migrate": "yarn workspace grad-radar-api db:migrate",
+    "db:deploy": "yarn workspace grad-radar-api db:deploy",
+    "db:studio": "yarn workspace grad-radar-api db:studio"
+  },
+  "devDependencies": {
+    "@ionic/cli": "7.2.1",
+    "cross-env": "10.1.0",
+    "start-server-and-test": "3.0.12"
+  },
+  "resolutions": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "tar": "7.5.22",
+    "tmp": "0.2.7"
+  }
+}
