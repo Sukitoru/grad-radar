@@ -33,3 +33,7 @@ lerna-debug.log*
 *.sw?
 
 /generated/prisma
+
+.agents
+.claude
+.windsurf
