@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DecisionStatus {
+  ACCEPTED
+  REJECTED
+  WAITLISTED
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  username     String        @unique @db.VarChar(50)
+  passwordHash String        @db.VarChar(255)
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+  applications Application[]
+
+  @@map("users")
+}
+
+model School {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String        @unique @db.VarChar(160)
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+  programs     Program[]
+  applications Application[]
+
+  @@map("schools")
+}
+
+model Program {
+  id           String        @id @default(uuid()) @db.Uuid
+  schoolId     String        @db.Uuid
+  name         String        @db.VarChar(160)
+  degreeLevel  String        @db.VarChar(50)
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+  school       School        @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  applications Application[]
+
+  @@unique([schoolId, name, degreeLevel])
+  @@index([schoolId])
+  @@map("programs")
+}
+
+model Term {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String        @db.VarChar(30)
+  academicYear Int
+  startDate    DateTime?     @db.Date
+  endDate      DateTime?     @db.Date
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+  applications Application[]
+
+  @@unique([name, academicYear])
+  @@map("terms")
+}
+
+model Application {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  schoolId        String    @db.Uuid
+  programId       String    @db.Uuid
+  termId          String    @db.Uuid
+  gpa             Decimal?  @db.Decimal(3, 2)
+  greVerbal       Int?
+  greQuantitative Int?
+  greWriting      Decimal?  @db.Decimal(2, 1)
+  researchArea    String?   @db.VarChar(255)
+  publications    Int       @default(0)
+  submissionDate  DateTime? @db.Date
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @db.Timestamptz(3)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school          School    @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  program         Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
+  term            Term      @relation(fields: [termId], references: [id], onDelete: Restrict)
+  decision        Decision?
+
+  @@index([userId])
+  @@index([schoolId])
+  @@index([programId])
+  @@index([termId])
+  @@map("applications")
+}
+
+model Decision {
+  id            String         @id @default(uuid()) @db.Uuid
+  applicationId String         @unique @db.Uuid
+  status        DecisionStatus
+  decisionDate  DateTime       @db.Date
+  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([status, decisionDate])
+  @@map("decisions")
+}

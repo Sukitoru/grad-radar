@@ -17,7 +17,13 @@
     "test": "yarn workspace client test.unit",
     "test:e2e": "cross-env ELECTRON_RUN_AS_NODE= start-test dev http://localhost:5173 \"yarn workspace client test.e2e\"",
     "lint": "yarn workspace client lint",
-    "ionic": "cd client && ionic"
+    "ionic": "cd client && ionic",
+    "prisma:format": "yarn workspace grad-radar-api prisma:format",
+    "prisma:validate": "yarn workspace grad-radar-api prisma:validate",
+    "prisma:generate": "yarn workspace grad-radar-api prisma:generate",
+    "db:migrate": "yarn workspace grad-radar-api db:migrate",
+    "db:deploy": "yarn workspace grad-radar-api db:deploy",
+    "db:studio": "yarn workspace grad-radar-api db:studio"
   },
   "devDependencies": {
     "@ionic/cli": "7.2.1",
