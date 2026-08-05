@@ -1,4 +1,12 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import {
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonMenuButton,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
 import IntroContainer from '../components/IntroContainer';
 import './Home.css';
 
@@ -7,6 +15,10 @@ const Home: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar id="toolbar">
+          <IonButtons slot="start">
+            <IonMenuButton menu="main-navigation" />
+          </IonButtons>
+
           <IonTitle>GradRadar</IonTitle>
         </IonToolbar>
       </IonHeader>
