@@ -4,6 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "dev": "node --watch src/server.ts",
+    "start": "node src/server.ts",
+    "typecheck": "tsc --noEmit",
     "prisma:format": "prisma format",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
@@ -12,10 +15,14 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "7.9.1"
+    "@prisma/client": "7.9.1",
+    "dotenv": "17.4.2",
+    "express": "5.2.1"
   },
   "devDependencies": {
-    "dotenv": "17.4.2",
-    "prisma": "7.9.1"
+    "@types/express": "5.0.6",
+    "@types/node": "24.13.3",
+    "prisma": "7.9.1",
+    "typescript": "7.0.2"
   }
 }

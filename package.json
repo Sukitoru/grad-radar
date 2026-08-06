@@ -11,6 +11,9 @@
     "client"
   ],
   "scripts": {
+    "dev:api": "yarn workspace grad-radar-api dev",
+    "start:api": "yarn workspace grad-radar-api start",
+    "typecheck:api": "yarn workspace grad-radar-api typecheck",
     "dev": "yarn workspace client dev",
     "build": "yarn workspace client build",
     "preview": "yarn workspace client preview",
