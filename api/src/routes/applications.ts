@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient } from './src/generated/prisma/client.ts';
+import { PrismaClient } from '../generated/prisma/client.ts';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const router = express.Router();
@@ -12,10 +12,6 @@ if (!connectionString) {
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
-
-//---Routes---
-
-/* Creates an application */
 
 router.post('/applications', async (req, res) => {
   const {
