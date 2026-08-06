@@ -1849,7 +1849,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/adapter-pg@npm:^7.9.1":
+"@prisma/adapter-pg@npm:7.9.1":
   version: 7.9.1
   resolution: "@prisma/adapter-pg@npm:7.9.1"
   dependencies:
@@ -1868,7 +1868,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^7.9.1":
+"@prisma/client@npm:7.9.1":
   version: 7.9.1
   resolution: "@prisma/client@npm:7.9.1"
   dependencies:
@@ -2591,7 +2591,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^5.0.6":
+"@types/express@npm:5.0.6":
   version: 5.0.6
   resolution: "@types/express@npm:5.0.6"
   dependencies:
@@ -4906,7 +4906,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^5.2.1":
+"express@npm:5.2.1":
   version: 5.2.1
   resolution: "express@npm:5.2.1"
   dependencies:
@@ -5434,12 +5434,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "grad-radar-api@workspace:api"
   dependencies:
-    "@prisma/adapter-pg": "npm:^7.9.1"
-    "@prisma/client": "npm:^7.9.1"
-    "@types/express": "npm:^5.0.6"
+    "@prisma/adapter-pg": "npm:7.9.1"
+    "@prisma/client": "npm:7.9.1"
+    "@types/express": "npm:5.0.6"
     dotenv: "npm:17.4.2"
-    express: "npm:^5.2.1"
-    prisma: "npm:^7.9.1"
+    express: "npm:5.2.1"
+    prisma: "npm:7.9.1"
   languageName: unknown
   linkType: soft
 
@@ -5448,10 +5448,7 @@ __metadata:
   resolution: "grad-radar@workspace:."
   dependencies:
     "@ionic/cli": "npm:7.2.1"
-    "@prisma/client": "npm:^7.9.1"
     cross-env: "npm:10.1.0"
-    express: "npm:^5.2.1"
-    prisma: "npm:^7.9.1"
     start-server-and-test: "npm:3.0.12"
   languageName: unknown
   linkType: soft
@@ -7251,7 +7248,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:^7.9.1":
+"prisma@npm:7.9.1":
   version: 7.9.1
   resolution: "prisma@npm:7.9.1"
   dependencies:

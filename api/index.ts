@@ -1,34 +1,60 @@
-import express from "express";
-import { PrismaClient } from "./src/generated/prisma/index.js";
-import { PrismaPg } from "@prisma/adapter-pg"; 
-import pg from "pg"; 
+import express from 'express';
+import { PrismaClient } from './src/generated/prisma/client.ts';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 const router = express.Router();
 
-const pool = new pg.Pool ({
-    connectionString: process.env.DATABASE_URL,
-});
+const connectionString = process.env.DATABASE_URL;
 
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient ({ adapter }); 
+if (!connectionString) {
+  throw new Error('DATABASE_URL is required.');
+}
+
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 //---Routes---
 
 /* Creates an application */
 
-router.post("/applications", async (req, res) => {
-    try {
-        const application = await prisma.application.create({
-            data: req.body,
-        });
+router.post('/applications', async (req, res) => {
+  const {
+    userId,
+    schoolId,
+    programId,
+    termId,
+    gpa,
+    greVerbal,
+    greQuantitative,
+    greWriting,
+    researchArea,
+    publications,
+    submissionDate,
+  } = req.body;
 
-        res.status(201).json(application);
-    } catch (error) {
-        res.status(500).json({ 
-            message: "Failed to create application.",
-        });
-    }
+  try {
+    const application = await prisma.application.create({
+      data: {
+        userId,
+        schoolId,
+        programId,
+        termId,
+        gpa,
+        greVerbal,
+        greQuantitative,
+        greWriting,
+        researchArea,
+        publications,
+        submissionDate,
+      },
+    });
+
+    res.status(201).json(application);
+  } catch {
+    res.status(500).json({
+      message: 'Failed to create application.',
+    });
+  }
 });
 
-export default router; 
-
+export default router;

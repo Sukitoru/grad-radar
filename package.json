@@ -28,7 +28,6 @@
   "devDependencies": {
     "@ionic/cli": "7.2.1",
     "cross-env": "10.1.0",
-    "prisma": "^7.9.1",
     "start-server-and-test": "3.0.12"
   },
   "resolutions": {
@@ -36,9 +35,5 @@
     "@types/react-dom": "19.2.4",
     "tar": "7.5.22",
     "tmp": "0.2.7"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.9.1",
-    "express": "^5.2.1"
   }
 }
