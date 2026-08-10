@@ -38,5 +38,9 @@
     "@types/react-dom": "19.2.4",
     "tar": "7.5.22",
     "tmp": "0.2.7"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "passport": "^0.7.0"
   }
 }
