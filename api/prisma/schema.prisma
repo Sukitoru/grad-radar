@@ -13,6 +13,11 @@ enum DecisionStatus {
   WAITLISTED
 }
 
+enum DegreeLevel {
+  Masters
+  Doctoral
+}
+
 model User {
   id           String        @id @default(uuid()) @db.Uuid
   username     String        @unique @db.VarChar(50)
@@ -39,7 +44,7 @@ model Program {
   id           String        @id @default(uuid()) @db.Uuid
   schoolId     String        @db.Uuid
   name         String        @db.VarChar(160)
-  degreeLevel  String        @db.VarChar(50)
+  degreeLevel  DegreeLevel
   createdAt    DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
   school       School        @relation(fields: [schoolId], references: [id], onDelete: Restrict)
@@ -65,25 +70,23 @@ model Term {
 }
 
 model Application {
-  id              String    @id @default(uuid()) @db.Uuid
-  userId          String    @db.Uuid
-  schoolId        String    @db.Uuid
-  programId       String    @db.Uuid
-  termId          String    @db.Uuid
-  gpa             Decimal?  @db.Decimal(3, 2)
-  greVerbal       Int?
-  greQuantitative Int?
-  greWriting      Decimal?  @db.Decimal(2, 1)
-  researchArea    String?   @db.VarChar(255)
-  publications    Int       @default(0)
-  submissionDate  DateTime? @db.Date
-  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt       DateTime  @updatedAt @db.Timestamptz(3)
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  school          School    @relation(fields: [schoolId], references: [id], onDelete: Restrict)
-  program         Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
-  term            Term      @relation(fields: [termId], references: [id], onDelete: Restrict)
-  decision        Decision?
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  schoolId       String    @db.Uuid
+  programId      String    @db.Uuid
+  termId         String    @db.Uuid
+  gpa            Decimal?  @db.Decimal(3, 2)
+  researchArea   String?   @db.VarChar(255)
+  awards         String?   @db.Text
+  publications   Int       @default(0)
+  submissionDate DateTime? @db.Date
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school         School    @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  program        Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
+  term           Term      @relation(fields: [termId], references: [id], onDelete: Restrict)
+  decision       Decision?
 
   @@index([userId])
   @@index([schoolId])
