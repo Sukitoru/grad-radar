@@ -2,6 +2,12 @@
 
 Community-driven graduate school application and admissions decision tracker
 
+## Project Scope
+
+- Track Master's and Doctoral applications.
+- Track GPA, awards, and publications.
+- Do not include GRE scores.
+
 ## Setup
 
 After pulling the project, run:

@@ -1,17 +1,7 @@
 import express from 'express';
-import { PrismaClient } from '../generated/prisma/client.ts';
-import { PrismaPg } from '@prisma/adapter-pg';
+import prisma from '../db.ts';
 
 const router = express.Router();
-
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error('DATABASE_URL is required.');
-}
-
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
 
 router.post('/applications', async (req, res) => {
   const {
@@ -20,10 +10,8 @@ router.post('/applications', async (req, res) => {
     programId,
     termId,
     gpa,
-    greVerbal,
-    greQuantitative,
-    greWriting,
     researchArea,
+    awards,
     publications,
     submissionDate,
   } = req.body;
@@ -36,10 +24,8 @@ router.post('/applications', async (req, res) => {
         programId,
         termId,
         gpa,
-        greVerbal,
-        greQuantitative,
-        greWriting,
         researchArea,
+        awards,
         publications,
         submissionDate,
       },
