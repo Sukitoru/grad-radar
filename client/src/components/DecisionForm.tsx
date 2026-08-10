@@ -14,10 +14,11 @@ import {
   IonIcon
 } from '@ionic/react';
 import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
+import { API_BASE_URL } from '../api';
 
 // Define the TypeScript interfaces for props
 interface DecisionFormProps {
-  applicationId: string | number;
+  applicationId: string;
   currentStatus?: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED' | null;
   currentDecisionDate?: string | null; // Expects ISO string (YYYY-MM-DD)
   onSuccess?: () => void; // Optional callback to trigger a refresh on the parent list
@@ -75,7 +76,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
     try {
       // API call to the backend PUT endpoint
-      const response = await fetch(`http://localhost:5000/api/applications/${applicationId}/decision`, {
+      const response = await fetch(`${API_BASE_URL}/applications/${applicationId}/decision`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -96,8 +97,9 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
       if (onSuccess) {
         onSuccess(); // Trigger parent refresh (e.g. updating stats and lists)
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
+      setError(message);
     } finally {
       setSubmitting(false);
     }
@@ -169,7 +171,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
           >
             {submitting ? (
               <>
-                <IonSpinner name="crescent" size="small" style={{ marginRight: '8px' }} />
+                <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
                 Saving...
               </>
             ) : (

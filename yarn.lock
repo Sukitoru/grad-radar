@@ -5591,6 +5591,7 @@ __metadata:
     express: "npm:5.2.1"
     prisma: "npm:7.9.1"
     typescript: "npm:7.0.2"
+    zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
 
@@ -9536,7 +9537,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25.0 || ^4.0.0":
+"zod@npm:4.4.3, zod@npm:^3.25.0 || ^4.0.0":
   version: 4.4.3
   resolution: "zod@npm:4.4.3"
   checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3

@@ -12,7 +12,6 @@ import {
   IonCardContent,
   IonList,
   IonItem,
-  IonLabel,
   IonBadge,
   IonButton,
   IonIcon,
@@ -23,7 +22,7 @@ import {
   IonModal,
   IonText,
   IonButtons,
-  IonMenuButton
+  IonMenuButton,
 } from '@ionic/react';
 import {
   personCircleOutline,
@@ -34,7 +33,7 @@ import {
   closeCircle,
   hourglassOutline,
   createOutline,
-  statsChartOutline
+  statsChartOutline,
 } from 'ionicons/icons';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 
@@ -43,10 +42,8 @@ interface UserProfile {
   id: string;
   username: string;
   gpa?: number;
-  greVerbal?: number;
-  greQuantitative?: number;
-  greWriting?: number;
   researchArea?: string;
+  awards?: string;
   publications?: number;
 }
 
@@ -87,86 +84,63 @@ const AccountPage: React.FC = () => {
 
       // Mock User Profile
       setProfile({
-        id: "usr-928471",
-        username: "AcademicBound99",
+        id: 'usr-928471',
+        username: 'AcademicBound99',
         gpa: 3.89,
-        greVerbal: 162,
-        greQuantitative: 166,
-        greWriting: 4.5,
-        researchArea: "Distributed Systems & Privacy",
+        researchArea: 'Distributed Systems & Privacy',
+        awards: 'Dean\'s List',
         publications: 2,
       });
 
       // Mock user's personal applications
       setApplications([
         {
-          id: "app-001",
-          school: { name: "Massachusetts Institute of Technology" },
-          program: { name: "Computer Science", degreeLevel: "PhD" },
-          term: { name: "Fall", academicYear: 2026 },
-          submissionDate: "2025-11-15T00:00:00.000Z",
+          id: 'app-001',
+          school: { name: 'Massachusetts Institute of Technology' },
+          program: { name: 'Computer Science', degreeLevel: 'Doctoral' },
+          term: { name: 'Fall', academicYear: 2026 },
+          submissionDate: '2025-11-15T00:00:00.000Z',
           decision: {
-            id: "dec-001",
-            status: "ACCEPTED",
-            decisionDate: "2026-02-18T00:00:00.000Z",
-          }
+            id: 'dec-001',
+            status: 'ACCEPTED',
+            decisionDate: '2026-02-18T00:00:00.000Z',
+          },
         },
         {
-          id: "app-002",
-          school: { name: "Stanford University" },
-          program: { name: "Computer Science", degreeLevel: "PhD" },
-          term: { name: "Fall", academicYear: 2026 },
-          submissionDate: "2025-12-01T00:00:00.000Z",
-          decision: null // Still Pending
+          id: 'app-002',
+          school: { name: 'Stanford University' },
+          program: { name: 'Computer Science', degreeLevel: 'Doctoral' },
+          term: { name: 'Fall', academicYear: 2026 },
+          submissionDate: '2025-12-01T00:00:00.000Z',
+          decision: null, // Still Pending
         },
         {
-          id: "app-003",
-          school: { name: "University of California, Berkeley" },
-          program: { name: "Electrical Engineering & Computer Sciences", degreeLevel: "PhD" },
-          term: { name: "Fall", academicYear: 2026 },
-          submissionDate: "2025-12-08T00:00:00.000Z",
+          id: 'app-003',
+          school: { name: 'University of California, Berkeley' },
+          program: { name: 'Electrical Engineering & Computer Sciences', degreeLevel: 'Doctoral' },
+          term: { name: 'Fall', academicYear: 2026 },
+          submissionDate: '2025-12-08T00:00:00.000Z',
           decision: {
-            id: "dec-003",
-            status: "WAITLISTED",
-            decisionDate: "2026-03-05T00:00:00.000Z",
-          }
-        }
+            id: 'dec-003',
+            status: 'WAITLISTED',
+            decisionDate: '2026-03-05T00:00:00.000Z',
+          },
+        },
       ]);
-    } catch (err: any) {
-      setError(err.message || 'Failed to retrieve account records.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to retrieve account records.';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-/* const fetchAccountData = async () => {
-  setLoading(true);
-  setError(null);
-  try {
-    // 1. Fetch user profile from PostgreSQL
-    const profileRes = await fetch('http://localhost:5000/api/users/me/profile', {
-      headers: { 'x-user-id': 'usr-928471' } // Swap with your actual auth state token/id
-    });
-    const profileData = await profileRes.json();
-    setProfile(profileData);
-
-    // 2. Fetch user's individual application list
-    const appsRes = await fetch('http://localhost:5000/api/users/me/applications', {
-      headers: { 'x-user-id': 'usr-928471' }
-    });
-    const appsData = await appsRes.json();
-    setApplications(appsData);
-
-  } catch (err: any) {
-    setError('Failed to load tracker metrics. Please check your connection.');
-  } finally {
-    setLoading(false);
-  }
-};
-*/
-
   useEffect(() => {
-    fetchAccountData();
+    const timeoutId = window.setTimeout(() => {
+      void fetchAccountData();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const handleOpenDecisionModal = (appId: string) => {
@@ -221,6 +195,7 @@ const AccountPage: React.FC = () => {
   const acceptedApps = applications.filter(a => a.decision?.status === 'ACCEPTED').length;
   const waitlistedApps = applications.filter(a => a.decision?.status === 'WAITLISTED').length;
   const pendingApps = applications.filter(a => !a.decision).length;
+  const selectedApplication = applications.find((application) => application.id === selectedAppId);
 
   if (loading) {
     return (
@@ -280,10 +255,8 @@ const AccountPage: React.FC = () => {
                       </h4>
                     </IonCol>
                     <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>GRE Score</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>
-                        {profile.greVerbal ? `V:${profile.greVerbal} Q:${profile.greQuantitative}` : 'Waived'}
-                      </h4>
+                      <IonText color="medium"><h6>Awards</h6></IonText>
+                      <h4 style={{ margin: '4px 0 0' }}>{profile.awards || 'None listed'}</h4>
                     </IonCol>
                     <IonCol size="6" sizeMd="3">
                       <IonText color="medium"><h6>Publications</h6></IonText>
@@ -335,7 +308,7 @@ const AccountPage: React.FC = () => {
               <IonCard>
                 <IonCardContent className="ion-text-center">
                   <p>You haven't tracked any applications yet.</p>
-                  <IonButton fill="outline" routerLink="/application-form" style={{ marginTop: '12px' }}>
+                  <IonButton fill="outline" routerLink="/applications/new" style={{ marginTop: '12px' }}>
                     Track an Application
                   </IonButton>
                 </IonCardContent>
@@ -406,9 +379,11 @@ const AccountPage: React.FC = () => {
                   <p>Specify the admissions outcome for this tracker entry.</p>
                 </div>
 
-                {selectedAppId && (
+                {selectedApplication && (
                   <DecisionForm
-                    applicationId={selectedAppId}
+                    applicationId={selectedApplication.id}
+                    currentStatus={selectedApplication.decision?.status}
+                    currentDecisionDate={selectedApplication.decision?.decisionDate}
                     onSuccess={handleDecisionSaveSuccess}
                   />
                 )}

@@ -67,9 +67,6 @@ const ApplicationForm: React.FC = () => {
                 placeholder="Select a degree level"
                 required
               >
-                <IonSelectOption value="Bachelors">
-                  Bachelor&apos;s
-                </IonSelectOption>
                 <IonSelectOption value="Masters">Master&apos;s</IonSelectOption>
                 <IonSelectOption value="Doctoral">Doctoral</IonSelectOption>
               </IonSelect>
@@ -116,36 +113,6 @@ const ApplicationForm: React.FC = () => {
               />
             </IonItem>
 
-            <IonItem>
-              <IonInput
-                type="number"
-                label="GRE Verbal"
-                labelPlacement="stacked"
-                name="greVerbal"
-                placeholder="Enter your verbal score"
-              />
-            </IonItem>
-
-            <IonItem>
-              <IonInput
-                type="number"
-                label="GRE Quantitative"
-                labelPlacement="stacked"
-                name="greQuantitative"
-                placeholder="Enter your quantitative score"
-              />
-            </IonItem>
-
-            <IonItem>
-              <IonInput
-                type="number"
-                step="0.5"
-                label="GRE Writing"
-                labelPlacement="stacked"
-                name="greWriting"
-                placeholder="Enter your writing score"
-              />
-            </IonItem>
           </IonList>
           <h2>Application Details</h2>
 
@@ -156,6 +123,16 @@ const ApplicationForm: React.FC = () => {
                 labelPlacement="stacked"
                 name="researchArea"
                 placeholder="Describe your research interests"
+                autoGrow={true}
+              />
+            </IonItem>
+
+            <IonItem>
+              <IonTextarea
+                label="Awards"
+                labelPlacement="stacked"
+                name="awards"
+                placeholder="List any awards or honors"
                 autoGrow={true}
               />
             </IonItem>
