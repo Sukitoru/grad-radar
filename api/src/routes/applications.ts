@@ -39,4 +39,73 @@ router.post('/applications', async (req, res) => {
   }
 });
 
+// List all applications.
+router.get('/applications', async (_request, response) => {
+  try {
+    const applications = await prisma.application.findMany();
+
+    response.json(applications);
+  } catch {
+    response.status(500).json({
+      message: 'Failed to retrieve applications.',
+    });
+  }
+});
+
+// Get one application by ID.
+router.get('/applications/:id', async (request, response) => {
+  try {
+    const application = await prisma.application.findUnique({
+      where: {
+        id: request.params.id,
+      },
+    });
+
+    if (!application) {
+      response.status(404).json({
+        message: 'Application not found.',
+      });
+      return;
+    }
+
+    response.json(application);
+  } catch {
+    response.status(500).json({
+      message: 'Failed to retrieve application.',
+    });
+  }
+});
+
+// Delete one application by ID.
+router.delete('/applications/:id', async (request, response) => {
+  try {
+    const application = await prisma.application.findUnique({
+      where: {
+        id: request.params.id,
+      },
+    });
+
+    if (!application) {
+      response.status(404).json({
+        message: 'Application not found.',
+      });
+      return;
+    }
+
+    await prisma.application.delete({
+      where: {
+        id: request.params.id,
+      },
+    });
+
+    response.json({
+      message: 'Application deleted successfully.',
+    });
+  } catch {
+    response.status(500).json({
+      message: 'Failed to delete application.',
+    });
+  }
+});
+
 export default router;
