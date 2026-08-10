@@ -17,6 +17,7 @@ import {
   barChartOutline,
   homeOutline,
   listOutline,
+  personCircleOutline,
   timeOutline,
 } from 'ionicons/icons';
 
@@ -42,6 +43,8 @@ const navigationItems = [
   },
 
   { label: 'Analytics', path: '/analytics', icon: barChartOutline },
+
+  { label: 'Account', path: '/account', icon: personCircleOutline },
 ];
 
 const AppNavigation: React.FC = () => {
