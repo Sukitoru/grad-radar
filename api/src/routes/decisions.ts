@@ -2,9 +2,50 @@ import express from 'express';
 import prisma from '../db.ts';
 import { updateDecisionSchema } from '../schemas/decision.ts';
 
-const router = express.Router();
+const decisionsRouter = express.Router();
 
-router.put('/applications/:id/decision', async (request, response) => {
+decisionsRouter.get('/decisions/recent', async (_request, response) => {
+  try {
+    const recentDecisions = await prisma.decision.findMany({
+      orderBy: {
+        decisionDate: 'desc',
+      },
+      select: {
+        id: true,
+        status: true,
+        decisionDate: true,
+        application: {
+          select: {
+            school: {
+              select: {
+                name: true,
+              },
+            },
+            program: {
+              select: {
+                name: true,
+                degreeLevel: true,
+              },
+            },
+            term: {
+              select: {
+                name: true,
+                academicYear: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    response.json(recentDecisions);
+  } catch {
+    response.status(500).json({
+      message: 'Failed to get recent decisions.',
+    });
+  }
+});
+
+decisionsRouter.put('/applications/:id/decision', async (request, response) => {
   const validationResult = updateDecisionSchema.safeParse(request.body);
 
   if (!validationResult.success) {
@@ -55,4 +96,4 @@ router.put('/applications/:id/decision', async (request, response) => {
   }
 });
 
-export default router;
+export default decisionsRouter;
