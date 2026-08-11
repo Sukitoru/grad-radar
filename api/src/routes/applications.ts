@@ -43,13 +43,23 @@ router.post('/applications', async (req, res) => {
 
 // List all applications.
 
-router.get('/applications', async (_request, response) => {
+router.get('/applications', async (req, res) => {
   try {
-    const applications = await prisma.application.findMany();
 
-    response.json(applications);
+    // Filtering by school, program, term, and decision by Id
+
+    const { schoolId, programId, termId } = req.query;
+    const applications = await prisma.application.findMany({
+      where: {
+        ...(schoolId && { schoolId: String(schoolId)}),
+        ...(programId && {programId: String(programId)}),
+        ...(termId && {termId: String(termId)}),
+    },
+  }); 
+
+    res.json(applications);
   } catch {
-    response.status(500).json({
+    res.status(500).json({
       message: 'Failed to retrieve applications.',
     });
   }
