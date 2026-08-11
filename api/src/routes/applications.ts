@@ -82,7 +82,7 @@ router.get('/applications/:id', async (request, response) => {
 
 // Updates the application by the signed in user 
 
-router.put('applicationa/:id', async (req, res) => {
+router.put('applications/:id', async (req, res) => {
     const {
     schoolId,
     programId,
@@ -108,7 +108,7 @@ router.put('applicationa/:id', async (req, res) => {
       });
     }
 
-    if (!application.userId !== userId)
+    if (application.userId !== userId)
     {
       return res.status(403).json ({
         message: 'You are not authorized to update this application.',
@@ -157,7 +157,7 @@ router.delete('/applications/:id', async (req, res) => {
       return;
     }
 
-    if (application.userId !== userId) {
+    if (!application.userId !== userId) {
       return res.status(403).json ({
         message: 'You are not authorized delete this application.',
       });
