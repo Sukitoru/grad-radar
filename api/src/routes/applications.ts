@@ -3,6 +3,12 @@ import prisma from '../db.ts';
 
 const router = express.Router();
 
+type AuthenticatedRequest = express.Request & {
+  user?: {
+    id: string;
+  };
+};
+
 router.post('/applications', async (req, res) => {
   const {
     userId,
@@ -76,8 +82,29 @@ router.get('/applications/:id', async (request, response) => {
   }
 });
 
-// Delete one application by ID.
-router.delete('/applications/:id', async (request, response) => {
+// Update one application owned by the signed-in user.
+router.put('/applications/:id', async (request, response) => {
+  const authenticatedRequest = request as AuthenticatedRequest;
+  const userId = authenticatedRequest.user?.id;
+
+  if (!userId) {
+    response.status(401).json({
+      message: 'You must be signed in to update an application.',
+    });
+    return;
+  }
+
+  const {
+    schoolId,
+    programId,
+    termId,
+    gpa,
+    researchArea,
+    awards,
+    publications,
+    submissionDate,
+  } = request.body;
+
   try {
     const application = await prisma.application.findUnique({
       where: {
@@ -88,6 +115,70 @@ router.delete('/applications/:id', async (request, response) => {
     if (!application) {
       response.status(404).json({
         message: 'Application not found.',
+      });
+      return;
+    }
+
+    if (application.userId !== userId) {
+      response.status(403).json({
+        message: 'You are not authorized to update this application.',
+      });
+      return;
+    }
+
+    const updatedApplication = await prisma.application.update({
+      where: {
+        id: request.params.id,
+      },
+      data: {
+        schoolId,
+        programId,
+        termId,
+        gpa,
+        researchArea,
+        awards,
+        publications,
+        submissionDate,
+      },
+    });
+
+    response.json(updatedApplication);
+  } catch {
+    response.status(500).json({
+      message: 'Failed to update application.',
+    });
+  }
+});
+
+// Delete one application by ID.
+router.delete('/applications/:id', async (request, response) => {
+  const authenticatedRequest = request as AuthenticatedRequest;
+  const userId = authenticatedRequest.user?.id;
+
+  if (!userId) {
+    response.status(401).json({
+      message: 'You must be signed in to delete an application.',
+    });
+    return;
+  }
+
+  try {
+    const application = await prisma.application.findUnique({
+      where: {
+        id: request.params.id,
+      },
+    });
+
+    if (!application) {
+      response.status(404).json({
+        message: 'Application not found.',
+      });
+      return;
+    }
+
+    if (application.userId !== userId) {
+      response.status(403).json({
+        message: 'You are not authorized to delete this application.',
       });
       return;
     }
