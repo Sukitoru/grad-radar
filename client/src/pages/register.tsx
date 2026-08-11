@@ -202,7 +202,7 @@ const RegisterPage: React.FC = () => {
                 >
                   {submitting ? (
                     <>
-                      <IonSpinner name="crescent" size="small" style={{ marginRight: '8px' }} />
+                      <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
                       Creating Account...
                     </>
                   ) : (

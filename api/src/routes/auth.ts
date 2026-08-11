@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { PrismaClient } from '../generated/prisma/client.ts';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { registerSchema, loginSchema } from '../schemas/auth.ts';
-import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
+import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.ts';
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ const prisma = new PrismaClient({ adapter });
  * @route   POST /auth/register
  * @desc    Create a new user account with hashed password protection
  */
-router.post('/auth/register', async (req, res): Promise<any> => {
+router.post('/register', async (req, res): Promise<any> => {
   try {
     // 1. Validate incoming body variables with Zod
     const validationResult = registerSchema.safeParse(req.body);
@@ -89,7 +89,7 @@ router.post('/auth/register', async (req, res): Promise<any> => {
  * @route   POST /auth/login
  * @desc    Authenticate user credentials, return signed JWT session token
  */
-router.post('/auth/login', async (req, res): Promise<any> => {
+router.post('/login', async (req, res): Promise<any> => {
   try {
     // 1. Validate login variables with Zod
     const validationResult = loginSchema.safeParse(req.body);
@@ -153,9 +153,16 @@ router.post('/auth/login', async (req, res): Promise<any> => {
  * @route   GET /auth/me
  * @desc    Fetch profile details of the currently authenticated user session
  */
-router.get('/auth/me', requireAuth, async (req: AuthenticatedRequest, res): Promise<any> => {
+router.get('/me', requireAuth, async (req: AuthenticatedRequest, res): Promise<any> => {
   return res.status(200).json({
     user: req.user
+  });
+});
+
+// Temporary endpoint until logout logic is added.
+router.post('/logout', (_request, response) => {
+  response.status(501).json({
+    message: 'Logout is in development.',
   });
 });
 
