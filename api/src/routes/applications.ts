@@ -35,6 +35,12 @@ router.post('/applications', async (req, res) => {
         publications,
         submissionDate,
       },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
+      },
     });
 
     res.status(201).json(application);
@@ -48,7 +54,14 @@ router.post('/applications', async (req, res) => {
 // List all applications.
 router.get('/applications', async (_request, response) => {
   try {
-    const applications = await prisma.application.findMany();
+    const applications = await prisma.application.findMany({
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
+      },
+    });
 
     response.json(applications);
   } catch {
@@ -64,6 +77,12 @@ router.get('/applications/:id', async (request, response) => {
     const application = await prisma.application.findUnique({
       where: {
         id: request.params.id,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
@@ -139,6 +158,12 @@ router.put('/applications/:id', async (request, response) => {
         awards,
         publications,
         submissionDate,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 

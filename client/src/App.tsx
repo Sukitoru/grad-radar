@@ -49,6 +49,9 @@ const App: React.FC = () => (
         <Route exact path="/applications/new">
           <ApplicationForm />
         </Route>
+        <Route exact path="/applications/:applicationId/edit">
+          <ApplicationForm />
+        </Route>
         <Route exact path="/applications">
           <AccountPage />
         </Route>

@@ -17,17 +17,22 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+import { useParams } from 'react-router-dom';
 import {
   createApplication,
+  getApplications,
   getPrograms,
   getSchools,
   getTerms,
+  updateApplication,
   type Program,
   type School,
   type Term,
 } from '../api';
 
 const ApplicationForm: React.FC = () => {
+  const { applicationId } = useParams<{ applicationId?: string }>();
+  const isEditing = Boolean(applicationId);
   const [schools, setSchools] = useState<School[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
@@ -60,6 +65,26 @@ const ApplicationForm: React.FC = () => {
         setSchools(schoolOptions);
         setPrograms(programOptions);
         setTerms(termOptions);
+
+        if (applicationId) {
+          const applications = await getApplications();
+          const application = applications.find(
+            (currentApplication) => currentApplication.id === applicationId,
+          );
+
+          if (!application) {
+            throw new Error('Application not found.');
+          }
+
+          setSchoolId(application.schoolId);
+          setProgramId(application.programId);
+          setTermId(application.termId);
+          setGpa(application.gpa === null ? '' : String(application.gpa));
+          setResearchArea(application.researchArea ?? '');
+          setAwards(application.awards ?? '');
+          setPublications(String(application.publications));
+          setSubmissionDate(application.submissionDate?.slice(0, 10) ?? '');
+        }
       } catch (loadError) {
         const loadMessage =
           loadError instanceof Error
@@ -72,7 +97,7 @@ const ApplicationForm: React.FC = () => {
     };
 
     void loadFormOptions();
-  }, []);
+  }, [applicationId]);
 
   const handleSchoolChange = (newSchoolId: string) => {
     setSchoolId(newSchoolId);
@@ -94,7 +119,7 @@ const ApplicationForm: React.FC = () => {
     setSaving(true);
 
     try {
-      await createApplication({
+      const applicationData = {
         userId: demoUserId,
         schoolId,
         programId,
@@ -104,17 +129,26 @@ const ApplicationForm: React.FC = () => {
         awards: awards || null,
         publications: publications ? Number(publications) : 0,
         submissionDate: submissionDate || null,
-      });
+      };
 
-      setMessage('Application saved successfully.');
-      setSchoolId('');
-      setProgramId('');
-      setTermId('');
-      setGpa('');
-      setResearchArea('');
-      setAwards('');
-      setPublications('0');
-      setSubmissionDate('');
+      if (applicationId) {
+        await updateApplication(applicationId, applicationData);
+      } else {
+        await createApplication(applicationData);
+      }
+
+      setMessage(isEditing ? 'Application updated successfully.' : 'Application saved successfully.');
+
+      if (!isEditing) {
+        setSchoolId('');
+        setProgramId('');
+        setTermId('');
+        setGpa('');
+        setResearchArea('');
+        setAwards('');
+        setPublications('0');
+        setSubmissionDate('');
+      }
     } catch (saveError) {
       const saveMessage =
         saveError instanceof Error
@@ -133,12 +167,12 @@ const ApplicationForm: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
-          <IonTitle>Add Application</IonTitle>
+          <IonTitle>{isEditing ? 'Edit Application' : 'Add Application'}</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding">
-        <h1>Application Details</h1>
+        <h1>{isEditing ? 'Edit Application Details' : 'Application Details'}</h1>
         <p>Enter the information for your graduate school application.</p>
 
         {loading ? (
@@ -285,7 +319,13 @@ const ApplicationForm: React.FC = () => {
               type="submit"
               disabled={saving || !schoolId || !programId || !termId}
             >
-              {saving ? <IonSpinner name="crescent" /> : 'Save Application'}
+              {saving ? (
+                <IonSpinner name="crescent" />
+              ) : isEditing ? (
+                'Update Application'
+              ) : (
+                'Save Application'
+              )}
             </IonButton>
           </form>
         )}

@@ -23,6 +23,7 @@ import {
   IonText,
   IonButtons,
   IonMenuButton,
+  IonAlert,
 } from '@ionic/react';
 import {
   personCircleOutline,
@@ -34,16 +35,12 @@ import {
   hourglassOutline,
   createOutline,
   statsChartOutline,
+  trashOutline,
 } from 'ionicons/icons';
 import {
+  deleteApplication,
   getApplications,
-  getPrograms,
-  getSchools,
-  getTerms,
   type Application,
-  type Program,
-  type School,
-  type Term,
 } from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 
@@ -60,17 +57,16 @@ interface UserProfile {
 const AccountPage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [schools, setSchools] = useState<School[]>([]);
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [terms, setTerms] = useState<Term[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
   // Modal tracking states
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
-  // Fetch the lookup lists and applications used by the tracker.
+  // Fetch applications and their related school, program, term, and decision.
   const fetchAccountData = async () => {
     setLoading(true);
     setError(null);
@@ -82,21 +78,13 @@ const AccountPage: React.FC = () => {
         throw new Error('VITE_DEMO_USER_ID is missing from the client environment.');
       }
 
-      const [applicationData, schoolData, programData, termData] = await Promise.all([
-        getApplications(),
-        getSchools(),
-        getPrograms(),
-        getTerms(),
-      ]);
+      const applicationData = await getApplications();
 
       const userApplications = applicationData.filter(
         (application) => application.userId === demoUserId,
       );
 
       setApplications(userApplications);
-      setSchools(schoolData);
-      setPrograms(programData);
-      setTerms(termData);
 
       // Mock User Profile
       setProfile({
@@ -135,28 +123,31 @@ const AccountPage: React.FC = () => {
     fetchAccountData(); // Reload account data to reflect updated decision status
   };
 
-  const getSchoolName = (schoolId: string) => {
-    return schools.find((school) => school.id === schoolId)?.name ?? 'Unknown school';
-  };
-
-  const getProgramDescription = (programId: string) => {
-    const program = programs.find((currentProgram) => currentProgram.id === programId);
-
-    if (!program) {
-      return 'Unknown program';
+  const handleDeleteApplication = async () => {
+    if (!applicationToDelete) {
+      return;
     }
 
-    return `${program.degreeLevel} in ${program.name}`;
-  };
+    setDeleting(true);
+    setError(null);
 
-  const getTermName = (termId: string) => {
-    const term = terms.find((currentTerm) => currentTerm.id === termId);
-
-    if (!term) {
-      return 'Unknown term';
+    try {
+      await deleteApplication(applicationToDelete.id);
+      setApplications((currentApplications) =>
+        currentApplications.filter(
+          (application) => application.id !== applicationToDelete.id,
+        ),
+      );
+      setApplicationToDelete(null);
+    } catch (deleteError) {
+      const message =
+        deleteError instanceof Error
+          ? deleteError.message
+          : 'Failed to delete the application.';
+      setError(message);
+    } finally {
+      setDeleting(false);
     }
-
-    return `${term.name} ${term.academicYear}`;
   };
 
   // Helper helper to generate decision status badges
@@ -327,13 +318,19 @@ const AccountPage: React.FC = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                           <span style={{ fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <IonIcon icon={schoolOutline} color="secondary" />
-                            {getSchoolName(app.schoolId)}
+                            {app.school?.name ?? 'Unknown school'}
                           </span>
                           {renderDecisionBadge(app.decision)}
                         </div>
 
                         <p style={{ margin: '8px 0 4px', fontSize: '14px', color: 'var(--ion-color-step-600)' }}>
-                          {getProgramDescription(app.programId)} · {getTermName(app.termId)}
+                          {app.program
+                            ? `${app.program.degreeLevel} in ${app.program.name}`
+                            : 'Unknown program'}
+                          {' · '}
+                          {app.term
+                            ? `${app.term.name} ${app.term.academicYear}`
+                            : 'Unknown term'}
                         </p>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
@@ -351,6 +348,28 @@ const AccountPage: React.FC = () => {
                           >
                             <IonIcon slot="start" icon={createOutline} />
                             {app.decision ? 'Edit Decision' : 'Update Decision'}
+                          </IonButton>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                          <IonButton
+                            size="small"
+                            fill="outline"
+                            routerLink={`/applications/${app.id}/edit`}
+                          >
+                            <IonIcon slot="start" icon={createOutline} />
+                            Edit Application
+                          </IonButton>
+
+                          <IonButton
+                            size="small"
+                            fill="outline"
+                            color="danger"
+                            disabled={deleting}
+                            onClick={() => setApplicationToDelete(app)}
+                          >
+                            <IonIcon slot="start" icon={trashOutline} />
+                            Delete
                           </IonButton>
                         </div>
 
@@ -406,6 +425,27 @@ const AccountPage: React.FC = () => {
                 </div>
               </IonContent>
             </IonModal>
+
+            <IonAlert
+              isOpen={applicationToDelete !== null}
+              header="Delete application?"
+              message="This action cannot be undone."
+              buttons={[
+                {
+                  text: 'Cancel',
+                  role: 'cancel',
+                  handler: () => setApplicationToDelete(null),
+                },
+                {
+                  text: 'Delete',
+                  role: 'destructive',
+                  handler: () => {
+                    void handleDeleteApplication();
+                  },
+                },
+              ]}
+              onDidDismiss={() => setApplicationToDelete(null)}
+            />
           </>
         )}
       </IonContent>
