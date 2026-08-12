@@ -7,7 +7,6 @@ import {
   IonContent,
   IonCard,
   IonCardHeader,
-  IonCardTitle,
   IonCardSubtitle,
   IonCardContent,
   IonList,
@@ -26,7 +25,6 @@ import {
   IonAlert,
 } from '@ionic/react';
 import {
-  personCircleOutline,
   schoolOutline,
   calendarOutline,
   ribbonOutline,
@@ -44,18 +42,7 @@ import {
 } from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 
-// Defining Type Interfaces for the Account Page
-interface UserProfile {
-  id: string;
-  username: string;
-  gpa?: number;
-  researchArea?: string;
-  awards?: string;
-  publications?: number;
-}
-
 const AccountPage: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,16 +72,6 @@ const AccountPage: React.FC = () => {
       );
 
       setApplications(userApplications);
-
-      // Mock User Profile
-      setProfile({
-        id: 'usr-928471',
-        username: 'AcademicBound99',
-        gpa: 3.89,
-        researchArea: 'Distributed Systems & Privacy',
-        awards: 'Dean\'s List',
-        publications: 2,
-      });
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to retrieve account records.';
@@ -199,7 +176,7 @@ const AccountPage: React.FC = () => {
         <IonContent className="ion-text-center ion-padding">
           <div style={{ marginTop: '40%' }}>
             <IonSpinner name="crescent" />
-            <p>Loading your profile...</p>
+            <p>Loading your applications...</p>
           </div>
         </IonContent>
       </IonPage>
@@ -213,7 +190,7 @@ const AccountPage: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
-          <IonTitle>My Account & Profile</IonTitle>
+          <IonTitle>My Applications</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -224,46 +201,7 @@ const AccountPage: React.FC = () => {
           </IonCard>
         )}
 
-        {profile && (
-          <>
-            {/* 1. Pseudonymous Profile Summary Card */}
-            <IonCard>
-              <IonCardHeader>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <IonIcon icon={personCircleOutline} style={{ fontSize: '48px', color: 'var(--ion-color-primary)' }} />
-                  <div>
-                    <IonCardTitle>{profile.username}</IonCardTitle>
-                    <IonCardSubtitle>Academic Profile (Pseudonymous)</IonCardSubtitle>
-                  </div>
-                </div>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonGrid className="ion-no-padding">
-                  <IonRow>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>GPA</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>{profile.gpa || 'N/A'}</h4>
-                    </IonCol>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>Research Field</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                        {profile.researchArea || 'N/A'}
-                      </h4>
-                    </IonCol>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>Awards</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>{profile.awards || 'None listed'}</h4>
-                    </IonCol>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>Publications</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>{profile.publications || 0}</h4>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonCardContent>
-            </IonCard>
-
-            {/* 2. Success Rate & Statistics Banner */}
+            {/* Application statistics */}
             <IonCard>
               <IonCardHeader>
                 <IonCardSubtitle style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -295,7 +233,7 @@ const AccountPage: React.FC = () => {
               </IonCardContent>
             </IonCard>
 
-            {/* 3. Personal Tracker List Section */}
+            {/* Personal tracker list */}
             <h5 className="ion-padding-start" style={{ fontWeight: 'bold', margin: '24px 0 12px' }}>
               My Tracked Applications
             </h5>
@@ -332,6 +270,10 @@ const AccountPage: React.FC = () => {
                             ? `${app.term.name} ${app.term.academicYear}`
                             : 'Unknown term'}
                         </p>
+
+                        <p><strong>Research area:</strong> {app.researchArea ?? 'Not listed'}</p>
+                        <p><strong>Awards:</strong> {app.awards ?? 'None listed'}</p>
+                        <p><strong>Publications:</strong> {app.publications}</p>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
                           <span style={{ fontSize: '12px', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -395,7 +337,7 @@ const AccountPage: React.FC = () => {
               </IonList>
             )}
 
-            {/* 4. Decision Update Modal containing our DecisionForm component */}
+            {/* Decision update modal */}
             <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
               <IonContent className="ion-padding">
                 <div className="ion-text-center ion-padding-bottom">
@@ -446,8 +388,6 @@ const AccountPage: React.FC = () => {
               ]}
               onDidDismiss={() => setApplicationToDelete(null)}
             />
-          </>
-        )}
       </IonContent>
     </IonPage>
   );

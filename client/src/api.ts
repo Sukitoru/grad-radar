@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+  import.meta.env.VITE_API_URL ?? '/api';
 
 export interface School {
   id: string;
@@ -23,6 +23,18 @@ export interface Decision {
   id: string;
   status: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED';
   decisionDate: string;
+}
+
+export interface RecentDecision extends Decision {
+  createdAt: string;
+  application: {
+    researchArea: string | null;
+    awards: string | null;
+    publications: number;
+    school: Pick<School, 'name'>;
+    program: Pick<Program, 'name' | 'degreeLevel'>;
+    term: Pick<Term, 'name' | 'academicYear'>;
+  };
 }
 
 export interface Application {
@@ -80,6 +92,9 @@ export const getPrograms = () => apiRequest<Program[]>('/programs');
 export const getTerms = () => apiRequest<Term[]>('/terms');
 
 export const getApplications = () => apiRequest<Application[]>('/applications');
+
+export const getRecentDecisions = () =>
+  apiRequest<RecentDecision[]>('/decisions/recent');
 
 export const createApplication = (application: ApplicationInput) =>
   apiRequest<Application>('/applications', {

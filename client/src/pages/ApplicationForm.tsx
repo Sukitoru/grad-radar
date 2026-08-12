@@ -17,7 +17,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import {
   createApplication,
   getApplications,
@@ -31,6 +31,7 @@ import {
 } from '../api';
 
 const ApplicationForm: React.FC = () => {
+  const history = useHistory();
   const { applicationId } = useParams<{ applicationId?: string }>();
   const isEditing = Boolean(applicationId);
   const [schools, setSchools] = useState<School[]>([]);
@@ -137,18 +138,7 @@ const ApplicationForm: React.FC = () => {
         await createApplication(applicationData);
       }
 
-      setMessage(isEditing ? 'Application updated successfully.' : 'Application saved successfully.');
-
-      if (!isEditing) {
-        setSchoolId('');
-        setProgramId('');
-        setTermId('');
-        setGpa('');
-        setResearchArea('');
-        setAwards('');
-        setPublications('0');
-        setSubmissionDate('');
-      }
+      history.push('/applications');
     } catch (saveError) {
       const saveMessage =
         saveError instanceof Error
