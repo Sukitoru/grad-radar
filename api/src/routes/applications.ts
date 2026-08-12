@@ -1,5 +1,10 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
+import {
+  createApplicationSchema,
+  updateApplicationSchema,
+} from '../schemas/application.ts';
 
 const router = express.Router();
 
@@ -10,6 +15,16 @@ type AuthenticatedRequest = express.Request & {
 };
 
 router.post('/applications', async (req, res) => {
+  const validationResult = createApplicationSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    res.status(400).json({
+      message: 'Invalid application data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
   const {
     userId,
     schoolId,
@@ -20,7 +35,7 @@ router.post('/applications', async (req, res) => {
     awards,
     publications,
     submissionDate,
-  } = req.body;
+  } = validationResult.data;
 
   try {
     const application = await prisma.application.create({
@@ -94,6 +109,16 @@ router.put('/applications/:id', async (request, response) => {
     return;
   }
 
+  const validationResult = updateApplicationSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid application data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
   const {
     schoolId,
     programId,
@@ -103,7 +128,7 @@ router.put('/applications/:id', async (request, response) => {
     awards,
     publications,
     submissionDate,
-  } = request.body;
+  } = validationResult.data;
 
   try {
     const application = await prisma.application.findUnique({
