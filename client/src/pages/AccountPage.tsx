@@ -35,6 +35,16 @@ import {
   createOutline,
   statsChartOutline,
 } from 'ionicons/icons';
+import {
+  getApplications,
+  getPrograms,
+  getSchools,
+  getTerms,
+  type Application,
+  type Program,
+  type School,
+  type Term,
+} from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 
 // Defining Type Interfaces for the Account Page
@@ -47,22 +57,12 @@ interface UserProfile {
   publications?: number;
 }
 
-interface Application {
-  id: string;
-  school: { name: string };
-  program: { name: string; degreeLevel: string };
-  term: { name: string; academicYear: number };
-  submissionDate?: string;
-  decision?: {
-    id: string;
-    status: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED';
-    decisionDate: string;
-  } | null;
-}
-
 const AccountPage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -70,17 +70,33 @@ const AccountPage: React.FC = () => {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  // Simulated API fetch of User Profile and their specific Applications
+  // Fetch the lookup lists and applications used by the tracker.
   const fetchAccountData = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      // In a real application, you would pull the logged-in user details from auth state/headers
-      // GET /api/users/me/profile
-      // GET /api/users/me/applications
-      
-      // Simulate API lag
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+
+      if (!demoUserId) {
+        throw new Error('VITE_DEMO_USER_ID is missing from the client environment.');
+      }
+
+      const [applicationData, schoolData, programData, termData] = await Promise.all([
+        getApplications(),
+        getSchools(),
+        getPrograms(),
+        getTerms(),
+      ]);
+
+      const userApplications = applicationData.filter(
+        (application) => application.userId === demoUserId,
+      );
+
+      setApplications(userApplications);
+      setSchools(schoolData);
+      setPrograms(programData);
+      setTerms(termData);
 
       // Mock User Profile
       setProfile({
@@ -92,41 +108,6 @@ const AccountPage: React.FC = () => {
         publications: 2,
       });
 
-      // Mock user's personal applications
-      setApplications([
-        {
-          id: 'app-001',
-          school: { name: 'Massachusetts Institute of Technology' },
-          program: { name: 'Computer Science', degreeLevel: 'Doctoral' },
-          term: { name: 'Fall', academicYear: 2026 },
-          submissionDate: '2025-11-15T00:00:00.000Z',
-          decision: {
-            id: 'dec-001',
-            status: 'ACCEPTED',
-            decisionDate: '2026-02-18T00:00:00.000Z',
-          },
-        },
-        {
-          id: 'app-002',
-          school: { name: 'Stanford University' },
-          program: { name: 'Computer Science', degreeLevel: 'Doctoral' },
-          term: { name: 'Fall', academicYear: 2026 },
-          submissionDate: '2025-12-01T00:00:00.000Z',
-          decision: null, // Still Pending
-        },
-        {
-          id: 'app-003',
-          school: { name: 'University of California, Berkeley' },
-          program: { name: 'Electrical Engineering & Computer Sciences', degreeLevel: 'Doctoral' },
-          term: { name: 'Fall', academicYear: 2026 },
-          submissionDate: '2025-12-08T00:00:00.000Z',
-          decision: {
-            id: 'dec-003',
-            status: 'WAITLISTED',
-            decisionDate: '2026-03-05T00:00:00.000Z',
-          },
-        },
-      ]);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to retrieve account records.';
       setError(message);
@@ -152,6 +133,30 @@ const AccountPage: React.FC = () => {
     setIsModalOpen(false);
     setSelectedAppId(null);
     fetchAccountData(); // Reload account data to reflect updated decision status
+  };
+
+  const getSchoolName = (schoolId: string) => {
+    return schools.find((school) => school.id === schoolId)?.name ?? 'Unknown school';
+  };
+
+  const getProgramDescription = (programId: string) => {
+    const program = programs.find((currentProgram) => currentProgram.id === programId);
+
+    if (!program) {
+      return 'Unknown program';
+    }
+
+    return `${program.degreeLevel} in ${program.name}`;
+  };
+
+  const getTermName = (termId: string) => {
+    const term = terms.find((currentTerm) => currentTerm.id === termId);
+
+    if (!term) {
+      return 'Unknown term';
+    }
+
+    return `${term.name} ${term.academicYear}`;
   };
 
   // Helper helper to generate decision status badges
@@ -322,13 +327,13 @@ const AccountPage: React.FC = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                           <span style={{ fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <IonIcon icon={schoolOutline} color="secondary" />
-                            {app.school.name}
+                            {getSchoolName(app.schoolId)}
                           </span>
                           {renderDecisionBadge(app.decision)}
                         </div>
 
                         <p style={{ margin: '8px 0 4px', fontSize: '14px', color: 'var(--ion-color-step-600)' }}>
-                          {app.program.degreeLevel} in {app.program.name}
+                          {getProgramDescription(app.programId)} · {getTermName(app.termId)}
                         </p>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
