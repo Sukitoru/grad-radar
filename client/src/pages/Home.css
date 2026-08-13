@@ -1,27 +1,40 @@
 .home-page {
-  width: min(900px, calc(100% - 32px));
+  width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 64px 0;
+  padding: 32px 0;
 }
 
 .home-intro {
-  max-width: 650px;
-  margin: 0 auto;
+  padding: 32px 24px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  background: var(--ion-card-background, var(--ion-background-color));
   text-align: center;
 }
 
 .home-intro > ion-icon {
-  color: var(--ion-color-primary);
-  font-size: 64px;
+  display: block;
+  margin: 0 auto 12px;
+  color: var(--ion-color-medium);
+  font-size: 42px;
+}
+
+.home-label {
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .home-intro h1 {
-  margin: 16px 0;
-  font-size: 2.8rem;
+  margin: 8px 0;
+  font-size: 2.4rem;
 }
 
 .home-intro p {
-  margin: 0;
+  max-width: 650px;
+  margin: 0 auto;
   color: var(--ion-color-medium);
   font-size: 1.1rem;
   line-height: 1.6;
@@ -32,7 +45,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 22px;
 }
 
 .home-buttons ion-button {
@@ -41,12 +54,12 @@
 }
 
 .home-steps {
-  margin-top: 80px;
+  margin-top: 28px;
 }
 
 .home-steps h2 {
-  margin-bottom: 24px;
-  text-align: center;
+  margin: 0 2px 12px;
+  font-size: 20px;
 }
 
 .home-step-list {
@@ -56,15 +69,15 @@
 }
 
 .home-step {
-  padding: 24px;
-  border: 1px solid var(--ion-color-light-shade);
+  padding: 20px;
+  border: 1px solid var(--ion-color-step-150);
   border-radius: 12px;
   background: var(--ion-card-background, var(--ion-background-color));
 }
 
 .home-step ion-icon {
-  color: var(--ion-color-primary);
-  font-size: 32px;
+  color: var(--ion-color-medium);
+  font-size: 28px;
 }
 
 .home-step h3 {
@@ -80,7 +93,7 @@
 
 @media (max-width: 650px) {
   .home-page {
-    padding: 48px 0;
+    padding: 20px 0;
   }
 
   .home-intro h1 {
@@ -91,7 +104,4 @@
     grid-template-columns: 1fr;
   }
 
-  .home-steps {
-    margin-top: 56px;
-  }
 }

@@ -22,6 +22,7 @@ import { useHistory } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../api';
 import { awardOptions, maximumAwards } from '../awardOptions';
 import HeaderActions from '../components/HeaderActions';
+import './FormPages.css';
 
 const AccountPage: React.FC = () => {
   const history = useHistory();
@@ -116,10 +117,14 @@ const AccountPage: React.FC = () => {
       </IonHeader>
 
       <IonContent className="ion-padding">
-        <h1>Account Settings</h1>
-        <p>
-          Save information that can be copied into new application forms.
-        </p>
+        <div className="form-page-container">
+          <header className="form-page-heading">
+            <span className="form-page-label">Account profile</span>
+            <h1>Account settings</h1>
+            <p>
+              Save information that can be copied into new application forms.
+            </p>
+          </header>
 
         {loading ? (
           <div className="ion-text-center ion-padding">
@@ -127,9 +132,16 @@ const AccountPage: React.FC = () => {
             <p>Loading account...</p>
           </div>
         ) : (
-          <form onSubmit={handleSave}>
-            <h2>Account</h2>
-            <IonList>
+          <form className="form-page-form" onSubmit={handleSave}>
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>01</span>
+                <div>
+                  <h2>Account</h2>
+                  <p>Update the name shown on your account.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields">
               <IonItem>
                 <IonInput
                   label="Username"
@@ -143,10 +155,18 @@ const AccountPage: React.FC = () => {
                   required
                 />
               </IonItem>
-            </IonList>
+              </IonList>
+            </section>
 
-            <h2>Application Defaults</h2>
-            <IonList>
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>02</span>
+                <div>
+                  <h2>Application defaults</h2>
+                  <p>Use these values to fill new applications faster.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields form-page-fields-three-column">
               <IonItem>
                 <IonInput
                   type="number"
@@ -203,14 +223,14 @@ const AccountPage: React.FC = () => {
                 />
               </IonItem>
 
-            </IonList>
+              </IonList>
+            </section>
 
-            {message && <IonNote color="success">{message}</IonNote>}
-            {error && <IonNote color="danger">{error}</IonNote>}
+            {message && <IonNote className="form-page-note" color="success">{message}</IonNote>}
+            {error && <IonNote className="form-page-note" color="danger">{error}</IonNote>}
 
+            <div className="form-page-actions">
             <IonButton
-              className="ion-margin-top"
-              expand="block"
               type="submit"
               disabled={saving}
             >
@@ -225,8 +245,6 @@ const AccountPage: React.FC = () => {
             </IonButton>
 
             <IonButton
-              className="ion-margin-top"
-              expand="block"
               fill="outline"
               color="danger"
               type="button"
@@ -235,8 +253,10 @@ const AccountPage: React.FC = () => {
               <IonIcon slot="start" icon={logOutOutline} />
               Log Out
             </IonButton>
+            </div>
           </form>
         )}
+        </div>
       </IonContent>
     </IonPage>
   );

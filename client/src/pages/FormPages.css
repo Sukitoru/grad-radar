@@ -1,0 +1,152 @@
+.form-page-container {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.form-page-heading {
+  padding: 20px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+
+.form-page-label {
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.form-page-heading h1 {
+  margin: 7px 0 4px;
+  font-size: 24px;
+}
+
+.form-page-heading p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 14px;
+}
+
+.form-page-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.form-page-section {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+
+.form-page-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-page-section-heading > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid var(--ion-color-step-200);
+  border-radius: 50%;
+  color: var(--ion-color-medium);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.form-page-section-heading h2 {
+  margin: 2px 0 4px;
+  font-size: 17px;
+}
+
+.form-page-section-heading p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.form-page-fields {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+}
+
+.form-page-fields-two-column {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-page-fields-three-column {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-page-field-wide {
+  grid-column: span 2;
+}
+
+.form-page-fields ion-item {
+  --background: rgba(var(--ion-color-medium-rgb), 0.05);
+  --border-color: transparent;
+  --inner-padding-bottom: 5px;
+  --inner-padding-end: 12px;
+  --inner-padding-start: 0;
+  --inner-padding-top: 5px;
+  --padding-start: 12px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+}
+
+.form-page-note {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+}
+
+.form-page-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.form-page-actions ion-button {
+  min-width: 150px;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .form-page-fields-two-column,
+  .form-page-fields-three-column {
+    grid-template-columns: 1fr;
+  }
+
+  .form-page-field-wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-page-heading,
+  .form-page-section {
+    padding: 15px;
+  }
+
+  .form-page-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-page-actions ion-button {
+    width: 100%;
+  }
+}

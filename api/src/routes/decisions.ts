@@ -8,6 +8,7 @@ const decisionsRouter = express.Router();
 decisionsRouter.get('/decisions/recent', async (_request, response) => {
   try {
     const recentDecisions = await prisma.decision.findMany({
+      take: 100,
       orderBy: {
         createdAt: 'desc',
       },

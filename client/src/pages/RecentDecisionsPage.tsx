@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   IonBadge,
+  IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
@@ -10,8 +11,12 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonItem,
   IonMenuButton,
   IonPage,
+  IonSearchbar,
+  IonSelect,
+  IonSelectOption,
   IonSpinner,
   IonTitle,
   IonToolbar,
@@ -27,9 +32,13 @@ import HeaderActions from '../components/HeaderActions';
 import './RecentDecisionsPage.css';
 
 const RecentDecisionsPage: React.FC = () => {
+  const decisionsPerPage = 10;
   const [decisions, setDecisions] = useState<RecentDecision[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [decisionFilter, setDecisionFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const loadRecentDecisions = async () => {
@@ -73,6 +82,37 @@ const RecentDecisionsPage: React.FC = () => {
     return 'warning';
   };
 
+  const filteredDecisions = decisions.filter((decision) => {
+    const searchValue = searchText.toLowerCase();
+    const schoolName = decision.application.school.name.toLowerCase();
+    const programName = decision.application.program.name.toLowerCase();
+    const matchesSearch =
+      schoolName.includes(searchValue) || programName.includes(searchValue);
+    const matchesDecision =
+      decisionFilter === 'ALL' || decision.status === decisionFilter;
+
+    return matchesSearch && matchesDecision;
+  });
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredDecisions.length / decisionsPerPage),
+  );
+  const firstDecisionIndex = (currentPage - 1) * decisionsPerPage;
+  const visibleDecisions = filteredDecisions.slice(
+    firstDecisionIndex,
+    firstDecisionIndex + decisionsPerPage,
+  );
+
+  const updateSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1);
+  };
+
+  const updateDecisionFilter = (value: string) => {
+    setDecisionFilter(value);
+    setCurrentPage(1);
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -99,6 +139,41 @@ const RecentDecisionsPage: React.FC = () => {
           </IonCard>
         )}
 
+        {!loading && !error && decisions.length > 0 && (
+          <>
+          <p className="recent-decision-summary">
+            Search the 100 most recent decisions. Use Analytics to view trends
+            across all submissions.
+          </p>
+          <div className="recent-decision-controls">
+            <IonSearchbar
+              className="recent-decision-search"
+              value={searchText}
+              placeholder="Search by school or program"
+              onIonInput={(event) =>
+                updateSearch(String(event.detail.value ?? ''))
+              }
+            />
+
+            <IonItem className="recent-decision-filter" lines="none">
+              <IonSelect
+                label="Decision"
+                value={decisionFilter}
+                interface="popover"
+                onIonChange={(event) =>
+                  updateDecisionFilter(event.detail.value)
+                }
+              >
+                <IonSelectOption value="ALL">All decisions</IonSelectOption>
+                <IonSelectOption value="ACCEPTED">Accepted</IonSelectOption>
+                <IonSelectOption value="REJECTED">Rejected</IonSelectOption>
+                <IonSelectOption value="WAITLISTED">Waitlisted</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+          </div>
+          </>
+        )}
+
         {!loading && !error && decisions.length === 0 && (
           <IonCard>
             <IonCardContent className="ion-text-center">
@@ -107,8 +182,20 @@ const RecentDecisionsPage: React.FC = () => {
           </IonCard>
         )}
 
-        {decisions.map((decision) => (
-          <IonCard key={decision.id} className="recent-decision-card">
+        {!loading &&
+          !error &&
+          decisions.length > 0 &&
+          filteredDecisions.length === 0 && (
+            <IonCard>
+              <IonCardContent className="ion-text-center">
+                No decisions match your search or filter.
+              </IonCardContent>
+            </IonCard>
+          )}
+
+        <div className="recent-decision-grid">
+          {visibleDecisions.map((decision) => (
+            <IonCard key={decision.id} className="recent-decision-card">
             <IonCardHeader className="recent-decision-header">
               <div className="recent-decision-heading">
                 <div>
@@ -219,8 +306,35 @@ const RecentDecisionsPage: React.FC = () => {
                 </span>
               </div>
             </IonCardContent>
-          </IonCard>
-        ))}
+            </IonCard>
+          ))}
+        </div>
+
+        {!loading && !error && filteredDecisions.length > 0 && (
+          <div className="recent-decision-pagination">
+            <IonButton
+              fill="outline"
+              size="small"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              Previous
+            </IonButton>
+
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <IonButton
+              fill="outline"
+              size="small"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              Next
+            </IonButton>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );
