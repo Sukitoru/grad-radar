@@ -160,6 +160,13 @@ const RecentDecisionsPage: React.FC = () => {
                 </div>
               </div>
 
+              <div className="recent-decision-research-area">
+                <span className="recent-decision-label">Research area</span>
+                <span className="recent-decision-value">
+                  {decision.application.researchArea ?? 'Not listed'}
+                </span>
+              </div>
+
               <div className="recent-decision-awards-row">
                 <span className="recent-decision-label">Awards</span>
                 <div className="recent-decision-awards-list">

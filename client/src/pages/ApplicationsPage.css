@@ -195,6 +195,13 @@
   font-weight: 600;
 }
 
+.application-research-area {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 12px;
+}
+
 .application-awards-row {
   display: flex;
   flex-direction: column;

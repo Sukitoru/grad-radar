@@ -386,6 +386,15 @@ const ApplicationsPage: React.FC = () => {
                     </div>
                   </div>
 
+                  <div className="application-research-area">
+                    <span className="application-detail-label">
+                      Research area
+                    </span>
+                    <span className="application-detail-value">
+                      {app.researchArea ?? 'Not listed'}
+                    </span>
+                  </div>
+
                   <div className="application-awards-row">
                     <span className="application-detail-label">Awards</span>
                     <div className="application-awards-list">

@@ -120,6 +120,7 @@ CREATE TABLE public.applications (
     "programId" uuid NOT NULL,
     "termId" uuid NOT NULL,
     gpa numeric(3,2),
+    "researchArea" character varying(255),
     awards text[] DEFAULT ARRAY[]::text[] NOT NULL,
     publications integer DEFAULT 0 NOT NULL,
     "submissionDate" date,

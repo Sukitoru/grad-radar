@@ -80,6 +80,7 @@ model Application {
   programId      String    @db.Uuid
   termId         String    @db.Uuid
   gpa            Decimal?  @db.Decimal(3, 2)
+  researchArea   String?   @db.VarChar(255)
   awards         String[]  @default([])
   publications   Int       @default(0)
   comments       String?   @db.Text

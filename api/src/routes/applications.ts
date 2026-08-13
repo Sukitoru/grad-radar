@@ -19,6 +19,7 @@ router.post('/applications', async (req, res) => {
     programId,
     termId,
     gpa,
+    researchArea,
     awards,
     publications,
     comments,
@@ -27,6 +28,15 @@ router.post('/applications', async (req, res) => {
 
   const selectedAwards = Array.isArray(awards) ? awards : [];
   const publicationCount = Number(publications ?? 0);
+  const savedResearchArea =
+    typeof researchArea === 'string' ? researchArea.trim() : '';
+
+  if (savedResearchArea.length > 255) {
+    res.status(400).json({
+      message: 'Research area must be 255 characters or fewer.',
+    });
+    return;
+  }
 
   if (
     selectedAwards.length > 5 ||
@@ -49,6 +59,7 @@ router.post('/applications', async (req, res) => {
         programId,
         termId,
         gpa,
+        researchArea: savedResearchArea || null,
         awards: selectedAwards,
         publications: publicationCount,
         comments,
@@ -133,6 +144,7 @@ router.put('/applications/:id', async (request, response) => {
     programId,
     termId,
     gpa,
+    researchArea,
     awards,
     publications,
     comments,
@@ -141,6 +153,15 @@ router.put('/applications/:id', async (request, response) => {
 
   const selectedAwards = Array.isArray(awards) ? awards : [];
   const publicationCount = Number(publications ?? 0);
+  const savedResearchArea =
+    typeof researchArea === 'string' ? researchArea.trim() : '';
+
+  if (savedResearchArea.length > 255) {
+    response.status(400).json({
+      message: 'Research area must be 255 characters or fewer.',
+    });
+    return;
+  }
 
   if (
     selectedAwards.length > 5 ||
@@ -178,6 +199,7 @@ router.put('/applications/:id', async (request, response) => {
         programId,
         termId,
         gpa,
+        researchArea: savedResearchArea || null,
         awards: selectedAwards,
         publications: publicationCount,
         comments,

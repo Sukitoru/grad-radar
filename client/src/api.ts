@@ -31,6 +31,7 @@ export interface RecentDecision extends Decision {
   createdAt: string;
   application: {
     gpa: number | string | null;
+    researchArea: string | null;
     awards: string[];
     publications: number;
     comments: string | null;
@@ -47,6 +48,7 @@ export interface Application {
   programId: string;
   termId: string;
   gpa: number | string | null;
+  researchArea: string | null;
   awards: string[];
   publications: number;
   comments: string | null;
@@ -63,6 +65,7 @@ export interface ApplicationInput {
   programId: string;
   termId: string;
   gpa: number | null;
+  researchArea: string | null;
   awards: string[];
   publications: number;
   comments: string | null;

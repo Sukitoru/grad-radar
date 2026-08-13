@@ -81,6 +81,13 @@
   font-weight: 600;
 }
 
+.recent-decision-research-area {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 12px;
+}
+
 .recent-decision-awards-row {
   display: flex;
   flex-direction: column;

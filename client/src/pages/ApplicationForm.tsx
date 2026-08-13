@@ -46,6 +46,7 @@ const ApplicationForm: React.FC = () => {
   const [semester, setSemester] = useState('');
   const [academicYear, setAcademicYear] = useState<number | ''>('');
   const [gpa, setGpa] = useState('');
+  const [researchArea, setResearchArea] = useState('');
   const [awards, setAwards] = useState<string[]>([]);
   const [publications, setPublications] = useState('0');
   const [comments, setComments] = useState('');
@@ -102,6 +103,7 @@ const ApplicationForm: React.FC = () => {
           setSemester(application.term?.name ?? '');
           setAcademicYear(application.term?.academicYear ?? '');
           setGpa(application.gpa === null ? '' : String(application.gpa));
+          setResearchArea(application.researchArea ?? '');
           setAwards(application.awards);
           setPublications(String(application.publications));
           setComments(application.comments ?? '');
@@ -156,6 +158,7 @@ const ApplicationForm: React.FC = () => {
         programId,
         termId,
         gpa: gpa ? Number(gpa) : null,
+        researchArea: researchArea || null,
         awards,
         publications: publications ? Number(publications) : 0,
         comments: comments || null,
@@ -174,6 +177,7 @@ const ApplicationForm: React.FC = () => {
         setSemester('');
         setAcademicYear('');
         setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
+        setResearchArea('');
         setAwards(profile.defaultAwards);
         setPublications(String(profile.defaultPublications));
         setComments('');
@@ -310,6 +314,19 @@ const ApplicationForm: React.FC = () => {
 
             <h2>Application Details</h2>
             <IonList>
+              <IonItem>
+                <IonInput
+                  label="Research Area"
+                  labelPlacement="stacked"
+                  placeholder="For example, distributed systems"
+                  maxlength={255}
+                  value={researchArea}
+                  onIonInput={(event) =>
+                    setResearchArea(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
               <IonItem>
                 <IonSelect
                   label="Awards"
