@@ -1,5 +1,7 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
+import { termRequestSchema } from '../schemas/term.ts';
 
 const router = express.Router();
 
@@ -32,7 +34,17 @@ router.get('/terms', async (_request, response) => {
 });
 
 router.post('/terms', async (request, response) => {
-  const { name, academicYear } = request.body;
+  const validationResult = termRequestSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid term data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
+  const { name, academicYear } = validationResult.data;
 
   try {
     const term = await prisma.term.create({
@@ -52,7 +64,17 @@ router.post('/terms', async (request, response) => {
 
 router.patch('/terms/:id', async (request, response) => {
   const { id } = request.params;
-  const { name, academicYear } = request.body;
+  const validationResult = termRequestSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid term data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
+  const { name, academicYear } = validationResult.data;
 
   try {
     const term = await prisma.term.update({

@@ -1,4 +1,5 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
 import { updateDecisionSchema } from '../schemas/decision.ts';
 
@@ -14,8 +15,15 @@ decisionsRouter.get('/decisions/recent', async (_request, response) => {
         id: true,
         status: true,
         decisionDate: true,
+        createdAt: true,
         application: {
           select: {
+            gpa: true,
+            researchArea: true,
+            awards: true,
+            publications: true,
+            publicationLinks: true,
+            comments: true,
             school: {
               select: {
                 name: true,
@@ -51,7 +59,7 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
   if (!validationResult.success) {
     response.status(400).json({
       message: 'Invalid decision data.',
-      errors: validationResult.error.flatten().fieldErrors,
+      errors: z.flattenError(validationResult.error).fieldErrors,
     });
     return;
   }

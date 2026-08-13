@@ -4,6 +4,7 @@ import schoolsRouter from './routes/schools.ts';
 import programsRouter from './routes/programs.ts';
 import termsRouter from './routes/terms.ts';
 import decisionsRouter from './routes/decisions.ts';
+import usersRouter from './routes/users.ts';
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use('/api', schoolsRouter);
 app.use('/api', programsRouter);
 app.use('/api', termsRouter);
 app.use('/api', decisionsRouter);
+app.use('/api', usersRouter);
 
 app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok' });

@@ -1,407 +1,237 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardSubtitle,
-  IonCardContent,
-  IonList,
-  IonItem,
-  IonBadge,
   IonButton,
-  IonIcon,
-  IonSpinner,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonModal,
-  IonText,
   IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonList,
   IonMenuButton,
+  IonNote,
+  IonPage,
+  IonSpinner,
+  IonTextarea,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/react';
-import {
-  personCircleOutline,
-  schoolOutline,
-  calendarOutline,
-  ribbonOutline,
-  checkmarkCircle,
-  closeCircle,
-  hourglassOutline,
-  createOutline,
-  statsChartOutline,
-} from 'ionicons/icons';
-import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
-
-// Defining Type Interfaces for the Account Page
-interface UserProfile {
-  id: string;
-  username: string;
-  gpa?: number;
-  researchArea?: string;
-  awards?: string;
-  publications?: number;
-}
-
-interface Application {
-  id: string;
-  school: { name: string };
-  program: { name: string; degreeLevel: string };
-  term: { name: string; academicYear: number };
-  submissionDate?: string;
-  decision?: {
-    id: string;
-    status: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED';
-    decisionDate: string;
-  } | null;
-}
+import { logOutOutline, saveOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { getUserProfile, updateUserProfile } from '../api';
 
 const AccountPage: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Modal tracking states
-  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  // Simulated API fetch of User Profile and their specific Applications
-  const fetchAccountData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // In a real application, you would pull the logged-in user details from auth state/headers
-      // GET /api/users/me/profile
-      // GET /api/users/me/applications
-      
-      // Simulate API lag
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock User Profile
-      setProfile({
-        id: 'usr-928471',
-        username: 'AcademicBound99',
-        gpa: 3.89,
-        researchArea: 'Distributed Systems & Privacy',
-        awards: 'Dean\'s List',
-        publications: 2,
-      });
-
-      // Mock user's personal applications
-      setApplications([
-        {
-          id: 'app-001',
-          school: { name: 'Massachusetts Institute of Technology' },
-          program: { name: 'Computer Science', degreeLevel: 'Doctoral' },
-          term: { name: 'Fall', academicYear: 2026 },
-          submissionDate: '2025-11-15T00:00:00.000Z',
-          decision: {
-            id: 'dec-001',
-            status: 'ACCEPTED',
-            decisionDate: '2026-02-18T00:00:00.000Z',
-          },
-        },
-        {
-          id: 'app-002',
-          school: { name: 'Stanford University' },
-          program: { name: 'Computer Science', degreeLevel: 'Doctoral' },
-          term: { name: 'Fall', academicYear: 2026 },
-          submissionDate: '2025-12-01T00:00:00.000Z',
-          decision: null, // Still Pending
-        },
-        {
-          id: 'app-003',
-          school: { name: 'University of California, Berkeley' },
-          program: { name: 'Electrical Engineering & Computer Sciences', degreeLevel: 'Doctoral' },
-          term: { name: 'Fall', academicYear: 2026 },
-          submissionDate: '2025-12-08T00:00:00.000Z',
-          decision: {
-            id: 'dec-003',
-            status: 'WAITLISTED',
-            decisionDate: '2026-03-05T00:00:00.000Z',
-          },
-        },
-      ]);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to retrieve account records.';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const history = useHistory();
+  const [username, setUsername] = useState('');
+  const [gpa, setGpa] = useState('');
+  const [awards, setAwards] = useState('');
+  const [publications, setPublications] = useState('0');
+  const [publicationLinks, setPublicationLinks] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void fetchAccountData();
-    }, 0);
+    const loadProfile = async () => {
+      const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
 
-    return () => window.clearTimeout(timeoutId);
+      if (!demoUserId) {
+        setError('VITE_DEMO_USER_ID is required for the local demo.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const profile = await getUserProfile(demoUserId);
+
+        setUsername(profile.username);
+        setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
+        setAwards(profile.defaultAwards ?? '');
+        setPublications(String(profile.defaultPublications));
+        setPublicationLinks(profile.defaultPublicationLinks ?? '');
+      } catch (loadError) {
+        const loadMessage =
+          loadError instanceof Error
+            ? loadError.message
+            : 'Failed to load the account profile.';
+        setError(loadMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadProfile();
   }, []);
 
-  const handleOpenDecisionModal = (appId: string) => {
-    setSelectedAppId(appId);
-    setIsModalOpen(true);
-  };
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setMessage('');
+    setError('');
 
-  const handleDecisionSaveSuccess = () => {
-    setIsModalOpen(false);
-    setSelectedAppId(null);
-    fetchAccountData(); // Reload account data to reflect updated decision status
-  };
+    const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
 
-  // Helper helper to generate decision status badges
-  const renderDecisionBadge = (decision: Application['decision']) => {
-    if (!decision) {
-      return (
-        <IonBadge color="medium" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <IonIcon icon={hourglassOutline} />
-          PENDING
-        </IonBadge>
-      );
+    if (!demoUserId) {
+      setError('VITE_DEMO_USER_ID is required for the local demo.');
+      return;
     }
 
-    switch (decision.status) {
-      case 'ACCEPTED':
-        return (
-          <IonBadge color="success" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <IonIcon icon={checkmarkCircle} />
-            ACCEPTED
-          </IonBadge>
-        );
-      case 'REJECTED':
-        return (
-          <IonBadge color="danger" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <IonIcon icon={closeCircle} />
-            REJECTED
-          </IonBadge>
-        );
-      case 'WAITLISTED':
-        return (
-          <IonBadge color="warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <IonIcon icon={hourglassOutline} />
-            WAITLISTED
-          </IonBadge>
-        );
+    setSaving(true);
+
+    try {
+      await updateUserProfile(demoUserId, {
+        username,
+        defaultGpa: gpa ? Number(gpa) : null,
+        defaultAwards: awards || null,
+        defaultPublications: publications ? Number(publications) : 0,
+        defaultPublicationLinks: publicationLinks || null,
+      });
+      setMessage('Account profile saved.');
+    } catch (saveError) {
+      const saveMessage =
+        saveError instanceof Error
+          ? saveError.message
+          : 'Failed to save the account profile.';
+      setError(saveMessage);
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Calculate high-level stats for user analytics
-  const totalApps = applications.length;
-  const acceptedApps = applications.filter(a => a.decision?.status === 'ACCEPTED').length;
-  const waitlistedApps = applications.filter(a => a.decision?.status === 'WAITLISTED').length;
-  const pendingApps = applications.filter(a => !a.decision).length;
-  const selectedApplication = applications.find((application) => application.id === selectedAppId);
-
-  if (loading) {
-    return (
-      <IonPage>
-        <IonContent className="ion-text-center ion-padding">
-          <div style={{ marginTop: '40%' }}>
-            <IonSpinner name="crescent" />
-            <p>Loading your profile...</p>
-          </div>
-        </IonContent>
-      </IonPage>
-    );
-  }
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    history.push('/');
+  };
 
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar>
           <IonButtons slot="start">
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
-          <IonTitle>My Account & Profile</IonTitle>
+          <IonTitle>Account</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding">
-        {error && (
-          <IonCard color="danger">
-            <IonCardContent>{error}</IonCardContent>
-          </IonCard>
-        )}
+        <h1>Account Settings</h1>
+        <p>
+          Save information that can be copied into new application forms.
+        </p>
 
-        {profile && (
-          <>
-            {/* 1. Pseudonymous Profile Summary Card */}
-            <IonCard>
-              <IonCardHeader>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <IonIcon icon={personCircleOutline} style={{ fontSize: '48px', color: 'var(--ion-color-primary)' }} />
-                  <div>
-                    <IonCardTitle>{profile.username}</IonCardTitle>
-                    <IonCardSubtitle>Academic Profile (Pseudonymous)</IonCardSubtitle>
-                  </div>
-                </div>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonGrid className="ion-no-padding">
-                  <IonRow>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>GPA</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>{profile.gpa || 'N/A'}</h4>
-                    </IonCol>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>Research Field</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                        {profile.researchArea || 'N/A'}
-                      </h4>
-                    </IonCol>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>Awards</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>{profile.awards || 'None listed'}</h4>
-                    </IonCol>
-                    <IonCol size="6" sizeMd="3">
-                      <IonText color="medium"><h6>Publications</h6></IonText>
-                      <h4 style={{ margin: '4px 0 0' }}>{profile.publications || 0}</h4>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonCardContent>
-            </IonCard>
+        {loading ? (
+          <div className="ion-text-center ion-padding">
+            <IonSpinner name="crescent" />
+            <p>Loading account...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSave}>
+            <h2>Account</h2>
+            <IonList>
+              <IonItem>
+                <IonInput
+                  label="Username"
+                  labelPlacement="stacked"
+                  value={username}
+                  minlength={3}
+                  maxlength={50}
+                  onIonInput={(event) =>
+                    setUsername(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
+            </IonList>
 
-            {/* 2. Success Rate & Statistics Banner */}
-            <IonCard>
-              <IonCardHeader>
-                <IonCardSubtitle style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <IonIcon icon={statsChartOutline} />
-                  APPLICATION METRICS
-                </IonCardSubtitle>
-              </IonCardHeader>
-              <IonCardContent style={{ paddingTop: 0 }}>
-                <IonGrid>
-                  <IonRow className="ion-text-center">
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-dark)', fontWeight: 'bold' }}>{totalApps}</h2>
-                      <IonText color="medium"><small>Submitted</small></IonText>
-                    </IonCol>
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-success)', fontWeight: 'bold' }}>{acceptedApps}</h2>
-                      <IonText color="success"><small>Accepted</small></IonText>
-                    </IonCol>
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-warning)', fontWeight: 'bold' }}>{waitlistedApps}</h2>
-                      <IonText color="warning"><small>Waitlisted</small></IonText>
-                    </IonCol>
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-step-600)', fontWeight: 'bold' }}>{pendingApps}</h2>
-                      <IonText color="medium"><small>Pending</small></IonText>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonCardContent>
-            </IonCard>
+            <h2>Application Defaults</h2>
+            <IonList>
+              <IonItem>
+                <IonInput
+                  type="number"
+                  min="0"
+                  max="4"
+                  step="0.01"
+                  label="GPA"
+                  labelPlacement="stacked"
+                  value={gpa}
+                  onIonInput={(event) =>
+                    setGpa(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
 
-            {/* 3. Personal Tracker List Section */}
-            <h5 className="ion-padding-start" style={{ fontWeight: 'bold', margin: '24px 0 12px' }}>
-              My Tracked Applications
-            </h5>
+              <IonItem>
+                <IonTextarea
+                  label="Awards"
+                  labelPlacement="stacked"
+                  placeholder="List any awards or honors"
+                  autoGrow={true}
+                  value={awards}
+                  onIonInput={(event) =>
+                    setAwards(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
 
-            {applications.length === 0 ? (
-              <IonCard>
-                <IonCardContent className="ion-text-center">
-                  <p>You haven't tracked any applications yet.</p>
-                  <IonButton fill="outline" routerLink="/applications/new" style={{ marginTop: '12px' }}>
-                    Track an Application
-                  </IonButton>
-                </IonCardContent>
-              </IonCard>
-            ) : (
-              <IonList>
-                {applications.map((app) => (
-                  <IonCard key={app.id} style={{ margin: '0 0 16px 0' }}>
-                    <IonItem lines="none" style={{ '--padding-start': '16px' }}>
-                      <div style={{ padding: '12px 0', width: '100%' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <IonIcon icon={schoolOutline} color="secondary" />
-                            {app.school.name}
-                          </span>
-                          {renderDecisionBadge(app.decision)}
-                        </div>
+              <IonItem>
+                <IonInput
+                  type="number"
+                  min="0"
+                  label="Number of Publications"
+                  labelPlacement="stacked"
+                  value={publications}
+                  onIonInput={(event) =>
+                    setPublications(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
 
-                        <p style={{ margin: '8px 0 4px', fontSize: '14px', color: 'var(--ion-color-step-600)' }}>
-                          {app.program.degreeLevel} in {app.program.name}
-                        </p>
+              <IonItem>
+                <IonTextarea
+                  label="Publication Links"
+                  labelPlacement="stacked"
+                  placeholder="Add one link per line"
+                  autoGrow={true}
+                  value={publicationLinks}
+                  onIonInput={(event) =>
+                    setPublicationLinks(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+            </IonList>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <IonIcon icon={calendarOutline} />
-                            Submitted: {app.submissionDate ? new Date(app.submissionDate).toLocaleDateString() : 'Pending'}
-                          </span>
+            {message && <IonNote color="success">{message}</IonNote>}
+            {error && <IonNote color="danger">{error}</IonNote>}
 
-                          <IonButton 
-                            size="small" 
-                            fill="clear" 
-                            color="primary" 
-                            onClick={() => handleOpenDecisionModal(app.id)}
-                            style={{ margin: 0 }}
-                          >
-                            <IonIcon slot="start" icon={createOutline} />
-                            {app.decision ? 'Edit Decision' : 'Update Decision'}
-                          </IonButton>
-                        </div>
+            <IonButton
+              className="ion-margin-top"
+              expand="block"
+              type="submit"
+              disabled={saving}
+            >
+              {saving ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <>
+                  <IonIcon slot="start" icon={saveOutline} />
+                  Save Account
+                </>
+              )}
+            </IonButton>
 
-                        {app.decision && (
-                          <div style={{ 
-                            marginTop: '12px', 
-                            padding: '8px 12px', 
-                            backgroundColor: 'var(--ion-color-step-50)', 
-                            borderRadius: '6px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            fontSize: '13px'
-                          }}>
-                            <IonIcon icon={ribbonOutline} color="warning" />
-                            <strong>Decision Date:</strong> {new Date(app.decision.decisionDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
-                    </IonItem>
-                  </IonCard>
-                ))}
-              </IonList>
-            )}
-
-            {/* 4. Decision Update Modal containing our DecisionForm component */}
-            <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
-              <IonContent className="ion-padding">
-                <div className="ion-text-center ion-padding-bottom">
-                  <h3>Record Decision Outcome</h3>
-                  <p>Specify the admissions outcome for this tracker entry.</p>
-                </div>
-
-                {selectedApplication && (
-                  <DecisionForm
-                    applicationId={selectedApplication.id}
-                    currentStatus={selectedApplication.decision?.status}
-                    currentDecisionDate={selectedApplication.decision?.decisionDate}
-                    onSuccess={handleDecisionSaveSuccess}
-                  />
-                )}
-
-                <div className="ion-padding-horizontal">
-                  <IonButton 
-                    fill="clear" 
-                    color="medium" 
-                    expand="block" 
-                    onClick={() => setIsModalOpen(false)}
-                    style={{ marginTop: '12px' }}
-                  >
-                    Cancel
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
-          </>
+            <IonButton
+              className="ion-margin-top"
+              expand="block"
+              fill="outline"
+              color="danger"
+              type="button"
+              onClick={handleLogout}
+            >
+              <IonIcon slot="start" icon={logOutOutline} />
+              Log Out
+            </IonButton>
+          </form>
         )}
       </IonContent>
     </IonPage>
