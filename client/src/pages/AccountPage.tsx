@@ -1,393 +1,238 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardContent,
-  IonList,
-  IonItem,
-  IonBadge,
   IonButton,
-  IonIcon,
-  IonSpinner,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonModal,
-  IonText,
   IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonList,
   IonMenuButton,
-  IonAlert,
+  IonNote,
+  IonPage,
+  IonSpinner,
+  IonTextarea,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/react';
-import {
-  schoolOutline,
-  calendarOutline,
-  ribbonOutline,
-  checkmarkCircle,
-  closeCircle,
-  hourglassOutline,
-  createOutline,
-  statsChartOutline,
-  trashOutline,
-} from 'ionicons/icons';
-import {
-  deleteApplication,
-  getApplications,
-  type Application,
-} from '../api';
-import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
+import { logOutOutline, saveOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { getUserProfile, updateUserProfile } from '../api';
 
 const AccountPage: React.FC = () => {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Modal tracking states
-  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
-  const [deleting, setDeleting] = useState<boolean>(false);
+  const history = useHistory();
+  const [username, setUsername] = useState('');
+  const [gpa, setGpa] = useState('');
+  const [awards, setAwards] = useState('');
+  const [publications, setPublications] = useState('0');
+  const [publicationLinks, setPublicationLinks] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  // Fetch applications and their related school, program, term, and decision.
-  const fetchAccountData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  useEffect(() => {
+    const loadProfile = async () => {
       const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
 
       if (!demoUserId) {
-        throw new Error('VITE_DEMO_USER_ID is missing from the client environment.');
+        setError('VITE_DEMO_USER_ID is required for the local demo.');
+        setLoading(false);
+        return;
       }
 
-      const applicationData = await getApplications();
+      try {
+        const profile = await getUserProfile(demoUserId);
 
-      const userApplications = applicationData.filter(
-        (application) => application.userId === demoUserId,
-      );
+        setUsername(profile.username);
+        setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
+        setAwards(profile.defaultAwards ?? '');
+        setPublications(String(profile.defaultPublications));
+        setPublicationLinks(profile.defaultPublicationLinks ?? '');
+      } catch (loadError) {
+        const loadMessage =
+          loadError instanceof Error
+            ? loadError.message
+            : 'Failed to load the account profile.';
+        setError(loadMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setApplications(userApplications);
-
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to retrieve account records.';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void fetchAccountData();
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
+    void loadProfile();
   }, []);
 
-  const handleOpenDecisionModal = (appId: string) => {
-    setSelectedAppId(appId);
-    setIsModalOpen(true);
-  };
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setMessage('');
+    setError('');
 
-  const handleDecisionSaveSuccess = () => {
-    setIsModalOpen(false);
-    setSelectedAppId(null);
-    fetchAccountData(); // Reload account data to reflect updated decision status
-  };
+    const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
 
-  const handleDeleteApplication = async () => {
-    if (!applicationToDelete) {
+    if (!demoUserId) {
+      setError('VITE_DEMO_USER_ID is required for the local demo.');
       return;
     }
 
-    setDeleting(true);
-    setError(null);
+    setSaving(true);
 
     try {
-      await deleteApplication(applicationToDelete.id);
-      setApplications((currentApplications) =>
-        currentApplications.filter(
-          (application) => application.id !== applicationToDelete.id,
-        ),
-      );
-      setApplicationToDelete(null);
-    } catch (deleteError) {
-      const message =
-        deleteError instanceof Error
-          ? deleteError.message
-          : 'Failed to delete the application.';
-      setError(message);
+      await updateUserProfile(demoUserId, {
+        username,
+        defaultGpa: gpa ? Number(gpa) : null,
+        defaultAwards: awards || null,
+        defaultPublications: publications ? Number(publications) : 0,
+        defaultPublicationLinks: publicationLinks || null,
+      });
+      setMessage('Account profile saved.');
+    } catch (saveError) {
+      const saveMessage =
+        saveError instanceof Error
+          ? saveError.message
+          : 'Failed to save the account profile.';
+      setError(saveMessage);
     } finally {
-      setDeleting(false);
+      setSaving(false);
     }
   };
 
-  // Helper helper to generate decision status badges
-  const renderDecisionBadge = (decision: Application['decision']) => {
-    if (!decision) {
-      return (
-        <IonBadge color="medium" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <IonIcon icon={hourglassOutline} />
-          PENDING
-        </IonBadge>
-      );
-    }
-
-    switch (decision.status) {
-      case 'ACCEPTED':
-        return (
-          <IonBadge color="success" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <IonIcon icon={checkmarkCircle} />
-            ACCEPTED
-          </IonBadge>
-        );
-      case 'REJECTED':
-        return (
-          <IonBadge color="danger" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <IonIcon icon={closeCircle} />
-            REJECTED
-          </IonBadge>
-        );
-      case 'WAITLISTED':
-        return (
-          <IonBadge color="warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <IonIcon icon={hourglassOutline} />
-            WAITLISTED
-          </IonBadge>
-        );
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    history.push('/');
   };
-
-  // Calculate high-level stats for user analytics
-  const totalApps = applications.length;
-  const acceptedApps = applications.filter(a => a.decision?.status === 'ACCEPTED').length;
-  const waitlistedApps = applications.filter(a => a.decision?.status === 'WAITLISTED').length;
-  const pendingApps = applications.filter(a => !a.decision).length;
-  const selectedApplication = applications.find((application) => application.id === selectedAppId);
-
-  if (loading) {
-    return (
-      <IonPage>
-        <IonContent className="ion-text-center ion-padding">
-          <div style={{ marginTop: '40%' }}>
-            <IonSpinner name="crescent" />
-            <p>Loading your applications...</p>
-          </div>
-        </IonContent>
-      </IonPage>
-    );
-  }
 
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar>
           <IonButtons slot="start">
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
-          <IonTitle>My Applications</IonTitle>
+          <IonTitle>Account</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding">
-        {error && (
-          <IonCard color="danger">
-            <IonCardContent>{error}</IonCardContent>
-          </IonCard>
+        <h1>Account Settings</h1>
+        <p>
+          Save information that can be copied into new application forms.
+        </p>
+
+        {loading ? (
+          <div className="ion-text-center ion-padding">
+            <IonSpinner name="crescent" />
+            <p>Loading account...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSave}>
+            <h2>Account</h2>
+            <IonList>
+              <IonItem>
+                <IonInput
+                  label="Username"
+                  labelPlacement="stacked"
+                  value={username}
+                  minlength={3}
+                  maxlength={50}
+                  onIonInput={(event) =>
+                    setUsername(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
+            </IonList>
+
+            <h2>Application Defaults</h2>
+            <IonList>
+              <IonItem>
+                <IonInput
+                  type="number"
+                  min="0"
+                  max="4"
+                  step="0.01"
+                  label="GPA"
+                  labelPlacement="stacked"
+                  value={gpa}
+                  onIonInput={(event) =>
+                    setGpa(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonTextarea
+                  label="Awards"
+                  labelPlacement="stacked"
+                  placeholder="List any awards or honors"
+                  autoGrow={true}
+                  value={awards}
+                  onIonInput={(event) =>
+                    setAwards(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonInput
+                  type="number"
+                  min="0"
+                  label="Number of Publications"
+                  labelPlacement="stacked"
+                  value={publications}
+                  onIonInput={(event) =>
+                    setPublications(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonTextarea
+                  label="Publication Links"
+                  labelPlacement="stacked"
+                  placeholder="Add one link per line"
+                  autoGrow={true}
+                  value={publicationLinks}
+                  onIonInput={(event) =>
+                    setPublicationLinks(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+            </IonList>
+
+            {message && <IonNote color="success">{message}</IonNote>}
+            {error && <IonNote color="danger">{error}</IonNote>}
+
+            <IonButton
+              className="ion-margin-top"
+              expand="block"
+              type="submit"
+              disabled={saving}
+            >
+              {saving ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <>
+                  <IonIcon slot="start" icon={saveOutline} />
+                  Save Account
+                </>
+              )}
+            </IonButton>
+
+            <IonButton
+              className="ion-margin-top"
+              expand="block"
+              fill="outline"
+              color="danger"
+              type="button"
+              onClick={handleLogout}
+            >
+              <IonIcon slot="start" icon={logOutOutline} />
+              Log Out
+            </IonButton>
+          </form>
         )}
-
-            {/* Application statistics */}
-            <IonCard>
-              <IonCardHeader>
-                <IonCardSubtitle style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <IonIcon icon={statsChartOutline} />
-                  APPLICATION METRICS
-                </IonCardSubtitle>
-              </IonCardHeader>
-              <IonCardContent style={{ paddingTop: 0 }}>
-                <IonGrid>
-                  <IonRow className="ion-text-center">
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-dark)', fontWeight: 'bold' }}>{totalApps}</h2>
-                      <IonText color="medium"><small>Submitted</small></IonText>
-                    </IonCol>
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-success)', fontWeight: 'bold' }}>{acceptedApps}</h2>
-                      <IonText color="success"><small>Accepted</small></IonText>
-                    </IonCol>
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-warning)', fontWeight: 'bold' }}>{waitlistedApps}</h2>
-                      <IonText color="warning"><small>Waitlisted</small></IonText>
-                    </IonCol>
-                    <IonCol>
-                      <h2 style={{ color: 'var(--ion-color-step-600)', fontWeight: 'bold' }}>{pendingApps}</h2>
-                      <IonText color="medium"><small>Pending</small></IonText>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonCardContent>
-            </IonCard>
-
-            {/* Personal tracker list */}
-            <h5 className="ion-padding-start" style={{ fontWeight: 'bold', margin: '24px 0 12px' }}>
-              My Tracked Applications
-            </h5>
-
-            {applications.length === 0 ? (
-              <IonCard>
-                <IonCardContent className="ion-text-center">
-                  <p>You haven't tracked any applications yet.</p>
-                  <IonButton fill="outline" routerLink="/applications/new" style={{ marginTop: '12px' }}>
-                    Track an Application
-                  </IonButton>
-                </IonCardContent>
-              </IonCard>
-            ) : (
-              <IonList>
-                {applications.map((app) => (
-                  <IonCard key={app.id} style={{ margin: '0 0 16px 0' }}>
-                    <IonItem lines="none" style={{ '--padding-start': '16px' }}>
-                      <div style={{ padding: '12px 0', width: '100%' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <IonIcon icon={schoolOutline} color="secondary" />
-                            {app.school?.name ?? 'Unknown school'}
-                          </span>
-                          {renderDecisionBadge(app.decision)}
-                        </div>
-
-                        <p style={{ margin: '8px 0 4px', fontSize: '14px', color: 'var(--ion-color-step-600)' }}>
-                          {app.program
-                            ? `${app.program.degreeLevel} in ${app.program.name}`
-                            : 'Unknown program'}
-                          {' · '}
-                          {app.term
-                            ? `${app.term.name} ${app.term.academicYear}`
-                            : 'Unknown term'}
-                        </p>
-
-                        <p><strong>Research area:</strong> {app.researchArea ?? 'Not listed'}</p>
-                        <p><strong>Awards:</strong> {app.awards ?? 'None listed'}</p>
-                        <p><strong>Publications:</strong> {app.publications}</p>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <IonIcon icon={calendarOutline} />
-                            Submitted: {app.submissionDate ? new Date(app.submissionDate).toLocaleDateString() : 'Pending'}
-                          </span>
-
-                          <IonButton 
-                            size="small" 
-                            fill="clear" 
-                            color="primary" 
-                            onClick={() => handleOpenDecisionModal(app.id)}
-                            style={{ margin: 0 }}
-                          >
-                            <IonIcon slot="start" icon={createOutline} />
-                            {app.decision ? 'Edit Decision' : 'Update Decision'}
-                          </IonButton>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                          <IonButton
-                            size="small"
-                            fill="outline"
-                            routerLink={`/applications/${app.id}/edit`}
-                          >
-                            <IonIcon slot="start" icon={createOutline} />
-                            Edit Application
-                          </IonButton>
-
-                          <IonButton
-                            size="small"
-                            fill="outline"
-                            color="danger"
-                            disabled={deleting}
-                            onClick={() => setApplicationToDelete(app)}
-                          >
-                            <IonIcon slot="start" icon={trashOutline} />
-                            Delete
-                          </IonButton>
-                        </div>
-
-                        {app.decision && (
-                          <div style={{ 
-                            marginTop: '12px', 
-                            padding: '8px 12px', 
-                            backgroundColor: 'var(--ion-color-step-50)', 
-                            borderRadius: '6px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            fontSize: '13px'
-                          }}>
-                            <IonIcon icon={ribbonOutline} color="warning" />
-                            <strong>Decision Date:</strong> {new Date(app.decision.decisionDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
-                    </IonItem>
-                  </IonCard>
-                ))}
-              </IonList>
-            )}
-
-            {/* Decision update modal */}
-            <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
-              <IonContent className="ion-padding">
-                <div className="ion-text-center ion-padding-bottom">
-                  <h3>Record Decision Outcome</h3>
-                  <p>Specify the admissions outcome for this tracker entry.</p>
-                </div>
-
-                {selectedApplication && (
-                  <DecisionForm
-                    applicationId={selectedApplication.id}
-                    currentStatus={selectedApplication.decision?.status}
-                    currentDecisionDate={selectedApplication.decision?.decisionDate}
-                    onSuccess={handleDecisionSaveSuccess}
-                  />
-                )}
-
-                <div className="ion-padding-horizontal">
-                  <IonButton 
-                    fill="clear" 
-                    color="medium" 
-                    expand="block" 
-                    onClick={() => setIsModalOpen(false)}
-                    style={{ marginTop: '12px' }}
-                  >
-                    Cancel
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
-
-            <IonAlert
-              isOpen={applicationToDelete !== null}
-              header="Delete application?"
-              message="This action cannot be undone."
-              buttons={[
-                {
-                  text: 'Cancel',
-                  role: 'cancel',
-                  handler: () => setApplicationToDelete(null),
-                },
-                {
-                  text: 'Delete',
-                  role: 'destructive',
-                  handler: () => {
-                    void handleDeleteApplication();
-                  },
-                },
-              ]}
-              onDidDismiss={() => setApplicationToDelete(null)}
-            />
       </IonContent>
     </IonPage>
   );

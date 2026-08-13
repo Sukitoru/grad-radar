@@ -13,6 +13,8 @@ router.post('/applications', async (req, res) => {
     researchArea,
     awards,
     publications,
+    publicationLinks,
+    comments,
     submissionDate,
   } = req.body;
 
@@ -27,6 +29,8 @@ router.post('/applications', async (req, res) => {
         researchArea,
         awards,
         publications,
+        publicationLinks,
+        comments,
         submissionDate: submissionDate ? new Date(submissionDate) : null,
       },
       include: {
@@ -105,6 +109,8 @@ router.put('/applications/:id', async (request, response) => {
     researchArea,
     awards,
     publications,
+    publicationLinks,
+    comments,
     submissionDate,
   } = request.body;
 
@@ -134,6 +140,8 @@ router.put('/applications/:id', async (request, response) => {
         researchArea,
         awards,
         publications,
+        publicationLinks,
+        comments,
         submissionDate: submissionDate ? new Date(submissionDate) : null,
       },
       include: {

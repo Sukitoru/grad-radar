@@ -24,6 +24,7 @@ import {
   getPrograms,
   getSchools,
   getTerms,
+  getUserProfile,
   updateApplication,
   type Program,
   type School,
@@ -44,6 +45,8 @@ const ApplicationForm: React.FC = () => {
   const [researchArea, setResearchArea] = useState('');
   const [awards, setAwards] = useState('');
   const [publications, setPublications] = useState('0');
+  const [publicationLinks, setPublicationLinks] = useState('');
+  const [comments, setComments] = useState('');
   const [submissionDate, setSubmissionDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -84,7 +87,19 @@ const ApplicationForm: React.FC = () => {
           setResearchArea(application.researchArea ?? '');
           setAwards(application.awards ?? '');
           setPublications(String(application.publications));
+          setPublicationLinks(application.publicationLinks ?? '');
+          setComments(application.comments ?? '');
           setSubmissionDate(application.submissionDate?.slice(0, 10) ?? '');
+        } else {
+          const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+
+          if (demoUserId) {
+            const profile = await getUserProfile(demoUserId);
+            setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
+            setAwards(profile.defaultAwards ?? '');
+            setPublications(String(profile.defaultPublications));
+            setPublicationLinks(profile.defaultPublicationLinks ?? '');
+          }
         }
       } catch (loadError) {
         const loadMessage =
@@ -129,6 +144,8 @@ const ApplicationForm: React.FC = () => {
         researchArea: researchArea || null,
         awards: awards || null,
         publications: publications ? Number(publications) : 0,
+        publicationLinks: publicationLinks || null,
+        comments: comments || null,
         submissionDate: submissionDate || null,
       };
 
@@ -283,6 +300,32 @@ const ApplicationForm: React.FC = () => {
                   value={publications}
                   onIonInput={(event) =>
                     setPublications(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonTextarea
+                  label="Publication Links"
+                  labelPlacement="stacked"
+                  placeholder="Add one link per line"
+                  autoGrow={true}
+                  value={publicationLinks}
+                  onIonInput={(event) =>
+                    setPublicationLinks(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonTextarea
+                  label="Application Comments"
+                  labelPlacement="stacked"
+                  placeholder="Share any notes about your application"
+                  autoGrow={true}
+                  value={comments}
+                  onIonInput={(event) =>
+                    setComments(String(event.detail.value ?? ''))
                   }
                 />
               </IonItem>

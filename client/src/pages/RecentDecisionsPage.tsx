@@ -21,6 +21,12 @@ import {
 } from 'ionicons/icons';
 import { getRecentDecisions, type RecentDecision } from '../api';
 
+const getValidPublicationLinks = (publicationLinks: string | null) =>
+  publicationLinks
+    ?.split('\n')
+    .map((link) => link.trim())
+    .filter((link) => link.startsWith('https://') || link.startsWith('http://')) ?? [];
+
 const RecentDecisionsPage: React.FC = () => {
   const [decisions, setDecisions] = useState<RecentDecision[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,6 +123,10 @@ const RecentDecisionsPage: React.FC = () => {
                 {decision.application.term.academicYear}
               </p>
               <p>
+                <strong>GPA:</strong>{' '}
+                {decision.application.gpa ?? 'Not listed'}
+              </p>
+              <p>
                 <strong>Research area:</strong>{' '}
                 {decision.application.researchArea ?? 'Not listed'}
               </p>
@@ -127,6 +137,26 @@ const RecentDecisionsPage: React.FC = () => {
               <p>
                 <strong>Publications:</strong>{' '}
                 {decision.application.publications}
+              </p>
+              {getValidPublicationLinks(decision.application.publicationLinks).length > 0 && (
+                <div>
+                  <strong>Publication links:</strong>
+                  <ul>
+                    {getValidPublicationLinks(decision.application.publicationLinks).map(
+                      (link, index) => (
+                        <li key={`${link}-${index}`}>
+                          <a href={link} target="_blank" rel="noreferrer">
+                            Publication {index + 1}
+                          </a>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </div>
+              )}
+              <p>
+                <strong>Comments:</strong>{' '}
+                {decision.application.comments ?? 'No comments added'}
               </p>
               <IonBadge color={getStatusColor(decision.status)}>
                 <IonIcon icon={getStatusIcon(decision.status)} />{' '}

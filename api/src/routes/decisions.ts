@@ -17,9 +17,12 @@ decisionsRouter.get('/decisions/recent', async (_request, response) => {
         createdAt: true,
         application: {
           select: {
+            gpa: true,
             researchArea: true,
             awards: true,
             publications: true,
+            publicationLinks: true,
+            comments: true,
             school: {
               select: {
                 name: true,

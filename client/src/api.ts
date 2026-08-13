@@ -28,9 +28,12 @@ export interface Decision {
 export interface RecentDecision extends Decision {
   createdAt: string;
   application: {
+    gpa: number | string | null;
     researchArea: string | null;
     awards: string | null;
     publications: number;
+    publicationLinks: string | null;
+    comments: string | null;
     school: Pick<School, 'name'>;
     program: Pick<Program, 'name' | 'degreeLevel'>;
     term: Pick<Term, 'name' | 'academicYear'>;
@@ -43,10 +46,12 @@ export interface Application {
   schoolId: string;
   programId: string;
   termId: string;
-  gpa: number | null;
+  gpa: number | string | null;
   researchArea: string | null;
   awards: string | null;
   publications: number;
+  publicationLinks: string | null;
+  comments: string | null;
   submissionDate: string | null;
   school?: School;
   program?: Program;
@@ -63,7 +68,26 @@ export interface ApplicationInput {
   researchArea: string | null;
   awards: string | null;
   publications: number;
+  publicationLinks: string | null;
+  comments: string | null;
   submissionDate: string | null;
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  defaultGpa: number | string | null;
+  defaultAwards: string | null;
+  defaultPublications: number;
+  defaultPublicationLinks: string | null;
+}
+
+export interface UserProfileInput {
+  username: string;
+  defaultGpa: number | null;
+  defaultAwards: string | null;
+  defaultPublications: number;
+  defaultPublicationLinks: string | null;
 }
 
 interface ApiErrorResponse {
@@ -93,6 +117,9 @@ export const getTerms = () => apiRequest<Term[]>('/terms');
 
 export const getApplications = () => apiRequest<Application[]>('/applications');
 
+export const getUserProfile = (userId: string) =>
+  apiRequest<UserProfile>(`/users/${userId}/profile`);
+
 export const getRecentDecisions = () =>
   apiRequest<RecentDecision[]>('/decisions/recent');
 
@@ -113,4 +140,11 @@ export const updateApplication = (id: string, application: ApplicationInput) =>
 export const deleteApplication = (id: string) =>
   apiRequest<{ message: string }>(`/applications/${id}`, {
     method: 'DELETE',
+  });
+
+export const updateUserProfile = (userId: string, profile: UserProfileInput) =>
+  apiRequest<UserProfile>(`/users/${userId}/profile`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(profile),
   });

@@ -4,6 +4,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 import ApplicationForm from './pages/ApplicationForm';
 import AccountPage from './pages/AccountPage';
+import ApplicationsPage from './pages/ApplicationsPage';
 import RecentDecisionsPage from './pages/RecentDecisionsPage';
 import AppNavigation from './components/AppNavigation';
 
@@ -54,7 +55,7 @@ const App: React.FC = () => (
           <ApplicationForm />
         </Route>
         <Route exact path="/applications">
-          <AccountPage />
+          <ApplicationsPage />
         </Route>
         <Route exact path="/decisions/recent">
           <RecentDecisionsPage />
