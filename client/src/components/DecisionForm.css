@@ -1,0 +1,30 @@
+.decision-form-card {
+  margin: 0;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+}
+
+.decision-form-header {
+  border-bottom: 1px solid var(--ion-color-step-150);
+}
+
+.decision-form-header ion-card-title {
+  font-size: 19px;
+}
+
+.decision-form-field {
+  --background: rgba(var(--ion-color-medium-rgb), 0.05);
+  --border-color: transparent;
+  --inner-padding-bottom: 5px;
+  --inner-padding-end: 12px;
+  --inner-padding-top: 5px;
+  --padding-start: 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+}
+
+.decision-form-submit {
+  margin: 12px 0 0;
+}

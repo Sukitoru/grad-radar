@@ -35,6 +35,7 @@ const Home: React.FC = () => {
         <main className="home-page">
           <section className="home-intro">
             <IonIcon icon={schoolOutline} aria-hidden="true" />
+            <span className="home-label">Graduate application tracker</span>
             <h1>Grad Radar</h1>
             <p>
               Track your graduate school applications and learn from admission
@@ -45,7 +46,7 @@ const Home: React.FC = () => {
               <IonButton routerLink="/applications/new">
                 Add an application
               </IonButton>
-              <IonButton fill="outline" routerLink="/account">
+              <IonButton fill="outline" routerLink="/applications">
                 My applications
               </IonButton>
             </div>

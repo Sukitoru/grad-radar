@@ -32,6 +32,7 @@ import {
 } from '../api';
 import { awardOptions, maximumAwards } from '../awardOptions';
 import HeaderActions from '../components/HeaderActions';
+import './FormPages.css';
 
 const ApplicationForm: React.FC = () => {
   const history = useHistory();
@@ -209,8 +210,12 @@ const ApplicationForm: React.FC = () => {
       </IonHeader>
 
       <IonContent className="ion-padding">
-        <h1>{isEditing ? 'Edit Application Details' : 'Application Details'}</h1>
-        <p>Enter the information for your graduate school application.</p>
+        <div className="form-page-container">
+          <header className="form-page-heading">
+            <span className="form-page-label">Application tracker</span>
+            <h1>{isEditing ? 'Edit application' : 'Add an application'}</h1>
+            <p>Enter the information for your graduate school application.</p>
+          </header>
 
         {loading ? (
           <div className="ion-text-center ion-padding">
@@ -218,11 +223,19 @@ const ApplicationForm: React.FC = () => {
             <p>Loading schools, programs, and terms...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <h2>School and Program</h2>
-            <IonList>
+          <form className="form-page-form" onSubmit={handleSubmit}>
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>01</span>
+                <div>
+                  <h2>School and program</h2>
+                  <p>Select where and what you applied to.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields form-page-fields-two-column">
               <IonItem>
                 <IonSelect
+                  interface="popover"
                   label="School"
                   labelPlacement="stacked"
                   placeholder="Select a school"
@@ -240,6 +253,7 @@ const ApplicationForm: React.FC = () => {
 
               <IonItem>
                 <IonSelect
+                  interface="popover"
                   label="Program"
                   labelPlacement="stacked"
                   placeholder="Select a program"
@@ -255,12 +269,21 @@ const ApplicationForm: React.FC = () => {
                   ))}
                 </IonSelect>
               </IonItem>
-            </IonList>
+              </IonList>
+            </section>
 
-            <h2>Term</h2>
-            <IonList>
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>02</span>
+                <div>
+                  <h2>Starting term</h2>
+                  <p>Choose the semester and year for this program.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields form-page-fields-two-column">
               <IonItem>
                 <IonSelect
+                  interface="popover"
                   label="Starting Semester"
                   labelPlacement="stacked"
                   placeholder="Select a semester"
@@ -277,6 +300,7 @@ const ApplicationForm: React.FC = () => {
 
               <IonItem>
                 <IonSelect
+                  interface="popover"
                   label="Starting Year"
                   labelPlacement="stacked"
                   placeholder="Select a year"
@@ -293,10 +317,18 @@ const ApplicationForm: React.FC = () => {
                   ))}
                 </IonSelect>
               </IonItem>
-            </IonList>
+              </IonList>
+            </section>
 
-            <h2>Academic Statistics</h2>
-            <IonList>
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>03</span>
+                <div>
+                  <h2>Academic statistics</h2>
+                  <p>Add the GPA included with this application.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields">
               <IonItem>
                 <IonInput
                   type="number"
@@ -310,10 +342,18 @@ const ApplicationForm: React.FC = () => {
                   onIonInput={(event) => setGpa(String(event.detail.value ?? ''))}
                 />
               </IonItem>
-            </IonList>
+              </IonList>
+            </section>
 
-            <h2>Application Details</h2>
-            <IonList>
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>04</span>
+                <div>
+                  <h2>Application details</h2>
+                  <p>Add research interests, experience, and private notes.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields form-page-fields-three-column">
               <IonItem>
                 <IonInput
                   label="Research Area"
@@ -369,7 +409,7 @@ const ApplicationForm: React.FC = () => {
                 />
               </IonItem>
 
-              <IonItem>
+              <IonItem className="form-page-field-wide">
                 <IonTextarea
                   label="Application Comments"
                   labelPlacement="stacked"
@@ -393,14 +433,14 @@ const ApplicationForm: React.FC = () => {
                   }
                 />
               </IonItem>
-            </IonList>
+              </IonList>
+            </section>
 
-            {message && <IonNote color="success">{message}</IonNote>}
-            {error && <IonNote color="danger">{error}</IonNote>}
+            {message && <IonNote className="form-page-note" color="success">{message}</IonNote>}
+            {error && <IonNote className="form-page-note" color="danger">{error}</IonNote>}
 
+            <div className="form-page-actions">
             <IonButton
-              className="ion-margin-top"
-              expand="block"
               type="submit"
               disabled={saving || !schoolId || !programId || !termId}
             >
@@ -412,8 +452,10 @@ const ApplicationForm: React.FC = () => {
                 'Save Application'
               )}
             </IonButton>
+            </div>
           </form>
         )}
+        </div>
       </IonContent>
     </IonPage>
   );
