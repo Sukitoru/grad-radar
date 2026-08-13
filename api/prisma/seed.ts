@@ -4,14 +4,34 @@ import { faker } from '@faker-js/faker';
 // This TypeScript interface guarantees that every object in our array has the exact 
 // structure that Recharts expects when mapping data lines, bars, or scatter plots.
 export interface ApplicationData {
+  id: string;
+  userId: string;
+  schoolId: string;
+  programId: string;
+  termId: string;
+  
   username: string;
   gpa: number;
-  gre: number;
+  
+  researchArea: string;
+  awards: string;
   publications: number;
+  publicationLinks: string;
+  
   status: string;
-  decisionDate: string;
+  comments: string;
+  
+  decisionDate: string; // Or 'Date' if parsed as a Date object
+  submissionDate: Date; 
+  createdAt: Date;
+  updatedAt: Date;
+  
+  user: User;
+  school: School;
+  program: Program;
+  term: Term;
+  decision?: Decision;
 }
-
 // BLOCK 2: Data Generation Function
 // This function accepts a number (e.g., 50) and returns an array of that many mock records.
 export const generateRechartsMockData = (numRecords: number): ApplicationData[] => {
@@ -31,8 +51,6 @@ export const generateRechartsMockData = (numRecords: number): ApplicationData[] 
       // Generates a float for GPA between 2.5 and 4.0 (useful for stat band charts)
       gpa: faker.number.float({ min: 2.5, max: 4.0, fractionDigits: 2 }),
       
-      // Generates a GRE score between 260 and 340
-      gre: faker.number.int({ min: 260, max: 340 }),
       
       // Generates between 0 and 3 publications
       publications: faker.number.int({ min: 0, max: 3 }),
