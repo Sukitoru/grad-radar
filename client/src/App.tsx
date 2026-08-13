@@ -1,4 +1,5 @@
 import { Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
@@ -41,35 +42,39 @@ import './theme/variables.css';
 
 setupIonicReact();
 
+const queryClient = new QueryClient();
+
 const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <AppNavigation />
-      <IonRouterOutlet id="main-content">
-        <Route exact path="/">
-          <Home />
-        </Route>
-        <Route exact path="/applications/new">
-          <ApplicationForm />
-        </Route>
-        <Route exact path="/applications/:applicationId/edit">
-          <ApplicationForm />
-        </Route>
-        <Route exact path="/applications">
-          <ApplicationsPage />
-        </Route>
-        <Route exact path="/decisions/recent">
-          <RecentDecisionsPage />
-        </Route>
-        <Route exact path="/account">
-          <AccountPage />
-        </Route>
-        <Route exact path="/analytics">
-          <AnalyticsDashboard />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
+  <QueryClientProvider client={queryClient}>
+    <IonApp>
+      <IonReactRouter>
+        <AppNavigation />
+        <IonRouterOutlet id="main-content">
+          <Route exact path="/">
+            <Home />
+          </Route>
+          <Route exact path="/applications/new">
+            <ApplicationForm />
+          </Route>
+          <Route exact path="/applications/:applicationId/edit">
+            <ApplicationForm />
+          </Route>
+          <Route exact path="/applications">
+            <ApplicationsPage />
+          </Route>
+          <Route exact path="/decisions/recent">
+            <RecentDecisionsPage />
+          </Route>
+          <Route exact path="/account">
+            <AccountPage />
+          </Route>
+          <Route exact path="/analytics">
+            <AnalyticsDashboard />
+          </Route>
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
+  </QueryClientProvider>
 );
 
 export default App;
