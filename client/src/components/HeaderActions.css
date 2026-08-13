@@ -7,6 +7,10 @@
   width: 40px;
   height: 40px;
   margin: 0;
+  --background-hover: rgba(var(--ion-color-medium-rgb), 0.12);
+  --background-focused: rgba(var(--ion-color-medium-rgb), 0.12);
+  --border-radius: 50%;
+  --color: var(--ion-text-color);
   --padding-start: 8px;
   --padding-end: 8px;
 }

@@ -113,7 +113,7 @@ const RecentDecisionsPage: React.FC = () => {
               <div className="recent-decision-heading">
                 <div>
                   <IonCardTitle className="recent-decision-school">
-                    <IonIcon icon={schoolOutline} color="secondary" />
+                    <IonIcon icon={schoolOutline} color="medium" />
                     {decision.application.school.name}
                   </IonCardTitle>
                   <IonCardSubtitle className="recent-decision-program">
@@ -127,63 +127,64 @@ const RecentDecisionsPage: React.FC = () => {
                   color={getStatusColor(decision.status)}
                 >
                   <IonIcon icon={getStatusIcon(decision.status)} />{' '}
-                  {decision.status}
+                  {decision.status.charAt(0) +
+                    decision.status.slice(1).toLowerCase()}
                 </IonBadge>
               </div>
             </IonCardHeader>
 
             <IonCardContent>
-              <div className="recent-decision-details">
-                <div className="recent-decision-detail recent-decision-term">
+              <div className="recent-decision-facts">
+                <div className="recent-decision-fact">
+                  <span className="recent-decision-label">Term</span>
                   <span className="recent-decision-value">
                     {decision.application.term.name}{' '}
                     {decision.application.term.academicYear}
                   </span>
                 </div>
 
-                <div className="recent-decision-detail">
+                <div className="recent-decision-fact">
+                  <span className="recent-decision-label">GPA</span>
                   <span className="recent-decision-value">
                     {decision.application.gpa === null
-                      ? 'GPA not listed'
-                      : `GPA ${Number(decision.application.gpa).toFixed(2)}`}
+                      ? 'Not listed'
+                      : Number(decision.application.gpa).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="recent-decision-detail">
+                <div className="recent-decision-fact">
+                  <span className="recent-decision-label">Publications</span>
                   <span className="recent-decision-value">
-                    {decision.application.publications.toLocaleString()}{' '}
-                    {decision.application.publications === 1
-                      ? 'publication'
-                      : 'publications'}
+                    {decision.application.publications.toLocaleString()}
                   </span>
                 </div>
+              </div>
 
+              <div className="recent-decision-awards-row">
+                <span className="recent-decision-label">Awards</span>
+                <div className="recent-decision-awards-list">
                 {decision.application.awards.length === 0 ? (
-                  <div className="recent-decision-detail">
-                    <span className="recent-decision-value">No awards</span>
-                  </div>
+                  <span className="recent-decision-empty-value">None listed</span>
                 ) : (
                   decision.application.awards.map((award) => (
-                    <div
+                    <span
                       key={award}
-                      className="recent-decision-detail recent-decision-award"
+                      className="recent-decision-award-tag"
                     >
-                      <span className="recent-decision-value">{award}</span>
-                    </div>
+                      {award}
+                    </span>
                   ))
                 )}
-
-                {decision.status === 'WAITLISTED' &&
-                  decision.waitlistUntilTerm && (
-                    <div className="recent-decision-detail">
-                      <span className="recent-decision-value">
-                        Until{' '}
-                        {decision.waitlistUntilTerm.name}{' '}
-                        {decision.waitlistUntilTerm.academicYear}
-                      </span>
-                    </div>
-                  )}
+                </div>
               </div>
+
+              {decision.status === 'WAITLISTED' &&
+                decision.waitlistUntilTerm && (
+                  <div className="recent-decision-waitlist">
+                    Waitlisted until {decision.waitlistUntilTerm.name}{' '}
+                    {decision.waitlistUntilTerm.academicYear}
+                  </div>
+                )}
 
               <div className="recent-decision-comments">
                 <span className="recent-decision-label">Comments</span>
