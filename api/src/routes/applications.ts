@@ -1,5 +1,10 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
+import {
+  createApplicationSchema,
+  updateApplicationSchema,
+} from '../schemas/application.ts';
 
 const router = express.Router();
 
@@ -12,7 +17,26 @@ const allowedAwards = [
   'Merit Scholarship',
 ];
 
+const applicationFilterSchema = z.object({
+  schoolId: z.uuid().optional(),
+  programId: z.uuid().optional(),
+  termId: z.uuid().optional(),
+  decisionStatus: z
+    .enum(['ACCEPTED', 'REJECTED', 'WAITLISTED', 'PENDING'])
+    .optional(),
+});
+
 router.post('/applications', async (req, res) => {
+  const validationResult = createApplicationSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    res.status(400).json({
+      message: 'Invalid application data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
   const {
     userId,
     schoolId,
@@ -24,7 +48,7 @@ router.post('/applications', async (req, res) => {
     publications,
     comments,
     submissionDate,
-  } = req.body;
+  } = validationResult.data;
 
   const selectedAwards = Array.isArray(awards) ? awards : [];
   const publicationCount = Number(publications ?? 0);
@@ -63,7 +87,7 @@ router.post('/applications', async (req, res) => {
         awards: selectedAwards,
         publications: publicationCount,
         comments,
-        submissionDate: submissionDate ? new Date(submissionDate) : null,
+        submissionDate,
       },
       include: {
         school: true,
@@ -84,9 +108,32 @@ router.post('/applications', async (req, res) => {
 });
 
 // List all applications.
-router.get('/applications', async (_request, response) => {
+router.get('/applications', async (request, response) => {
+  const validationResult = applicationFilterSchema.safeParse(request.query);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid application filters.',
+      errors: validationResult.error.flatten().fieldErrors,
+    });
+    return;
+  }
+
+  const { schoolId, programId, termId, decisionStatus } =
+    validationResult.data;
+
   try {
     const applications = await prisma.application.findMany({
+      where: {
+        schoolId,
+        programId,
+        termId,
+        ...(decisionStatus === 'PENDING'
+          ? { decision: null }
+          : decisionStatus
+            ? { decision: { is: { status: decisionStatus } } }
+            : {}),
+      },
       include: {
         school: true,
         program: true,
@@ -139,6 +186,16 @@ router.get('/applications/:id', async (request, response) => {
 
 // Update one application by ID.
 router.put('/applications/:id', async (request, response) => {
+  const validationResult = updateApplicationSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid application data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
   const {
     schoolId,
     programId,
@@ -149,7 +206,7 @@ router.put('/applications/:id', async (request, response) => {
     publications,
     comments,
     submissionDate,
-  } = request.body;
+  } = validationResult.data;
 
   const selectedAwards = Array.isArray(awards) ? awards : [];
   const publicationCount = Number(publications ?? 0);
@@ -203,7 +260,7 @@ router.put('/applications/:id', async (request, response) => {
         awards: selectedAwards,
         publications: publicationCount,
         comments,
-        submissionDate: submissionDate ? new Date(submissionDate) : null,
+        submissionDate,
       },
       include: {
         school: true,
