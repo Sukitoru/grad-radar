@@ -64,6 +64,9 @@ const App: React.FC = () => (
         <Route exact path="/account">
           <AccountPage />
         </Route>
+        <Route exact path="/analytics">
+          <AnalyticsDashboard />
+        </Route>
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>

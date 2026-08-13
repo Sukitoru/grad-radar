@@ -1,0 +1,39 @@
+.analytics-page-container {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+}
+
+.analytics-overview {
+  padding: 20px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+
+.analytics-overview-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.analytics-overview h1 {
+  margin: 7px 0 4px;
+  font-size: 24px;
+}
+
+.analytics-overview p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .analytics-overview {
+    padding: 16px;
+  }
+}
