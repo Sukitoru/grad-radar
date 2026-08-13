@@ -3,14 +3,17 @@
  *
  * Deterministic seed data for the graduate application tracker.
  *
- * Run:  npx tsx prisma/seed.ts
- *   or: npx prisma db seed   (with the package.json config at the bottom of this file)
+ * Run from the repository root with: yarn db:seed
  */
 
-import { randomUUID } from "node:crypto";
-import { faker } from "@faker-js/faker";
-import { DegreeLevel, DecisionStatus } from "../src/generated/prisma/client";
-import { prisma } from "../lib/prisma";
+import 'dotenv/config';
+import { randomUUID } from 'node:crypto';
+import { faker } from '@faker-js/faker';
+import {
+  DegreeLevel,
+  DecisionStatus,
+} from '../src/generated/prisma/client.ts';
+import prisma from '../src/db.ts';
 
 // Same data every run. Change or remove for fresh data each time.
 faker.seed(20260813);
@@ -28,83 +31,84 @@ const CONFIG = {
   decisionRate: 0.7,
 } as const;
 
-// Placeholder bcrypt hash. Every seeded user gets the same one so you can log in
-// during development. Replace with a real hash of a known password, e.g.:
-//   const passwordHash = await bcrypt.hash("password123", 10);
-const PASSWORD_HASH = "$2b$10$KIXQ9vJ8Zz1nQ9pYy0m8XeR7hVJqK4bJz9oQmN0dLx2sVpB1uYw3C";
+// Seeded users only provide application data. This placeholder is not a
+// password that should be used to sign in.
+const PASSWORD_HASH =
+  '$2b$10$KIXQ9vJ8Zz1nQ9pYy0m8XeR7hVJqK4bJz9oQmN0dLx2sVpB1uYw3C';
+const SEED_USERNAME_PREFIX = 'seed_user_';
 
 const SCHOOL_NAMES = [
-  "Stanford University",
-  "Massachusetts Institute of Technology",
-  "Carnegie Mellon University",
-  "University of California, Berkeley",
-  "California Institute of Technology",
-  "Princeton University",
-  "Cornell University",
-  "Columbia University",
-  "University of Michigan, Ann Arbor",
-  "Georgia Institute of Technology",
-  "University of Washington",
-  "University of Illinois Urbana-Champaign",
-  "University of Texas at Austin",
-  "New York University",
-  "Johns Hopkins University",
-  "Duke University",
-  "Northwestern University",
-  "Brown University",
-  "Rice University",
-  "University of Wisconsin-Madison",
-  "Purdue University",
-  "University of Maryland, College Park",
-  "Boston University",
-  "University of Pennsylvania",
-  "Yale University",
-  "University of Chicago",
-  "University of Toronto",
-  "ETH Zurich",
+  'Stanford University',
+  'Massachusetts Institute of Technology',
+  'Carnegie Mellon University',
+  'University of California, Berkeley',
+  'California Institute of Technology',
+  'Princeton University',
+  'Cornell University',
+  'Columbia University',
+  'University of Michigan, Ann Arbor',
+  'Georgia Institute of Technology',
+  'University of Washington',
+  'University of Illinois Urbana-Champaign',
+  'University of Texas at Austin',
+  'New York University',
+  'Johns Hopkins University',
+  'Duke University',
+  'Northwestern University',
+  'Brown University',
+  'Rice University',
+  'University of Wisconsin-Madison',
+  'Purdue University',
+  'University of Maryland, College Park',
+  'Boston University',
+  'University of Pennsylvania',
+  'Yale University',
+  'University of Chicago',
+  'University of Toronto',
+  'ETH Zurich',
 ];
 
 const PROGRAM_NAMES = [
-  "Computer Science",
-  "Electrical and Computer Engineering",
-  "Applied Mathematics",
-  "Artificial Intelligence",
-  "Data Science",
-  "Robotics",
-  "Bioinformatics",
-  "Human-Computer Interaction",
-  "Statistics",
-  "Information Systems",
-  "Computational Biology",
-  "Machine Learning",
+  'Computer Science',
+  'Electrical and Computer Engineering',
+  'Applied Mathematics',
+  'Artificial Intelligence',
+  'Data Science',
+  'Robotics',
+  'Bioinformatics',
+  'Human-Computer Interaction',
+  'Statistics',
+  'Information Systems',
+  'Computational Biology',
+  'Machine Learning',
 ];
 
 const RESEARCH_AREAS = [
-  "Distributed systems",
-  "Programming languages and compilers",
-  "Computer vision",
-  "Natural language processing",
-  "Reinforcement learning",
-  "Database systems",
-  "Computer architecture",
-  "Cryptography and security",
-  "Theoretical computer science",
-  "Graphics and rendering",
-  "Human-computer interaction",
-  "Computational neuroscience",
+  'Distributed systems',
+  'Programming languages and compilers',
+  'Computer vision',
+  'Natural language processing',
+  'Reinforcement learning',
+  'Database systems',
+  'Computer architecture',
+  'Cryptography and security',
+  'Theoretical computer science',
+  'Graphics and rendering',
+  'Human-computer interaction',
+  'Computational neuroscience',
 ];
 
 const AWARD_NAMES = [
   "Dean's List",
-  "NSF Graduate Research Fellowship (honorable mention)",
-  "Summa Cum Laude",
-  "Undergraduate Research Award",
-  "Barry Goldwater Scholarship",
-  "Phi Beta Kappa",
-  "Best Undergraduate Thesis",
-  "ACM Student Research Competition finalist",
-  "Departmental Excellence Award",
-  "Tau Beta Pi",
+  'NSF Graduate Research Fellowship (honorable mention)',
+  'Summa Cum Laude',
+  'Undergraduate Research Award',
+  'Barry Goldwater Scholarship',
+  'Phi Beta Kappa',
+  'Best Undergraduate Thesis',
+  'ACM Student Research Competition finalist',
+  'Departmental Excellence Award',
+  'Tau Beta Pi',
 ];
 
 // ---------------------------------------------------------------------------
@@ -138,33 +142,34 @@ function randomAwards(): string | null {
   if (faker.datatype.boolean({ probability: 0.35 })) return null;
   return faker.helpers
     .arrayElements(AWARD_NAMES, { min: 1, max: 3 })
-    .join("\n");
+    .join('\n');
 }
 
 function publicationLinksFor(count: number): string | null {
   if (count === 0) return null;
   return Array.from({ length: count }, () =>
     `https://doi.org/10.${faker.number.int({ min: 1000, max: 9999 })}/${faker.string.alphanumeric(8).toLowerCase()}`,
-  ).join("\n");
+  ).join('\n');
 }
 
 // ---------------------------------------------------------------------------
 // Reset
 // ---------------------------------------------------------------------------
 
-async function reset() {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED_PROD !== "true") {
-    throw new Error("Refusing to truncate tables with NODE_ENV=production.");
+async function removeOldSeedData() {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Seed data cannot be added in production.');
   }
 
-  // Order matters: Program, School and Term use onDelete: Restrict, so children
-  // have to go first.
-  await prisma.decision.deleteMany();
-  await prisma.application.deleteMany();
-  await prisma.program.deleteMany();
-  await prisma.school.deleteMany();
-  await prisma.term.deleteMany();
-  await prisma.user.deleteMany();
+  // Deleting these users also deletes only their applications and decisions.
+  // Data created by classmates is left alone.
+  await prisma.user.deleteMany({
+    where: {
+      username: {
+        startsWith: SEED_USERNAME_PREFIX,
+      },
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -182,15 +187,7 @@ type SeededUser = {
 };
 
 async function seedUsers(): Promise<SeededUser[]> {
-  const usernames = new Set<string>();
-
-  const users: SeededUser[] = Array.from({ length: CONFIG.users }, () => {
-    let username = faker.internet.username().toLowerCase().slice(0, 50);
-    while (usernames.has(username)) {
-      username = `${faker.internet.username().toLowerCase().slice(0, 44)}${faker.number.int({ min: 10, max: 9999 })}`;
-    }
-    usernames.add(username);
-
+  const users: SeededUser[] = Array.from({ length: CONFIG.users }, (_, index) => {
     const defaultPublications = faker.helpers.weightedArrayElement([
       { weight: 5, value: 0 },
       { weight: 3, value: 1 },
@@ -200,7 +197,7 @@ async function seedUsers(): Promise<SeededUser[]> {
 
     return {
       id: randomUUID(),
-      username,
+      username: `${SEED_USERNAME_PREFIX}${index + 1}`,
       passwordHash: PASSWORD_HASH,
       defaultGpa: randomGpa(),
       defaultAwards: randomAwards(),
@@ -219,15 +216,25 @@ async function seedSchools(): Promise<SeededSchool[]> {
   const names = faker.helpers
     .arrayElements(SCHOOL_NAMES, Math.min(CONFIG.schools, SCHOOL_NAMES.length));
 
-  const schools = names.map((name) => ({ id: randomUUID(), name }));
-  await prisma.school.createMany({ data: schools });
+  const schools: SeededSchool[] = [];
+
+  for (const name of names) {
+    const school = await prisma.school.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+
+    schools.push({ id: school.id, name: school.name });
+  }
+
   return schools;
 }
 
 type SeededProgram = { id: string; schoolId: string; degreeLevel: DegreeLevel };
 
 async function seedPrograms(schools: SeededSchool[]): Promise<SeededProgram[]> {
-  const programs: Array<SeededProgram & { name: string }> = [];
+  const programs: SeededProgram[] = [];
 
   for (const school of schools) {
     // @@unique([schoolId, name, degreeLevel]) means the pair has to be unique
@@ -246,11 +253,30 @@ async function seedPrograms(schools: SeededSchool[]): Promise<SeededProgram[]> {
       if (used.has(key)) continue;
       used.add(key);
 
-      programs.push({ id: randomUUID(), schoolId: school.id, name, degreeLevel });
+      const program = await prisma.program.upsert({
+        where: {
+          schoolId_name_degreeLevel: {
+            schoolId: school.id,
+            name,
+            degreeLevel,
+          },
+        },
+        update: {},
+        create: {
+          schoolId: school.id,
+          name,
+          degreeLevel,
+        },
+      });
+
+      programs.push({
+        id: program.id,
+        schoolId: program.schoolId,
+        degreeLevel: program.degreeLevel,
+      });
     }
   }
 
-  await prisma.program.createMany({ data: programs });
   return programs;
 }
 
@@ -258,25 +284,93 @@ type SeededTerm = { id: string; startDate: Date };
 
 async function seedTerms(): Promise<SeededTerm[]> {
   const definitions = [
-    { name: "Fall", academicYear: 2024, start: utcDate(2024, 8, 26), end: utcDate(2024, 12, 20) },
-    { name: "Spring", academicYear: 2025, start: utcDate(2025, 1, 21), end: utcDate(2025, 5, 16) },
-    { name: "Fall", academicYear: 2025, start: utcDate(2025, 8, 25), end: utcDate(2025, 12, 19) },
-    { name: "Spring", academicYear: 2026, start: utcDate(2026, 1, 20), end: utcDate(2026, 5, 15) },
-    { name: "Fall", academicYear: 2026, start: utcDate(2026, 8, 24), end: utcDate(2026, 12, 18) },
-    { name: "Spring", academicYear: 2027, start: utcDate(2027, 1, 19), end: utcDate(2027, 5, 14) },
+    {
+      name: 'Fall',
+      academicYear: 2024,
+      start: utcDate(2024, 8, 26),
+      end: utcDate(2024, 12, 20),
+    },
+    {
+      name: 'Spring',
+      academicYear: 2025,
+      start: utcDate(2025, 1, 21),
+      end: utcDate(2025, 5, 16),
+    },
+    {
+      name: 'Fall',
+      academicYear: 2025,
+      start: utcDate(2025, 8, 25),
+      end: utcDate(2025, 12, 19),
+    },
+    {
+      name: 'Spring',
+      academicYear: 2026,
+      start: utcDate(2026, 1, 20),
+      end: utcDate(2026, 5, 15),
+    },
+    {
+      name: 'Fall',
+      academicYear: 2026,
+      start: utcDate(2026, 8, 24),
+      end: utcDate(2026, 12, 18),
+    },
+    {
+      name: 'Spring',
+      academicYear: 2027,
+      start: utcDate(2027, 1, 19),
+      end: utcDate(2027, 5, 14),
+    },
   ];
 
-  const terms = definitions.map((t) => ({
-    id: randomUUID(),
-    name: t.name,
-    academicYear: t.academicYear,
-    startDate: t.start,
-    endDate: t.end,
-  }));
+  const terms: SeededTerm[] = [];
 
-  await prisma.term.createMany({ data: terms });
-  return terms.map((t) => ({ id: t.id, startDate: t.startDate }));
+  for (const definition of definitions) {
+    const term = await prisma.term.upsert({
+      where: {
+        name_academicYear: {
+          name: definition.name,
+          academicYear: definition.academicYear,
+        },
+      },
+      update: {
+        startDate: definition.start,
+        endDate: definition.end,
+      },
+      create: {
+        name: definition.name,
+        academicYear: definition.academicYear,
+        startDate: definition.start,
+        endDate: definition.end,
+      },
+    });
+
+    terms.push({ id: term.id, startDate: definition.start });
+  }
+
+  return terms;
 }
+
+type SeededApplication = {
+  id: string;
+  userId: string;
+  schoolId: string;
+  programId: string;
+  termId: string;
+  gpa: string;
+  researchArea: string;
+  awards: string | null;
+  publications: number;
+  publicationLinks: string | null;
+  comments: string | null;
+  submissionDate: Date;
+};
+
+type SeededDecision = {
+  id: string;
+  applicationId: string;
+  status: DecisionStatus;
+  decisionDate: Date;
+};
 
 async function seedApplicationsAndDecisions(
   users: SeededUser[],
@@ -284,8 +378,8 @@ async function seedApplicationsAndDecisions(
   terms: SeededTerm[],
 ) {
   const today = dateOnly(new Date());
-  const applications: any[] = [];
-  const decisions: any[] = [];
+  const applications: SeededApplication[] = [];
+  const decisions: SeededDecision[] = [];
 
   for (const user of users) {
     const count = faker.number.int(CONFIG.applicationsPerUser);
@@ -322,7 +416,9 @@ async function seedApplicationsAndDecisions(
         schoolId: program.schoolId,
         programId: program.id,
         termId: term.id,
-        gpa: faker.datatype.boolean({ probability: 0.85 }) ? user.defaultGpa : randomGpa(),
+        gpa: faker.datatype.boolean({ probability: 0.85 })
+          ? user.defaultGpa
+          : randomGpa(),
         researchArea: faker.helpers.arrayElement(RESEARCH_AREAS),
         awards: faker.datatype.boolean({ probability: 0.7 })
           ? user.defaultAwards
@@ -336,7 +432,10 @@ async function seedApplicationsAndDecisions(
       });
 
       // Decisions land 45 to 150 days after submission, and never in the future.
-      const decisionDate = addDays(submissionDate, faker.number.int({ min: 45, max: 150 }));
+      const decisionDate = addDays(
+        submissionDate,
+        faker.number.int({ min: 45, max: 150 }),
+      );
       if (decisionDate > today) continue;
       if (!faker.datatype.boolean({ probability: CONFIG.decisionRate })) continue;
 
@@ -364,8 +463,8 @@ async function seedApplicationsAndDecisions(
 // ---------------------------------------------------------------------------
 
 async function main() {
-  console.time("seed");
-  await reset();
+  console.time('seed');
+  await removeOldSeedData();
 
   const users = await seedUsers();
   const schools = await seedSchools();
@@ -381,7 +480,7 @@ async function main() {
     applications: counts.applications,
     decisions: counts.decisions,
   });
-  console.timeEnd("seed");
+  console.timeEnd('seed');
 }
 
 main()
@@ -392,13 +491,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-/*
-Install:
-  npm i -D @faker-js/faker tsx
-
-package.json:
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  }
-*/

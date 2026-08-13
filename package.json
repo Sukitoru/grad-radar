@@ -27,7 +27,8 @@
     "prisma:generate": "yarn workspace grad-radar-api prisma:generate",
     "db:migrate": "yarn workspace grad-radar-api db:migrate",
     "db:deploy": "yarn workspace grad-radar-api db:deploy",
-    "db:studio": "yarn workspace grad-radar-api db:studio"
+    "db:studio": "yarn workspace grad-radar-api db:studio",
+    "db:seed": "yarn workspace grad-radar-api db:seed"
   },
   "devDependencies": {
     "@ionic/cli": "7.2.1",
