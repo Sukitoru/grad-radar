@@ -11,6 +11,7 @@
     "client"
   ],
   "scripts": {
+    "dev:all": "concurrently --kill-others-on-fail --names api,client \"yarn dev:api\" \"yarn dev\"",
     "dev:api": "yarn workspace grad-radar-api dev",
     "start:api": "yarn workspace grad-radar-api start",
     "typecheck:api": "yarn workspace grad-radar-api typecheck",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@ionic/cli": "7.2.1",
+    "concurrently": "10.0.4",
     "cross-env": "10.1.0",
     "start-server-and-test": "3.0.12"
   },

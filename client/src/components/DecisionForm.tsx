@@ -124,9 +124,9 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
               disabled={submitting}
               className="custom-select"
             >
-              <IonSelectOption value="ACCEPTED">Accepted 🎉</IonSelectOption>
+              <IonSelectOption value="ACCEPTED">Accepted</IonSelectOption>
               <IonSelectOption value="REJECTED">Rejected</IonSelectOption>
-              <IonSelectOption value="WAITLISTED">Waitlisted ⏳</IonSelectOption>
+              <IonSelectOption value="WAITLISTED">Waitlisted</IonSelectOption>
             </IonSelect>
           </IonItem>
 

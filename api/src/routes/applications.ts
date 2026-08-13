@@ -8,12 +8,6 @@ import {
 
 const router = express.Router();
 
-type AuthenticatedRequest = express.Request & {
-  user?: {
-    id: string;
-  };
-};
-
 router.post('/applications', async (req, res) => {
   const validationResult = createApplicationSchema.safeParse(req.body);
 
@@ -34,6 +28,8 @@ router.post('/applications', async (req, res) => {
     researchArea,
     awards,
     publications,
+    publicationLinks,
+    comments,
     submissionDate,
   } = validationResult.data;
 
@@ -48,7 +44,15 @@ router.post('/applications', async (req, res) => {
         researchArea,
         awards,
         publications,
+        publicationLinks,
+        comments,
         submissionDate,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
@@ -63,7 +67,14 @@ router.post('/applications', async (req, res) => {
 // List all applications.
 router.get('/applications', async (_request, response) => {
   try {
-    const applications = await prisma.application.findMany();
+    const applications = await prisma.application.findMany({
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
+      },
+    });
 
     response.json(applications);
   } catch {
@@ -79,6 +90,12 @@ router.get('/applications/:id', async (request, response) => {
     const application = await prisma.application.findUnique({
       where: {
         id: request.params.id,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
@@ -97,18 +114,8 @@ router.get('/applications/:id', async (request, response) => {
   }
 });
 
-// Update one application owned by the signed-in user.
+// Update one application by ID.
 router.put('/applications/:id', async (request, response) => {
-  const authenticatedRequest = request as AuthenticatedRequest;
-  const userId = authenticatedRequest.user?.id;
-
-  if (!userId) {
-    response.status(401).json({
-      message: 'You must be signed in to update an application.',
-    });
-    return;
-  }
-
   const validationResult = updateApplicationSchema.safeParse(request.body);
 
   if (!validationResult.success) {
@@ -127,6 +134,8 @@ router.put('/applications/:id', async (request, response) => {
     researchArea,
     awards,
     publications,
+    publicationLinks,
+    comments,
     submissionDate,
   } = validationResult.data;
 
@@ -144,13 +153,6 @@ router.put('/applications/:id', async (request, response) => {
       return;
     }
 
-    if (application.userId !== userId) {
-      response.status(403).json({
-        message: 'You are not authorized to update this application.',
-      });
-      return;
-    }
-
     const updatedApplication = await prisma.application.update({
       where: {
         id: request.params.id,
@@ -163,7 +165,15 @@ router.put('/applications/:id', async (request, response) => {
         researchArea,
         awards,
         publications,
+        publicationLinks,
+        comments,
         submissionDate,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
@@ -177,16 +187,6 @@ router.put('/applications/:id', async (request, response) => {
 
 // Delete one application by ID.
 router.delete('/applications/:id', async (request, response) => {
-  const authenticatedRequest = request as AuthenticatedRequest;
-  const userId = authenticatedRequest.user?.id;
-
-  if (!userId) {
-    response.status(401).json({
-      message: 'You must be signed in to delete an application.',
-    });
-    return;
-  }
-
   try {
     const application = await prisma.application.findUnique({
       where: {
@@ -197,13 +197,6 @@ router.delete('/applications/:id', async (request, response) => {
     if (!application) {
       response.status(404).json({
         message: 'Application not found.',
-      });
-      return;
-    }
-
-    if (application.userId !== userId) {
-      response.status(403).json({
-        message: 'You are not authorized to delete this application.',
       });
       return;
     }

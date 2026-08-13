@@ -21,6 +21,8 @@ const applicationFieldsSchema = z.object({
     .int({ error: 'Publications must be a whole number.' })
     .nonnegative({ error: 'Publications cannot be negative.' })
     .optional(),
+  publicationLinks: z.string().trim().optional().nullable(),
+  comments: z.string().trim().optional().nullable(),
   submissionDate: z.coerce
     .date({ error: 'Submission date must be a valid date.' })
     .optional()
