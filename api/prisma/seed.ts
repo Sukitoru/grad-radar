@@ -83,6 +83,21 @@ const PROGRAM_NAMES = [
   'Machine Learning',
 ];
 
+const RESEARCH_AREAS = [
+  'Distributed systems',
+  'Programming languages and compilers',
+  'Computer vision',
+  'Natural language processing',
+  'Reinforcement learning',
+  'Database systems',
+  'Computer architecture',
+  'Cryptography and security',
+  'Theoretical computer science',
+  'Graphics and rendering',
+  'Human-computer interaction',
+  'Computational neuroscience',
+];
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -311,6 +326,7 @@ type SeededApplication = {
   programId: string;
   termId: string;
   gpa: string;
+  researchArea: string;
   publications: number;
   comments: string | null;
   submissionDate: Date;
@@ -370,6 +386,7 @@ async function seedApplicationsAndDecisions(
         gpa: faker.datatype.boolean({ probability: 0.85 })
           ? user.defaultGpa
           : randomGpa(),
+        researchArea: faker.helpers.arrayElement(RESEARCH_AREAS),
         publications,
         comments: faker.datatype.boolean({ probability: 0.4 })
           ? faker.lorem.sentence({ min: 8, max: 20 })
