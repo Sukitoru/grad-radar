@@ -4,6 +4,8 @@ import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 import ApplicationForm from './pages/ApplicationForm';
 import AccountPage from './pages/AccountPage';
+import ApplicationsPage from './pages/ApplicationsPage';
+import RecentDecisionsPage from './pages/RecentDecisionsPage';
 import AppNavigation from './components/AppNavigation';
 
 /* Core CSS required for Ionic components to work properly */
@@ -48,6 +50,15 @@ const App: React.FC = () => (
         </Route>
         <Route exact path="/applications/new">
           <ApplicationForm />
+        </Route>
+        <Route exact path="/applications/:applicationId/edit">
+          <ApplicationForm />
+        </Route>
+        <Route exact path="/applications">
+          <ApplicationsPage />
+        </Route>
+        <Route exact path="/decisions/recent">
+          <RecentDecisionsPage />
         </Route>
         <Route exact path="/account">
           <AccountPage />

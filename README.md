@@ -23,3 +23,9 @@ To build the project:
 ```bash
 corepack yarn build
 ```
+
+## AI Disclosure
+
+### Sukitoru
+
+I used ChatGPT as a learning and development assistant. I used it to find relevant documentation and examples, explain how an implementation works. I then wrote and adapted the code for Grad Radar. GPT reviewed my work and provided feedback, creating a cycle of research, implementation, review, and revision. I made the final design decisions and was responsible for testing and understanding the submitted code

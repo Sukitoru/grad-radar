@@ -1,5 +1,7 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
+import { schoolRequestSchema } from '../schemas/school.ts';
 
 const router = express.Router();
 
@@ -24,7 +26,16 @@ router.get('/schools', async (_request, response) => {
 });
 
 router.post('/schools', async (request, response) => {
-  const { name } = request.body;
+  const validationResult = schoolRequestSchema.safeParse(request.body);
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid school data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
+  const { name } = validationResult.data;
 
   try {
     const school = await prisma.school.create({
@@ -43,7 +54,17 @@ router.post('/schools', async (request, response) => {
 
 router.patch('/schools/:id', async (request, response) => {
   const { id } = request.params;
-  const { name } = request.body;
+  const validationResult = schoolRequestSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid school data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
+  const { name } = validationResult.data;
 
   try {
     const school = await prisma.school.update({

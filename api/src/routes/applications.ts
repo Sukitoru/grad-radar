@@ -1,9 +1,17 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
 
 const router = express.Router();
 
-// Creates the application 
+const applicationFilterSchema = z.object({
+  schoolId: z.uuid().optional(),
+  programId: z.uuid().optional(),
+  termId: z.uuid().optional(),
+  decisionStatus: z
+    .enum(['ACCEPTED', 'REJECTED', 'WAITLISTED', 'PENDING'])
+    .optional(),
+});
 
 router.post('/applications', async (req, res) => {
   const {
@@ -15,6 +23,8 @@ router.post('/applications', async (req, res) => {
     researchArea,
     awards,
     publications,
+    publicationLinks,
+    comments,
     submissionDate,
   } = req.body;
 
@@ -29,7 +39,15 @@ router.post('/applications', async (req, res) => {
         researchArea,
         awards,
         publications,
-        submissionDate,
+        publicationLinks,
+        comments,
+        submissionDate: submissionDate ? new Date(submissionDate) : null,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
@@ -42,36 +60,60 @@ router.post('/applications', async (req, res) => {
 });
 
 // List all applications.
+router.get('/applications', async (request, response) => {
+  const validationResult = applicationFilterSchema.safeParse(request.query);
 
-router.get('/applications', async (req, res) => {
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid application filters.',
+      errors: validationResult.error.flatten().fieldErrors,
+    });
+    return;
+  }
+
+  const { schoolId, programId, termId, decisionStatus } =
+    validationResult.data;
+
   try {
-
-    // Filtering by school, program, term, and decision by Id
-
-    const { schoolId, programId, termId } = req.query;
     const applications = await prisma.application.findMany({
       where: {
-        ...(schoolId && { schoolId: String(schoolId)}),
-        ...(programId && {programId: String(programId)}),
-        ...(termId && {termId: String(termId)}),
-    },
-  }); 
+        schoolId,
+        programId,
+        termId,
+        ...(decisionStatus === 'PENDING'
+          ? { decision: null }
+          : decisionStatus
+            ? { decision: { is: { status: decisionStatus } } }
+            : {}),
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
+      },
+    });
 
-    res.json(applications);
+    response.json(applications);
   } catch {
-    res.status(500).json({
+    response.status(500).json({
       message: 'Failed to retrieve applications.',
     });
   }
 });
 
 // Get one application by ID.
-
 router.get('/applications/:id', async (request, response) => {
   try {
     const application = await prisma.application.findUnique({
       where: {
         id: request.params.id,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
@@ -90,10 +132,9 @@ router.get('/applications/:id', async (request, response) => {
   }
 });
 
-// Updates the application by the signed in user 
-
-router.put('applications/:id', async (req, res) => {
-    const {
+// Update one application by ID.
+router.put('/applications/:id', async (request, response) => {
+  const {
     schoolId,
     programId,
     termId,
@@ -101,33 +142,28 @@ router.put('applications/:id', async (req, res) => {
     researchArea,
     awards,
     publications,
+    publicationLinks,
+    comments,
     submissionDate,
-  } = req.body;
-  
+  } = request.body;
+
   try {
-    const userId = (req as any).user.id;
-    const application = await prisma.application.findUnique ({
+    const application = await prisma.application.findUnique({
       where: {
-        id: req.params.id,
+        id: request.params.id,
       },
     });
 
     if (!application) {
-      return res.status(404).json ({
+      response.status(404).json({
         message: 'Application not found.',
       });
+      return;
     }
 
-    if (application.userId !== userId)
-    {
-      return res.status(403).json ({
-        message: 'You are not authorized to update this application.',
-      });
-    }
-
-    const updatedApplication = await prisma.application.update ({
+    const updatedApplication = await prisma.application.update({
       where: {
-        id: req.params.id,
+        id: request.params.id,
       },
       data: {
         schoolId,
@@ -137,53 +173,53 @@ router.put('applications/:id', async (req, res) => {
         researchArea,
         awards,
         publications,
-        submissionDate,
+        publicationLinks,
+        comments,
+        submissionDate: submissionDate ? new Date(submissionDate) : null,
+      },
+      include: {
+        school: true,
+        program: true,
+        term: true,
+        decision: true,
       },
     });
 
-    res.json(updatedApplication);
+    response.json(updatedApplication);
   } catch {
-    res.status(500).json({
+    response.status(500).json({
       message: 'Failed to update application.',
     });
   }
 });
 
 // Delete one application by ID.
-
-router.delete('/applications/:id', async (req, res) => {
+router.delete('/applications/:id', async (request, response) => {
   try {
-    const  userId = (req as any).user.id;
     const application = await prisma.application.findUnique({
       where: {
-        id: req.params.id,
+        id: request.params.id,
       },
     });
 
     if (!application) {
-      res.status(404).json({
+      response.status(404).json({
         message: 'Application not found.',
       });
       return;
     }
 
-    if (!application.userId !== userId) {
-      return res.status(403).json ({
-        message: 'You are not authorized delete this application.',
-      });
-    }
-
     await prisma.application.delete({
       where: {
-        id: req.params.id,
+        id: request.params.id,
       },
     });
 
-    res.json({
+    response.json({
       message: 'Application deleted successfully.',
     });
   } catch {
-    res.status(500).json({
+    response.status(500).json({
       message: 'Failed to delete application.',
     });
   }
