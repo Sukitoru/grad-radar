@@ -1,5 +1,7 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
+import { programRequestSchema } from '../schemas/program.ts';
 
 const router = express.Router();
 
@@ -25,8 +27,17 @@ router.get('/programs', async (_request, response) => {
 });
 
 router.post('/programs', async (request, response) => {
-  const { schoolId, name, degreeLevel } = request.body;
+  const validationResult = programRequestSchema.safeParse(request.body);
 
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid program data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
+  const { schoolId, name, degreeLevel } = validationResult.data;
   try {
     const program = await prisma.program.create({
       data: {
@@ -46,7 +57,17 @@ router.post('/programs', async (request, response) => {
 
 router.patch('/programs/:id', async (request, response) => {
   const { id } = request.params;
-  const { schoolId, name, degreeLevel } = request.body;
+  const validationResult = programRequestSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid program data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
+  const { schoolId, name, degreeLevel } = validationResult.data;
 
   try {
     const program = await prisma.program.update({

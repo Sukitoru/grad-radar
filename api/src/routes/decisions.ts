@@ -1,4 +1,5 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
 import { updateDecisionSchema } from '../schemas/decision.ts';
 
@@ -64,7 +65,7 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
   if (!validationResult.success) {
     response.status(400).json({
       message: 'Invalid decision data.',
-      errors: validationResult.error.flatten().fieldErrors,
+      errors: z.flattenError(validationResult.error).fieldErrors,
     });
     return;
   }
