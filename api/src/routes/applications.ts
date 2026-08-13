@@ -1,9 +1,24 @@
 import express from 'express';
+import { z } from 'zod';
 import prisma from '../db.ts';
+import {
+  createApplicationSchema,
+  updateApplicationSchema,
+} from '../schemas/application.ts';
 
 const router = express.Router();
 
 router.post('/applications', async (req, res) => {
+  const validationResult = createApplicationSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    res.status(400).json({
+      message: 'Invalid application data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
   const {
     userId,
     schoolId,
@@ -16,7 +31,7 @@ router.post('/applications', async (req, res) => {
     publicationLinks,
     comments,
     submissionDate,
-  } = req.body;
+  } = validationResult.data;
 
   try {
     const application = await prisma.application.create({
@@ -31,7 +46,7 @@ router.post('/applications', async (req, res) => {
         publications,
         publicationLinks,
         comments,
-        submissionDate: submissionDate ? new Date(submissionDate) : null,
+        submissionDate,
       },
       include: {
         school: true,
@@ -101,6 +116,16 @@ router.get('/applications/:id', async (request, response) => {
 
 // Update one application by ID.
 router.put('/applications/:id', async (request, response) => {
+  const validationResult = updateApplicationSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid application data.',
+      errors: z.flattenError(validationResult.error).fieldErrors,
+    });
+    return;
+  }
+
   const {
     schoolId,
     programId,
@@ -112,7 +137,7 @@ router.put('/applications/:id', async (request, response) => {
     publicationLinks,
     comments,
     submissionDate,
-  } = request.body;
+  } = validationResult.data;
 
   try {
     const application = await prisma.application.findUnique({
@@ -142,7 +167,7 @@ router.put('/applications/:id', async (request, response) => {
         publications,
         publicationLinks,
         comments,
-        submissionDate: submissionDate ? new Date(submissionDate) : null,
+        submissionDate,
       },
       include: {
         school: true,
