@@ -83,34 +83,6 @@ const PROGRAM_NAMES = [
   'Machine Learning',
 ];
 
-const RESEARCH_AREAS = [
-  'Distributed systems',
-  'Programming languages and compilers',
-  'Computer vision',
-  'Natural language processing',
-  'Reinforcement learning',
-  'Database systems',
-  'Computer architecture',
-  'Cryptography and security',
-  'Theoretical computer science',
-  'Graphics and rendering',
-  'Human-computer interaction',
-  'Computational neuroscience',
-];
-
-const AWARD_NAMES = [
-  "Dean's List",
-  'NSF Graduate Research Fellowship (honorable mention)',
-  'Summa Cum Laude',
-  'Undergraduate Research Award',
-  'Barry Goldwater Scholarship',
-  'Phi Beta Kappa',
-  'Best Undergraduate Thesis',
-  'ACM Student Research Competition finalist',
-  'Departmental Excellence Award',
-  'Tau Beta Pi',
-];
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -136,20 +108,6 @@ function addDays(base: Date, days: number): Date {
 /** GPA that fits Decimal(3, 2). Returned as a string so no float rounding creeps in. */
 function randomGpa(): string {
   return faker.number.float({ min: 2.9, max: 4.0, fractionDigits: 2 }).toFixed(2);
-}
-
-function randomAwards(): string | null {
-  if (faker.datatype.boolean({ probability: 0.35 })) return null;
-  return faker.helpers
-    .arrayElements(AWARD_NAMES, { min: 1, max: 3 })
-    .join('\n');
-}
-
-function publicationLinksFor(count: number): string | null {
-  if (count === 0) return null;
-  return Array.from({ length: count }, () =>
-    `https://doi.org/10.${faker.number.int({ min: 1000, max: 9999 })}/${faker.string.alphanumeric(8).toLowerCase()}`,
-  ).join('\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -181,9 +139,7 @@ type SeededUser = {
   username: string;
   passwordHash: string;
   defaultGpa: string;
-  defaultAwards: string | null;
   defaultPublications: number;
-  defaultPublicationLinks: string | null;
 };
 
 async function seedUsers(): Promise<SeededUser[]> {
@@ -200,9 +156,7 @@ async function seedUsers(): Promise<SeededUser[]> {
       username: `${SEED_USERNAME_PREFIX}${index + 1}`,
       passwordHash: PASSWORD_HASH,
       defaultGpa: randomGpa(),
-      defaultAwards: randomAwards(),
       defaultPublications,
-      defaultPublicationLinks: publicationLinksFor(defaultPublications),
     };
   });
 
@@ -357,10 +311,7 @@ type SeededApplication = {
   programId: string;
   termId: string;
   gpa: string;
-  researchArea: string;
-  awards: string | null;
   publications: number;
-  publicationLinks: string | null;
   comments: string | null;
   submissionDate: Date;
 };
@@ -419,12 +370,7 @@ async function seedApplicationsAndDecisions(
         gpa: faker.datatype.boolean({ probability: 0.85 })
           ? user.defaultGpa
           : randomGpa(),
-        researchArea: faker.helpers.arrayElement(RESEARCH_AREAS),
-        awards: faker.datatype.boolean({ probability: 0.7 })
-          ? user.defaultAwards
-          : randomAwards(),
         publications,
-        publicationLinks: publicationLinksFor(publications),
         comments: faker.datatype.boolean({ probability: 0.4 })
           ? faker.lorem.sentence({ min: 8, max: 20 })
           : null,
