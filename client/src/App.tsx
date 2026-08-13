@@ -7,6 +7,8 @@ import AccountPage from './pages/AccountPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import RecentDecisionsPage from './pages/RecentDecisionsPage';
 import AppNavigation from './components/AppNavigation';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
