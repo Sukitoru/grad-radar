@@ -8,6 +8,15 @@ import {
 
 const router = express.Router();
 
+const applicationFilterSchema = z.object({
+  schoolId: z.uuid().optional(),
+  programId: z.uuid().optional(),
+  termId: z.uuid().optional(),
+  decisionStatus: z
+    .enum(['ACCEPTED', 'REJECTED', 'WAITLISTED', 'PENDING'])
+    .optional(),
+});
+
 router.post('/applications', async (req, res) => {
   const validationResult = createApplicationSchema.safeParse(req.body);
 
@@ -65,9 +74,32 @@ router.post('/applications', async (req, res) => {
 });
 
 // List all applications.
-router.get('/applications', async (_request, response) => {
+router.get('/applications', async (request, response) => {
+  const validationResult = applicationFilterSchema.safeParse(request.query);
+
+  if (!validationResult.success) {
+    response.status(400).json({
+      message: 'Invalid application filters.',
+      errors: validationResult.error.flatten().fieldErrors,
+    });
+    return;
+  }
+
+  const { schoolId, programId, termId, decisionStatus } =
+    validationResult.data;
+
   try {
     const applications = await prisma.application.findMany({
+      where: {
+        schoolId,
+        programId,
+        termId,
+        ...(decisionStatus === 'PENDING'
+          ? { decision: null }
+          : decisionStatus
+            ? { decision: { is: { status: decisionStatus } } }
+            : {}),
+      },
       include: {
         school: true,
         program: true,
