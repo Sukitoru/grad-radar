@@ -4,6 +4,9 @@ import {
   IonButtons,
   IonCard,
   IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
   IonContent,
   IonHeader,
   IonIcon,
@@ -20,12 +23,8 @@ import {
   schoolOutline,
 } from 'ionicons/icons';
 import { getRecentDecisions, type RecentDecision } from '../api';
-
-const getValidPublicationLinks = (publicationLinks: string | null) =>
-  publicationLinks
-    ?.split('\n')
-    .map((link) => link.trim())
-    .filter((link) => link.startsWith('https://') || link.startsWith('http://')) ?? [];
+import HeaderActions from '../components/HeaderActions';
+import './RecentDecisionsPage.css';
 
 const RecentDecisionsPage: React.FC = () => {
   const [decisions, setDecisions] = useState<RecentDecision[]>([]);
@@ -77,11 +76,12 @@ const RecentDecisionsPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar>
           <IonButtons slot="start">
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
           <IonTitle>Recent Decisions</IonTitle>
+          <HeaderActions />
         </IonToolbar>
       </IonHeader>
 
@@ -108,68 +108,100 @@ const RecentDecisionsPage: React.FC = () => {
         )}
 
         {decisions.map((decision) => (
-          <IonCard key={decision.id}>
-            <IonCardContent>
-              <h2>
-                <IonIcon icon={schoolOutline} />{' '}
-                {decision.application.school.name}
-              </h2>
-              <p>
-                {decision.application.program.degreeLevel} in{' '}
-                {decision.application.program.name}
-              </p>
-              <p>
-                {decision.application.term.name}{' '}
-                {decision.application.term.academicYear}
-              </p>
-              <p>
-                <strong>GPA:</strong>{' '}
-                {decision.application.gpa ?? 'Not listed'}
-              </p>
-              <p>
-                <strong>Research area:</strong>{' '}
-                {decision.application.researchArea ?? 'Not listed'}
-              </p>
-              <p>
-                <strong>Awards:</strong>{' '}
-                {decision.application.awards ?? 'None listed'}
-              </p>
-              <p>
-                <strong>Publications:</strong>{' '}
-                {decision.application.publications}
-              </p>
-              {getValidPublicationLinks(decision.application.publicationLinks).length > 0 && (
+          <IonCard key={decision.id} className="recent-decision-card">
+            <IonCardHeader className="recent-decision-header">
+              <div className="recent-decision-heading">
                 <div>
-                  <strong>Publication links:</strong>
-                  <ul>
-                    {getValidPublicationLinks(decision.application.publicationLinks).map(
-                      (link, index) => (
-                        <li key={`${link}-${index}`}>
-                          <a href={link} target="_blank" rel="noreferrer">
-                            Publication {index + 1}
-                          </a>
-                        </li>
-                      ),
-                    )}
-                  </ul>
+                  <IonCardTitle className="recent-decision-school">
+                    <IonIcon icon={schoolOutline} color="secondary" />
+                    {decision.application.school.name}
+                  </IonCardTitle>
+                  <IonCardSubtitle className="recent-decision-program">
+                    {decision.application.program.degreeLevel} in{' '}
+                    {decision.application.program.name}
+                  </IonCardSubtitle>
                 </div>
-              )}
-              <p>
-                <strong>Comments:</strong>{' '}
-                {decision.application.comments ?? 'No comments added'}
-              </p>
-              <IonBadge color={getStatusColor(decision.status)}>
-                <IonIcon icon={getStatusIcon(decision.status)} />{' '}
-                {decision.status}
-              </IonBadge>
-              <p>
-                Decision received:{' '}
-                {new Date(decision.decisionDate).toLocaleDateString()}
-              </p>
-              <p>
-                Added to Grad Radar:{' '}
-                {new Date(decision.createdAt).toLocaleString()}
-              </p>
+
+                <IonBadge
+                  className="recent-decision-status"
+                  color={getStatusColor(decision.status)}
+                >
+                  <IonIcon icon={getStatusIcon(decision.status)} />{' '}
+                  {decision.status}
+                </IonBadge>
+              </div>
+            </IonCardHeader>
+
+            <IonCardContent>
+              <div className="recent-decision-details">
+                <div className="recent-decision-detail recent-decision-term">
+                  <span className="recent-decision-value">
+                    {decision.application.term.name}{' '}
+                    {decision.application.term.academicYear}
+                  </span>
+                </div>
+
+                <div className="recent-decision-detail">
+                  <span className="recent-decision-value">
+                    {decision.application.gpa === null
+                      ? 'GPA not listed'
+                      : `GPA ${Number(decision.application.gpa).toFixed(2)}`}
+                  </span>
+                </div>
+
+                <div className="recent-decision-detail">
+                  <span className="recent-decision-value">
+                    {decision.application.publications.toLocaleString()}{' '}
+                    {decision.application.publications === 1
+                      ? 'publication'
+                      : 'publications'}
+                  </span>
+                </div>
+
+                {decision.application.awards.length === 0 ? (
+                  <div className="recent-decision-detail">
+                    <span className="recent-decision-value">No awards</span>
+                  </div>
+                ) : (
+                  decision.application.awards.map((award) => (
+                    <div
+                      key={award}
+                      className="recent-decision-detail recent-decision-award"
+                    >
+                      <span className="recent-decision-value">{award}</span>
+                    </div>
+                  ))
+                )}
+
+                {decision.status === 'WAITLISTED' &&
+                  decision.waitlistUntilTerm && (
+                    <div className="recent-decision-detail">
+                      <span className="recent-decision-value">
+                        Until{' '}
+                        {decision.waitlistUntilTerm.name}{' '}
+                        {decision.waitlistUntilTerm.academicYear}
+                      </span>
+                    </div>
+                  )}
+              </div>
+
+              <div className="recent-decision-comments">
+                <span className="recent-decision-label">Comments</span>
+                <p>
+                  {decision.application.comments ?? 'No comments added'}
+                </p>
+              </div>
+
+              <div className="recent-decision-dates">
+                <span>
+                  <strong>Decision received:</strong>{' '}
+                  {new Date(decision.decisionDate).toLocaleDateString()}
+                </span>
+                <span>
+                  <strong>Added on:</strong>{' '}
+                  {new Date(decision.createdAt).toLocaleDateString()}
+                </span>
+              </div>
             </IonCardContent>
           </IonCard>
         ))}

@@ -1,0 +1,191 @@
+.application-card {
+  margin: 0 0 10px;
+}
+
+.application-card ion-card-header {
+  padding: 12px 14px 10px;
+}
+
+.application-card ion-card-content {
+  padding: 10px 14px 12px;
+}
+
+.application-card-header {
+  border-bottom: 1px solid var(--ion-color-step-150);
+}
+
+.application-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.application-school-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.application-program-name {
+  margin-top: 3px;
+  font-size: 14px;
+  text-transform: none;
+}
+
+.application-status-badge {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.application-details-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.application-detail {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 4px;
+  padding: 5px 9px;
+  background: rgba(var(--ion-color-medium-rgb), 0.12);
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.55);
+  border-radius: 999px;
+}
+
+.application-detail-term {
+  background: var(--ion-color-success);
+  border-color: var(--ion-color-success);
+}
+
+.application-detail-term .application-detail-value {
+  color: var(--ion-color-success-contrast);
+}
+
+.application-detail-award {
+  background: rgba(var(--ion-color-warning-rgb), 0.12);
+  border-color: rgba(var(--ion-color-warning-rgb), 0.55);
+}
+
+.application-detail-label {
+  color: var(--ion-color-medium);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.application-detail-value {
+  color: var(--ion-text-color);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.application-comments {
+  margin-top: 9px;
+  padding-left: 8px;
+  border-left: 3px solid var(--ion-color-primary);
+}
+
+.application-comments p {
+  margin: 2px 0 0;
+  color: var(--ion-color-step-700);
+  line-height: 1.35;
+}
+
+.application-decision-details {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  padding: 6px 9px;
+  background: rgba(var(--ion-color-medium-rgb), 0.12);
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.45);
+  border-radius: 6px;
+}
+
+.application-decision-details > div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.application-decision-accepted {
+  background: rgba(var(--ion-color-success-rgb), 0.12);
+  border-color: rgba(var(--ion-color-success-rgb), 0.55);
+}
+
+.application-decision-accepted ion-icon {
+  color: var(--ion-color-success);
+}
+
+.application-decision-rejected {
+  background: rgba(var(--ion-color-danger-rgb), 0.12);
+  border-color: rgba(var(--ion-color-danger-rgb), 0.55);
+}
+
+.application-decision-rejected ion-icon {
+  color: var(--ion-color-danger);
+}
+
+.application-decision-waitlisted {
+  background: rgba(var(--ion-color-warning-rgb), 0.12);
+  border-color: rgba(var(--ion-color-warning-rgb), 0.55);
+}
+
+.application-decision-waitlisted ion-icon {
+  color: var(--ion-color-warning);
+}
+
+.application-submission-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  color: var(--ion-color-medium);
+  font-size: 12px;
+}
+
+.application-submission-row span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.application-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ion-color-step-100);
+}
+
+.application-actions ion-button {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .application-card-heading,
+  .application-submission-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .application-detail {
+    flex-basis: calc(50% - 4px);
+  }
+}
+
+@media (max-width: 360px) {
+  .application-detail {
+    flex-basis: 100%;
+  }
+}

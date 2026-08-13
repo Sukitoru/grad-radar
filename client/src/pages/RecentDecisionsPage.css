@@ -1,0 +1,127 @@
+.recent-decision-card {
+  margin: 0 0 10px;
+}
+
+.recent-decision-card ion-card-header {
+  padding: 12px 14px 10px;
+}
+
+.recent-decision-card ion-card-content {
+  padding: 10px 14px 12px;
+}
+
+.recent-decision-header {
+  border-bottom: 1px solid var(--ion-color-step-150);
+}
+
+.recent-decision-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.recent-decision-school {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.recent-decision-program {
+  margin-top: 3px;
+  font-size: 14px;
+  text-transform: none;
+}
+
+.recent-decision-status {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.recent-decision-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recent-decision-detail {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 4px;
+  padding: 5px 9px;
+  background: rgba(var(--ion-color-medium-rgb), 0.12);
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.55);
+  border-radius: 999px;
+}
+
+.recent-decision-term {
+  background: var(--ion-color-success);
+  border-color: var(--ion-color-success);
+}
+
+.recent-decision-term .recent-decision-value {
+  color: var(--ion-color-success-contrast);
+}
+
+.recent-decision-award {
+  background: rgba(var(--ion-color-warning-rgb), 0.12);
+  border-color: rgba(var(--ion-color-warning-rgb), 0.55);
+}
+
+.recent-decision-label {
+  color: var(--ion-color-medium);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.recent-decision-value {
+  color: var(--ion-text-color);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recent-decision-comments {
+  margin-top: 9px;
+  padding-left: 8px;
+  border-left: 3px solid var(--ion-color-primary);
+}
+
+.recent-decision-comments p {
+  margin: 2px 0 0;
+  color: var(--ion-color-step-700);
+  line-height: 1.35;
+}
+
+.recent-decision-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ion-color-step-100);
+  color: var(--ion-color-medium);
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .recent-decision-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .recent-decision-detail {
+    flex-basis: calc(50% - 4px);
+  }
+}
+
+@media (max-width: 360px) {
+  .recent-decision-detail {
+    flex-basis: 100%;
+  }
+}

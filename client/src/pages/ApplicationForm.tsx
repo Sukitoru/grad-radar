@@ -30,6 +30,8 @@ import {
   type School,
   type Term,
 } from '../api';
+import { awardOptions, maximumAwards } from '../awardOptions';
+import HeaderActions from '../components/HeaderActions';
 
 const ApplicationForm: React.FC = () => {
   const history = useHistory();
@@ -41,11 +43,11 @@ const ApplicationForm: React.FC = () => {
   const [schoolId, setSchoolId] = useState('');
   const [programId, setProgramId] = useState('');
   const [termId, setTermId] = useState('');
+  const [semester, setSemester] = useState('');
+  const [academicYear, setAcademicYear] = useState<number | ''>('');
   const [gpa, setGpa] = useState('');
-  const [researchArea, setResearchArea] = useState('');
-  const [awards, setAwards] = useState('');
+  const [awards, setAwards] = useState<string[]>([]);
   const [publications, setPublications] = useState('0');
-  const [publicationLinks, setPublicationLinks] = useState('');
   const [comments, setComments] = useState('');
   const [submissionDate, setSubmissionDate] = useState('');
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,20 @@ const ApplicationForm: React.FC = () => {
   const availablePrograms = programs.filter(
     (program) => program.schoolId === schoolId,
   );
+  const availableYears = [...new Set(terms.map((term) => term.academicYear))]
+    .sort((firstYear, secondYear) => firstYear - secondYear);
+
+  const selectTerm = (newSemester: string, newYear: number | '') => {
+    setSemester(newSemester);
+    setAcademicYear(newYear);
+
+    const matchingTerm = terms.find(
+      (term) =>
+        term.name === newSemester && term.academicYear === newYear,
+    );
+
+    setTermId(matchingTerm?.id ?? '');
+  };
 
   useEffect(() => {
     const loadFormOptions = async () => {
@@ -83,11 +99,11 @@ const ApplicationForm: React.FC = () => {
           setSchoolId(application.schoolId);
           setProgramId(application.programId);
           setTermId(application.termId);
+          setSemester(application.term?.name ?? '');
+          setAcademicYear(application.term?.academicYear ?? '');
           setGpa(application.gpa === null ? '' : String(application.gpa));
-          setResearchArea(application.researchArea ?? '');
-          setAwards(application.awards ?? '');
+          setAwards(application.awards);
           setPublications(String(application.publications));
-          setPublicationLinks(application.publicationLinks ?? '');
           setComments(application.comments ?? '');
           setSubmissionDate(application.submissionDate?.slice(0, 10) ?? '');
         } else {
@@ -96,9 +112,8 @@ const ApplicationForm: React.FC = () => {
           if (demoUserId) {
             const profile = await getUserProfile(demoUserId);
             setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
-            setAwards(profile.defaultAwards ?? '');
+            setAwards(profile.defaultAwards);
             setPublications(String(profile.defaultPublications));
-            setPublicationLinks(profile.defaultPublicationLinks ?? '');
           }
         }
       } catch (loadError) {
@@ -141,10 +156,8 @@ const ApplicationForm: React.FC = () => {
         programId,
         termId,
         gpa: gpa ? Number(gpa) : null,
-        researchArea: researchArea || null,
-        awards: awards || null,
+        awards,
         publications: publications ? Number(publications) : 0,
-        publicationLinks: publicationLinks || null,
         comments: comments || null,
         submissionDate: submissionDate || null,
       };
@@ -153,6 +166,18 @@ const ApplicationForm: React.FC = () => {
         await updateApplication(applicationId, applicationData);
       } else {
         await createApplication(applicationData);
+
+        const profile = await getUserProfile(demoUserId);
+        setSchoolId('');
+        setProgramId('');
+        setTermId('');
+        setSemester('');
+        setAcademicYear('');
+        setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
+        setAwards(profile.defaultAwards);
+        setPublications(String(profile.defaultPublications));
+        setComments('');
+        setSubmissionDate('');
       }
 
       history.push('/applications');
@@ -175,6 +200,7 @@ const ApplicationForm: React.FC = () => {
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
           <IonTitle>{isEditing ? 'Edit Application' : 'Add Application'}</IonTitle>
+          <HeaderActions />
         </IonToolbar>
       </IonHeader>
 
@@ -231,16 +257,34 @@ const ApplicationForm: React.FC = () => {
             <IonList>
               <IonItem>
                 <IonSelect
-                  label="Starting Term"
+                  label="Starting Semester"
                   labelPlacement="stacked"
-                  placeholder="Select a term"
-                  value={termId}
-                  onIonChange={(event) => setTermId(event.detail.value)}
+                  placeholder="Select a semester"
+                  value={semester}
+                  onIonChange={(event) =>
+                    selectTerm(event.detail.value, academicYear)
+                  }
                   required
                 >
-                  {terms.map((term) => (
-                    <IonSelectOption key={term.id} value={term.id}>
-                      {term.name} {term.academicYear}
+                  <IonSelectOption value="Spring">Spring</IonSelectOption>
+                  <IonSelectOption value="Fall">Fall</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+
+              <IonItem>
+                <IonSelect
+                  label="Starting Year"
+                  labelPlacement="stacked"
+                  placeholder="Select a year"
+                  value={academicYear}
+                  onIonChange={(event) =>
+                    selectTerm(semester, Number(event.detail.value))
+                  }
+                  required
+                >
+                  {availableYears.map((year) => (
+                    <IonSelectOption key={year} value={year}>
+                      {year}
                     </IonSelectOption>
                   ))}
                 </IonSelect>
@@ -267,52 +311,43 @@ const ApplicationForm: React.FC = () => {
             <h2>Application Details</h2>
             <IonList>
               <IonItem>
-                <IonTextarea
-                  label="Research Area"
-                  labelPlacement="stacked"
-                  placeholder="Describe your research interests"
-                  autoGrow={true}
-                  value={researchArea}
-                  onIonInput={(event) =>
-                    setResearchArea(String(event.detail.value ?? ''))
-                  }
-                />
-              </IonItem>
-
-              <IonItem>
-                <IonTextarea
+                <IonSelect
                   label="Awards"
                   labelPlacement="stacked"
-                  placeholder="List any awards or honors"
-                  autoGrow={true}
+                  placeholder="Select up to 5 awards"
+                  multiple={true}
                   value={awards}
-                  onIonInput={(event) => setAwards(String(event.detail.value ?? ''))}
-                />
+                  onIonChange={(event) => {
+                    const selectedAwards = event.detail.value as string[];
+
+                    if (selectedAwards.length <= maximumAwards) {
+                      setAwards(selectedAwards);
+                      setError('');
+                    } else {
+                      setError(`Select no more than ${maximumAwards} awards.`);
+                    }
+                  }}
+                >
+                  {awardOptions.map((award) => (
+                    <IonSelectOption key={award} value={award}>
+                      {award}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
               </IonItem>
 
               <IonItem>
                 <IonInput
                   type="number"
                   min="0"
+                  max="100"
+                  step="1"
                   label="Number of Publications"
                   labelPlacement="stacked"
                   placeholder="0"
                   value={publications}
                   onIonInput={(event) =>
                     setPublications(String(event.detail.value ?? ''))
-                  }
-                />
-              </IonItem>
-
-              <IonItem>
-                <IonTextarea
-                  label="Publication Links"
-                  labelPlacement="stacked"
-                  placeholder="Add one link per line"
-                  autoGrow={true}
-                  value={publicationLinks}
-                  onIonInput={(event) =>
-                    setPublicationLinks(String(event.detail.value ?? ''))
                   }
                 />
               </IonItem>

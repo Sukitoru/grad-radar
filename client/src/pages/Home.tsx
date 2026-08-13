@@ -8,6 +8,7 @@ import {
   IonToolbar,
 } from '@ionic/react';
 import IntroContainer from '../components/IntroContainer';
+import HeaderActions from '../components/HeaderActions';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -20,6 +21,7 @@ const Home: React.FC = () => {
           </IonButtons>
 
           <IonTitle>GradRadar</IonTitle>
+          <HeaderActions />
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
