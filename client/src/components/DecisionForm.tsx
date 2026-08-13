@@ -15,6 +15,7 @@ import {
 } from '@ionic/react';
 import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
 import { API_BASE_URL, getTerms, type Term } from '../api';
+import './DecisionForm.css';
 
 // Define the TypeScript interfaces for props
 interface DecisionFormProps {
@@ -165,15 +166,15 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
   };
 
   return (
-    <IonCard>
-      <IonCardHeader>
-        <IonCardTitle color="primary">Update Decision Status</IonCardTitle>
+    <IonCard className="decision-form-card">
+      <IonCardHeader className="decision-form-header">
+        <IonCardTitle>Update decision status</IonCardTitle>
       </IonCardHeader>
 
       <IonCardContent>
         <form onSubmit={handleSubmit}>
           {/* Status Selection - Using modern Ionic v8 Inline Label syntax */}
-          <IonItem className="ion-margin-bottom" lines="none">
+          <IonItem className="decision-form-field" lines="none">
             <IonSelect
               label="Admission Status"
               labelPlacement="stacked"
@@ -199,7 +200,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
           {status === 'WAITLISTED' && (
             <>
-              <IonItem className="ion-margin-bottom" lines="none">
+              <IonItem className="decision-form-field" lines="none">
                 <IonSelect
                   label="Waitlisted Until Semester"
                   labelPlacement="stacked"
@@ -215,7 +216,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
                 </IonSelect>
               </IonItem>
 
-              <IonItem className="ion-margin-bottom" lines="none">
+              <IonItem className="decision-form-field" lines="none">
                 <IonSelect
                   label="Waitlisted Until Year"
                   labelPlacement="stacked"
@@ -237,7 +238,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
           )}
 
           {/* Decision Date Picker - Using modern Ionic v8 Inline Label syntax */}
-          <IonItem className="ion-margin-bottom" lines="none">
+          <IonItem className="decision-form-field" lines="none">
             <IonInput
               label="Decision Date"
               labelPlacement="stacked"
@@ -273,7 +274,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
             expand="block"
             type="submit"
             disabled={submitting}
-            className="ion-margin-top"
+            className="decision-form-submit"
           >
             {submitting ? (
               <>
