@@ -123,7 +123,7 @@ const RecentDecisionsPage: React.FC = () => {
                 </div>
 
                 <IonBadge
-                  className="recent-decision-status"
+                  className={`recent-decision-status recent-decision-status-${decision.status.toLowerCase()}`}
                   color={getStatusColor(decision.status)}
                 >
                   <IonIcon icon={getStatusIcon(decision.status)} />{' '}
@@ -188,8 +188,16 @@ const RecentDecisionsPage: React.FC = () => {
               {decision.status === 'WAITLISTED' &&
                 decision.waitlistUntilTerm && (
                   <div className="recent-decision-waitlist">
-                    Waitlisted until {decision.waitlistUntilTerm.name}{' '}
-                    {decision.waitlistUntilTerm.academicYear}
+                    <IonIcon icon={hourglassOutline} />
+                    <div>
+                      <span className="recent-decision-label">
+                        Waitlist period
+                      </span>
+                      <strong>
+                        Through {decision.waitlistUntilTerm.name}{' '}
+                        {decision.waitlistUntilTerm.academicYear}
+                      </strong>
+                    </div>
                   </div>
                 )}
 
