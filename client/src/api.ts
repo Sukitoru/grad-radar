@@ -23,6 +23,8 @@ export interface Decision {
   id: string;
   status: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED';
   decisionDate: string;
+  waitlistUntilTermId: string | null;
+  waitlistUntilTerm?: Term | null;
 }
 
 export interface RecentDecision extends Decision {
@@ -30,9 +32,8 @@ export interface RecentDecision extends Decision {
   application: {
     gpa: number | string | null;
     researchArea: string | null;
-    awards: string | null;
+    awards: string[];
     publications: number;
-    publicationLinks: string | null;
     comments: string | null;
     school: Pick<School, 'name'>;
     program: Pick<Program, 'name' | 'degreeLevel'>;
@@ -48,9 +49,8 @@ export interface Application {
   termId: string;
   gpa: number | string | null;
   researchArea: string | null;
-  awards: string | null;
+  awards: string[];
   publications: number;
-  publicationLinks: string | null;
   comments: string | null;
   submissionDate: string | null;
   school?: School;
@@ -66,9 +66,8 @@ export interface ApplicationInput {
   termId: string;
   gpa: number | null;
   researchArea: string | null;
-  awards: string | null;
+  awards: string[];
   publications: number;
-  publicationLinks: string | null;
   comments: string | null;
   submissionDate: string | null;
 }
@@ -77,17 +76,15 @@ export interface UserProfile {
   id: string;
   username: string;
   defaultGpa: number | string | null;
-  defaultAwards: string | null;
+  defaultAwards: string[];
   defaultPublications: number;
-  defaultPublicationLinks: string | null;
 }
 
 export interface UserProfileInput {
   username: string;
   defaultGpa: number | null;
-  defaultAwards: string | null;
+  defaultAwards: string[];
   defaultPublications: number;
-  defaultPublicationLinks: string | null;
 }
 
 interface ApiErrorResponse {

@@ -11,22 +11,24 @@ import {
   IonMenuButton,
   IonNote,
   IonPage,
+  IonSelect,
+  IonSelectOption,
   IonSpinner,
-  IonTextarea,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
 import { logOutOutline, saveOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../api';
+import { awardOptions, maximumAwards } from '../awardOptions';
+import HeaderActions from '../components/HeaderActions';
 
 const AccountPage: React.FC = () => {
   const history = useHistory();
   const [username, setUsername] = useState('');
   const [gpa, setGpa] = useState('');
-  const [awards, setAwards] = useState('');
+  const [awards, setAwards] = useState<string[]>([]);
   const [publications, setPublications] = useState('0');
-  const [publicationLinks, setPublicationLinks] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -47,9 +49,8 @@ const AccountPage: React.FC = () => {
 
         setUsername(profile.username);
         setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
-        setAwards(profile.defaultAwards ?? '');
+        setAwards(profile.defaultAwards);
         setPublications(String(profile.defaultPublications));
-        setPublicationLinks(profile.defaultPublicationLinks ?? '');
       } catch (loadError) {
         const loadMessage =
           loadError instanceof Error
@@ -82,9 +83,8 @@ const AccountPage: React.FC = () => {
       await updateUserProfile(demoUserId, {
         username,
         defaultGpa: gpa ? Number(gpa) : null,
-        defaultAwards: awards || null,
+        defaultAwards: awards,
         defaultPublications: publications ? Number(publications) : 0,
-        defaultPublicationLinks: publicationLinks || null,
       });
       setMessage('Account profile saved.');
     } catch (saveError) {
@@ -111,6 +111,7 @@ const AccountPage: React.FC = () => {
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
           <IonTitle>Account</IonTitle>
+          <HeaderActions />
         </IonToolbar>
       </IonHeader>
 
@@ -162,22 +163,37 @@ const AccountPage: React.FC = () => {
               </IonItem>
 
               <IonItem>
-                <IonTextarea
+                <IonSelect
                   label="Awards"
                   labelPlacement="stacked"
-                  placeholder="List any awards or honors"
-                  autoGrow={true}
+                  placeholder="Select up to 5 awards"
+                  multiple={true}
                   value={awards}
-                  onIonInput={(event) =>
-                    setAwards(String(event.detail.value ?? ''))
-                  }
-                />
+                  onIonChange={(event) => {
+                    const selectedAwards = event.detail.value as string[];
+
+                    if (selectedAwards.length <= maximumAwards) {
+                      setAwards(selectedAwards);
+                      setError('');
+                    } else {
+                      setError(`Select no more than ${maximumAwards} awards.`);
+                    }
+                  }}
+                >
+                  {awardOptions.map((award) => (
+                    <IonSelectOption key={award} value={award}>
+                      {award}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
               </IonItem>
 
               <IonItem>
                 <IonInput
                   type="number"
                   min="0"
+                  max="100"
+                  step="1"
                   label="Number of Publications"
                   labelPlacement="stacked"
                   value={publications}
@@ -187,18 +203,6 @@ const AccountPage: React.FC = () => {
                 />
               </IonItem>
 
-              <IonItem>
-                <IonTextarea
-                  label="Publication Links"
-                  labelPlacement="stacked"
-                  placeholder="Add one link per line"
-                  autoGrow={true}
-                  value={publicationLinks}
-                  onIonInput={(event) =>
-                    setPublicationLinks(String(event.detail.value ?? ''))
-                  }
-                />
-              </IonItem>
             </IonList>
 
             {message && <IonNote color="success">{message}</IonNote>}

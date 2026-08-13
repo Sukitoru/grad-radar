@@ -8,6 +8,15 @@ import {
 
 const router = express.Router();
 
+const allowedAwards = [
+  'Honors',
+  "Dean's List",
+  'Academic Excellence',
+  'Outstanding Student',
+  'Research Award',
+  'Merit Scholarship',
+];
+
 const applicationFilterSchema = z.object({
   schoolId: z.uuid().optional(),
   programId: z.uuid().optional(),
@@ -37,10 +46,34 @@ router.post('/applications', async (req, res) => {
     researchArea,
     awards,
     publications,
-    publicationLinks,
     comments,
     submissionDate,
   } = validationResult.data;
+
+  const selectedAwards = Array.isArray(awards) ? awards : [];
+  const publicationCount = Number(publications ?? 0);
+  const savedResearchArea =
+    typeof researchArea === 'string' ? researchArea.trim() : '';
+
+  if (savedResearchArea.length > 255) {
+    res.status(400).json({
+      message: 'Research area must be 255 characters or fewer.',
+    });
+    return;
+  }
+
+  if (
+    selectedAwards.length > 5 ||
+    selectedAwards.some((award) => !allowedAwards.includes(award)) ||
+    !Number.isInteger(publicationCount) ||
+    publicationCount < 0 ||
+    publicationCount > 100
+  ) {
+    res.status(400).json({
+      message: 'Select up to 5 valid awards and enter 0 to 100 publications.',
+    });
+    return;
+  }
 
   try {
     const application = await prisma.application.create({
@@ -50,10 +83,9 @@ router.post('/applications', async (req, res) => {
         programId,
         termId,
         gpa,
-        researchArea,
-        awards,
-        publications,
-        publicationLinks,
+        researchArea: savedResearchArea || null,
+        awards: selectedAwards,
+        publications: publicationCount,
         comments,
         submissionDate,
       },
@@ -61,7 +93,9 @@ router.post('/applications', async (req, res) => {
         school: true,
         program: true,
         term: true,
-        decision: true,
+        decision: {
+          include: { waitlistUntilTerm: true },
+        },
       },
     });
 
@@ -104,7 +138,9 @@ router.get('/applications', async (request, response) => {
         school: true,
         program: true,
         term: true,
-        decision: true,
+        decision: {
+          include: { waitlistUntilTerm: true },
+        },
       },
     });
 
@@ -127,7 +163,9 @@ router.get('/applications/:id', async (request, response) => {
         school: true,
         program: true,
         term: true,
-        decision: true,
+        decision: {
+          include: { waitlistUntilTerm: true },
+        },
       },
     });
 
@@ -166,10 +204,34 @@ router.put('/applications/:id', async (request, response) => {
     researchArea,
     awards,
     publications,
-    publicationLinks,
     comments,
     submissionDate,
   } = validationResult.data;
+
+  const selectedAwards = Array.isArray(awards) ? awards : [];
+  const publicationCount = Number(publications ?? 0);
+  const savedResearchArea =
+    typeof researchArea === 'string' ? researchArea.trim() : '';
+
+  if (savedResearchArea.length > 255) {
+    response.status(400).json({
+      message: 'Research area must be 255 characters or fewer.',
+    });
+    return;
+  }
+
+  if (
+    selectedAwards.length > 5 ||
+    selectedAwards.some((award) => !allowedAwards.includes(award)) ||
+    !Number.isInteger(publicationCount) ||
+    publicationCount < 0 ||
+    publicationCount > 100
+  ) {
+    response.status(400).json({
+      message: 'Select up to 5 valid awards and enter 0 to 100 publications.',
+    });
+    return;
+  }
 
   try {
     const application = await prisma.application.findUnique({
@@ -194,10 +256,9 @@ router.put('/applications/:id', async (request, response) => {
         programId,
         termId,
         gpa,
-        researchArea,
-        awards,
-        publications,
-        publicationLinks,
+        researchArea: savedResearchArea || null,
+        awards: selectedAwards,
+        publications: publicationCount,
         comments,
         submissionDate,
       },
@@ -205,7 +266,9 @@ router.put('/applications/:id', async (request, response) => {
         school: true,
         program: true,
         term: true,
-        decision: true,
+        decision: {
+          include: { waitlistUntilTerm: true },
+        },
       },
     });
 

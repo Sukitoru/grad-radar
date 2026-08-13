@@ -16,12 +16,12 @@ const applicationFieldsSchema = z.object({
     .max(255, { error: 'Research area must be 255 characters or less.' })
     .optional()
     .nullable(),
-  awards: z.string().trim().optional().nullable(),
+  awards: z.array(z.string().trim().min(1)).max(5).optional(),
   publications: z
     .int({ error: 'Publications must be a whole number.' })
     .nonnegative({ error: 'Publications cannot be negative.' })
+    .max(100, { error: 'Publications cannot be greater than 100.' })
     .optional(),
-  publicationLinks: z.string().trim().optional().nullable(),
   comments: z.string().trim().optional().nullable(),
   submissionDate: z.coerce
     .date({ error: 'Submission date must be a valid date.' })

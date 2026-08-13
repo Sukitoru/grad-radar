@@ -9,20 +9,27 @@ decisionsRouter.get('/decisions/recent', async (_request, response) => {
   try {
     const recentDecisions = await prisma.decision.findMany({
       orderBy: {
-        decisionDate: 'desc',
+        createdAt: 'desc',
       },
       select: {
         id: true,
         status: true,
         decisionDate: true,
+        waitlistUntilTermId: true,
         createdAt: true,
+        waitlistUntilTerm: {
+          select: {
+            id: true,
+            name: true,
+            academicYear: true,
+          },
+        },
         application: {
           select: {
             gpa: true,
             researchArea: true,
             awards: true,
             publications: true,
-            publicationLinks: true,
             comments: true,
             school: {
               select: {
@@ -65,12 +72,17 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
   }
 
   const { id } = request.params;
-  const { status, decisionDate } = validationResult.data;
+  const { status, decisionDate, waitlistUntilTermId } = validationResult.data;
+  const savedWaitlistTermId =
+    status === 'WAITLISTED' ? waitlistUntilTermId : null;
 
   try {
     const application = await prisma.application.findUnique({
       where: {
         id,
+      },
+      include: {
+        term: true,
       },
     });
 
@@ -81,6 +93,27 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
       return;
     }
 
+    if (savedWaitlistTermId) {
+      const waitlistTerm = await prisma.term.findUnique({
+        where: {
+          id: savedWaitlistTermId,
+        },
+      });
+      const waitlistIsLater =
+        waitlistTerm &&
+        (waitlistTerm.academicYear > application.term.academicYear ||
+          (waitlistTerm.academicYear === application.term.academicYear &&
+            application.term.name === 'Spring' &&
+            waitlistTerm.name === 'Fall'));
+
+      if (!waitlistIsLater) {
+        response.status(400).json({
+          message: 'The waitlist semester must be after the application semester.',
+        });
+        return;
+      }
+    }
+
     const decision = await prisma.decision.upsert({
       where: {
         applicationId: id,
@@ -88,11 +121,13 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
       update: {
         status,
         decisionDate,
+        waitlistUntilTermId: savedWaitlistTermId,
       },
       create: {
         applicationId: id,
         status,
         decisionDate,
+        waitlistUntilTermId: savedWaitlistTermId,
       },
     });
 

@@ -19,16 +19,15 @@ enum DegreeLevel {
 }
 
 model User {
-  id                      String        @id @default(uuid()) @db.Uuid
-  username                String        @unique @db.VarChar(50)
-  passwordHash            String        @db.VarChar(255)
-  defaultGpa              Decimal?      @db.Decimal(3, 2)
-  defaultAwards           String?       @db.Text
-  defaultPublications     Int           @default(0)
-  defaultPublicationLinks String?       @db.Text
-  createdAt               DateTime      @default(now()) @db.Timestamptz(3)
-  updatedAt               DateTime      @updatedAt @db.Timestamptz(3)
-  applications            Application[]
+  id                  String        @id @default(uuid()) @db.Uuid
+  username            String        @unique @db.VarChar(50)
+  passwordHash        String        @db.VarChar(255)
+  defaultGpa          Decimal?      @db.Decimal(3, 2)
+  defaultAwards       String[]      @default([])
+  defaultPublications Int           @default(0)
+  createdAt           DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime      @updatedAt @db.Timestamptz(3)
+  applications        Application[]
 
   @@map("users")
 }
@@ -60,39 +59,39 @@ model Program {
 }
 
 model Term {
-  id           String        @id @default(uuid()) @db.Uuid
-  name         String        @db.VarChar(30)
-  academicYear Int
-  startDate    DateTime?     @db.Date
-  endDate      DateTime?     @db.Date
-  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
-  applications Application[]
+  id                  String        @id @default(uuid()) @db.Uuid
+  name                String        @db.VarChar(30)
+  academicYear        Int
+  startDate           DateTime?     @db.Date
+  endDate             DateTime?     @db.Date
+  createdAt           DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime      @updatedAt @db.Timestamptz(3)
+  applications        Application[]
+  waitlistedDecisions Decision[]    @relation("WaitlistUntilTerm")
 
   @@unique([name, academicYear])
   @@map("terms")
 }
 
 model Application {
-  id               String    @id @default(uuid()) @db.Uuid
-  userId           String    @db.Uuid
-  schoolId         String    @db.Uuid
-  programId        String    @db.Uuid
-  termId           String    @db.Uuid
-  gpa              Decimal?  @db.Decimal(3, 2)
-  researchArea     String?   @db.VarChar(255)
-  awards           String?   @db.Text
-  publications     Int       @default(0)
-  publicationLinks String?   @db.Text
-  comments         String?   @db.Text
-  submissionDate   DateTime? @db.Date
-  createdAt        DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt        DateTime  @updatedAt @db.Timestamptz(3)
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  school           School    @relation(fields: [schoolId], references: [id], onDelete: Restrict)
-  program          Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
-  term             Term      @relation(fields: [termId], references: [id], onDelete: Restrict)
-  decision         Decision?
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  schoolId       String    @db.Uuid
+  programId      String    @db.Uuid
+  termId         String    @db.Uuid
+  gpa            Decimal?  @db.Decimal(3, 2)
+  researchArea   String?   @db.VarChar(255)
+  awards         String[]  @default([])
+  publications   Int       @default(0)
+  comments       String?   @db.Text
+  submissionDate DateTime? @db.Date
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school         School    @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  program        Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
+  term           Term      @relation(fields: [termId], references: [id], onDelete: Restrict)
+  decision       Decision?
 
   @@index([userId])
   @@index([schoolId])
@@ -102,14 +101,17 @@ model Application {
 }
 
 model Decision {
-  id            String         @id @default(uuid()) @db.Uuid
-  applicationId String         @unique @db.Uuid
-  status        DecisionStatus
-  decisionDate  DateTime       @db.Date
-  createdAt     DateTime       @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime       @updatedAt @db.Timestamptz(3)
-  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  id                  String         @id @default(uuid()) @db.Uuid
+  applicationId       String         @unique @db.Uuid
+  status              DecisionStatus
+  decisionDate        DateTime       @db.Date
+  waitlistUntilTermId String?        @db.Uuid
+  createdAt           DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime       @updatedAt @db.Timestamptz(3)
+  application         Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  waitlistUntilTerm   Term?          @relation("WaitlistUntilTerm", fields: [waitlistUntilTermId], references: [id], onDelete: SetNull)
 
   @@index([status, decisionDate])
+  @@index([waitlistUntilTermId])
   @@map("decisions")
 }

@@ -9,6 +9,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+import HeaderActions from '../components/HeaderActions';
 import {
   addCircleOutline,
   checkmarkCircleOutline,
@@ -26,6 +27,7 @@ const Home: React.FC = () => {
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
           <IonTitle>Grad Radar</IonTitle>
+          <HeaderActions />
         </IonToolbar>
       </IonHeader>
 

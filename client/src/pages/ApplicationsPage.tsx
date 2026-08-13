@@ -7,6 +7,7 @@ import {
   IonContent,
   IonCard,
   IonCardHeader,
+  IonCardTitle,
   IonCardSubtitle,
   IonCardContent,
   IonList,
@@ -15,11 +16,7 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
-  IonGrid,
-  IonRow,
-  IonCol,
   IonModal,
-  IonText,
   IonButtons,
   IonMenuButton,
   IonAlert,
@@ -37,15 +34,12 @@ import {
   createOutline,
   statsChartOutline,
   trashOutline,
+  addOutline,
 } from 'ionicons/icons';
 import { deleteApplication, getApplications, type Application } from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
-
-const getValidPublicationLinks = (publicationLinks: string | null) =>
-  publicationLinks
-    ?.split('\n')
-    .map((link) => link.trim())
-    .filter((link) => link.startsWith('https://') || link.startsWith('http://')) ?? [];
+import HeaderActions from '../components/HeaderActions';
+import './ApplicationsPage.css';
 
 const ApplicationsPage: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -144,11 +138,12 @@ const ApplicationsPage: React.FC = () => {
     if (!decision) {
       return (
         <IonBadge
+          className="application-status-badge"
           color="medium"
           style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
         >
           <IonIcon icon={hourglassOutline} />
-          PENDING
+          Pending
         </IonBadge>
       );
     }
@@ -157,31 +152,34 @@ const ApplicationsPage: React.FC = () => {
       case 'ACCEPTED':
         return (
           <IonBadge
+            className="application-status-badge"
             color="success"
             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <IonIcon icon={checkmarkCircle} />
-            ACCEPTED
+            Accepted
           </IonBadge>
         );
       case 'REJECTED':
         return (
           <IonBadge
+            className="application-status-badge"
             color="danger"
             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <IonIcon icon={closeCircle} />
-            REJECTED
+            Rejected
           </IonBadge>
         );
       case 'WAITLISTED':
         return (
           <IonBadge
+            className="application-status-badge"
             color="warning"
             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <IonIcon icon={hourglassOutline} />
-            WAITLISTED
+            Waitlisted
           </IonBadge>
         );
     }
@@ -230,102 +228,70 @@ const ApplicationsPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar color="primary">
+        <IonToolbar>
           <IonButtons slot="start">
             <IonMenuButton menu="main-navigation" />
           </IonButtons>
           <IonTitle>My Applications</IonTitle>
+          <HeaderActions />
         </IonToolbar>
       </IonHeader>
 
       <IonContent className="ion-padding">
+        <div className="applications-page-container">
         {error && (
           <IonCard color="danger">
             <IonCardContent>{error}</IonCardContent>
           </IonCard>
         )}
 
-        {/* Application statistics */}
-        <IonCard>
-          <IonCardHeader>
-            <IonCardSubtitle
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-            >
+        <section className="applications-overview">
+          <div className="applications-overview-heading">
+            <div>
+              <span className="applications-overview-label">
               <IonIcon icon={statsChartOutline} />
-              APPLICATION METRICS
-            </IonCardSubtitle>
-          </IonCardHeader>
-          <IonCardContent style={{ paddingTop: 0 }}>
-            <IonGrid>
-              <IonRow className="ion-text-center">
-                <IonCol>
-                  <h2
-                    style={{
-                      color: 'var(--ion-color-dark)',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {totalApps}
-                  </h2>
-                  <IonText color="medium">
-                    <small>Submitted</small>
-                  </IonText>
-                </IonCol>
-                <IonCol>
-                  <h2
-                    style={{
-                      color: 'var(--ion-color-success)',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {acceptedApps}
-                  </h2>
-                  <IonText color="success">
-                    <small>Accepted</small>
-                  </IonText>
-                </IonCol>
-                <IonCol>
-                  <h2
-                    style={{
-                      color: 'var(--ion-color-warning)',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {waitlistedApps}
-                  </h2>
-                  <IonText color="warning">
-                    <small>Waitlisted</small>
-                  </IonText>
-                </IonCol>
-                <IonCol>
-                  <h2
-                    style={{
-                      color: 'var(--ion-color-step-600)',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {pendingApps}
-                  </h2>
-                  <IonText color="medium">
-                    <small>Pending</small>
-                  </IonText>
-                </IonCol>
-              </IonRow>
-            </IonGrid>
-          </IonCardContent>
-        </IonCard>
+                Application overview
+              </span>
+              <h1>My applications</h1>
+              <p>Review your applications and update admission decisions.</p>
+            </div>
+
+            <IonButton size="small" routerLink="/applications/new">
+              <IonIcon slot="start" icon={addOutline} />
+              Add application
+            </IonButton>
+          </div>
+
+          <div className="application-metrics">
+            <div className="application-metric">
+              <strong>{totalApps}</strong>
+              <span>Total</span>
+            </div>
+            <div className="application-metric">
+              <strong>{acceptedApps}</strong>
+              <span>Accepted</span>
+            </div>
+            <div className="application-metric">
+              <strong>{waitlistedApps}</strong>
+              <span>Waitlisted</span>
+            </div>
+            <div className="application-metric">
+              <strong>{pendingApps}</strong>
+              <span>Pending</span>
+            </div>
+          </div>
+        </section>
 
         {/* Personal tracker list */}
-        <h5
-          className="ion-padding-start"
-          style={{ fontWeight: 'bold', margin: '24px 0 12px' }}
-        >
-          My Tracked Applications
-        </h5>
+        <div className="applications-list-heading">
+          <h2>Tracked applications</h2>
+          <span>{filteredApplications.length} shown</span>
+        </div>
 
         {applications.length > 0 && (
-          <>
+          <div className="application-filters">
             <IonSearchbar
+              className="application-search"
               value={searchText}
               placeholder="Search by school or program"
               onIonInput={(event) =>
@@ -333,7 +299,7 @@ const ApplicationsPage: React.FC = () => {
               }
             />
 
-            <IonItem>
+            <IonItem className="application-filter-item" lines="none">
               <IonSelect
                 label="Decision"
                 value={decisionFilter}
@@ -347,7 +313,7 @@ const ApplicationsPage: React.FC = () => {
                 <IonSelectOption value="WAITLISTED">Waitlisted</IonSelectOption>
               </IonSelect>
             </IonItem>
-          </>
+          </div>
         )}
 
         {applications.length === 0 ? (
@@ -370,171 +336,165 @@ const ApplicationsPage: React.FC = () => {
             </IonCardContent>
           </IonCard>
         ) : (
-          <IonList>
+          <IonList className="application-card-list">
             {filteredApplications.map((app) => (
-              <IonCard key={app.id} style={{ margin: '0 0 16px 0' }}>
-                <IonItem lines="none" style={{ '--padding-start': '16px' }}>
-                  <div style={{ padding: '12px 0', width: '100%' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: '18px',
-                          fontWeight: 'bold',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                        }}
-                      >
-                        <IonIcon icon={schoolOutline} color="secondary" />
+              <IonCard key={app.id} className="application-card">
+                <IonCardHeader className="application-card-header">
+                  <div className="application-card-heading">
+                    <div>
+                      <IonCardTitle className="application-school-name">
+                        <IonIcon icon={schoolOutline} color="medium" />
                         {app.school?.name ?? 'Unknown school'}
-                      </span>
-                      {renderDecisionBadge(app.decision)}
+                      </IonCardTitle>
+                      <IonCardSubtitle className="application-program-name">
+                        {app.program
+                          ? `${app.program.degreeLevel} in ${app.program.name}`
+                          : 'Unknown program'}
+                      </IonCardSubtitle>
                     </div>
-
-                    <p
-                      style={{
-                        margin: '8px 0 4px',
-                        fontSize: '14px',
-                        color: 'var(--ion-color-step-600)',
-                      }}
-                    >
-                      {app.program
-                        ? `${app.program.degreeLevel} in ${app.program.name}`
-                        : 'Unknown program'}
-                      {' · '}
-                      {app.term
-                        ? `${app.term.name} ${app.term.academicYear}`
-                        : 'Unknown term'}
-                    </p>
-
-                    <p>
-                      <strong>GPA:</strong> {app.gpa ?? 'Not listed'}
-                    </p>
-                    <p>
-                      <strong>Research area:</strong>{' '}
-                      {app.researchArea ?? 'Not listed'}
-                    </p>
-                    <p>
-                      <strong>Awards:</strong> {app.awards ?? 'None listed'}
-                    </p>
-                    <p>
-                      <strong>Publications:</strong> {app.publications}
-                    </p>
-
-                    {getValidPublicationLinks(app.publicationLinks).length > 0 && (
-                      <div>
-                        <strong>Publication links:</strong>
-                        <ul>
-                          {getValidPublicationLinks(app.publicationLinks).map(
-                            (link, index) => (
-                              <li key={`${link}-${index}`}>
-                                <a href={link} target="_blank" rel="noreferrer">
-                                  Publication {index + 1}
-                                </a>
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                      </div>
-                    )}
-
-                    <p>
-                      <strong>Comments:</strong>{' '}
-                      {app.comments ?? 'No comments added'}
-                    </p>
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: '16px',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: '12px',
-                          color: 'var(--ion-color-medium)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <IonIcon icon={calendarOutline} />
-                        Submitted:{' '}
-                        {app.submissionDate
-                          ? new Date(app.submissionDate).toLocaleDateString()
-                          : 'Pending'}
-                      </span>
-
-                      <IonButton
-                        size="small"
-                        fill="clear"
-                        color="primary"
-                        onClick={() => handleOpenDecisionModal(app.id)}
-                        style={{ margin: 0 }}
-                      >
-                        <IonIcon slot="start" icon={createOutline} />
-                        {app.decision ? 'Edit Decision' : 'Update Decision'}
-                      </IonButton>
-                    </div>
-
-                    <div
-                      style={{ display: 'flex', gap: '8px', marginTop: '8px' }}
-                    >
-                      <IonButton
-                        size="small"
-                        fill="outline"
-                        routerLink={`/applications/${app.id}/edit`}
-                      >
-                        <IonIcon slot="start" icon={createOutline} />
-                        Edit Application
-                      </IonButton>
-
-                      <IonButton
-                        size="small"
-                        fill="outline"
-                        color="danger"
-                        disabled={deleting}
-                        onClick={() => setApplicationToDelete(app)}
-                      >
-                        <IonIcon slot="start" icon={trashOutline} />
-                        Delete
-                      </IonButton>
-                    </div>
-
-                    {app.decision && (
-                      <div
-                        style={{
-                          marginTop: '12px',
-                          padding: '8px 12px',
-                          backgroundColor: 'var(--ion-color-step-50)',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '13px',
-                        }}
-                      >
-                        <IonIcon icon={ribbonOutline} color="warning" />
-                        <strong>Decision Date:</strong>{' '}
-                        {new Date(
-                          app.decision.decisionDate,
-                        ).toLocaleDateString()}
-                      </div>
-                    )}
+                    {renderDecisionBadge(app.decision)}
                   </div>
-                </IonItem>
+                </IonCardHeader>
+
+                <IonCardContent>
+                  <div className="application-facts">
+                    <div className="application-fact">
+                      <span className="application-detail-label">Term</span>
+                      <span className="application-detail-value">
+                        {app.term
+                          ? `${app.term.name} ${app.term.academicYear}`
+                          : 'Unknown term'}
+                      </span>
+                    </div>
+
+                    <div className="application-fact">
+                      <span className="application-detail-label">GPA</span>
+                      <span className="application-detail-value">
+                        {app.gpa === null
+                          ? 'Not listed'
+                          : Number(app.gpa).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="application-fact">
+                      <span className="application-detail-label">
+                        Publications
+                      </span>
+                      <span className="application-detail-value">
+                        {app.publications.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="application-research-area">
+                    <span className="application-detail-label">
+                      Research area
+                    </span>
+                    <span className="application-detail-value">
+                      {app.researchArea ?? 'Not listed'}
+                    </span>
+                  </div>
+
+                  <div className="application-awards-row">
+                    <span className="application-detail-label">Awards</span>
+                    <div className="application-awards-list">
+                    {app.awards.length === 0 ? (
+                      <span className="application-empty-value">None listed</span>
+                    ) : (
+                      app.awards.map((award) => (
+                        <span
+                          key={award}
+                          className="application-award-tag"
+                        >
+                          {award}
+                        </span>
+                      ))
+                    )}
+                    </div>
+                  </div>
+
+                  <div className="application-comments">
+                    <span className="application-detail-label">Comments</span>
+                    <p>{app.comments ?? 'No comments added'}</p>
+                  </div>
+
+                  {app.decision && (
+                    <div
+                      className={`application-decision-details application-decision-${app.decision.status.toLowerCase()}`}
+                    >
+                      <IonIcon icon={ribbonOutline} />
+                      <div>
+                        <span className="application-detail-value">
+                          {app.decision.status === 'ACCEPTED'
+                            ? 'Accepted'
+                            : app.decision.status === 'REJECTED'
+                              ? 'Rejected'
+                              : 'Waitlisted'}{' '}
+                          on{' '}
+                          {new Date(
+                            app.decision.decisionDate,
+                          ).toLocaleDateString()}
+                          {app.decision.status === 'WAITLISTED' &&
+                            app.decision.waitlistUntilTerm && (
+                              <>
+                                {' · Until '}
+                                {app.decision.waitlistUntilTerm.name}{' '}
+                                {app.decision.waitlistUntilTerm.academicYear}
+                              </>
+                            )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="application-submission-row">
+                    <span>
+                      <IonIcon icon={calendarOutline} />
+                      Submitted:{' '}
+                      {app.submissionDate
+                        ? new Date(app.submissionDate).toLocaleDateString()
+                        : 'Pending'}
+                    </span>
+                  </div>
+
+                  <div className="application-actions">
+                    <IonButton
+                      size="small"
+                      fill="clear"
+                      color="medium"
+                      onClick={() => handleOpenDecisionModal(app.id)}
+                    >
+                      <IonIcon slot="start" icon={createOutline} />
+                      {app.decision ? 'Edit Decision' : 'Update Decision'}
+                    </IonButton>
+
+                    <IonButton
+                      size="small"
+                      fill="clear"
+                      color="medium"
+                      routerLink={`/applications/${app.id}/edit`}
+                    >
+                      <IonIcon slot="start" icon={createOutline} />
+                      Edit Application
+                    </IonButton>
+
+                    <IonButton
+                      size="small"
+                      fill="clear"
+                      color="danger"
+                      disabled={deleting}
+                      onClick={() => setApplicationToDelete(app)}
+                    >
+                      <IonIcon slot="start" icon={trashOutline} />
+                      Delete
+                    </IonButton>
+                  </div>
+                </IonCardContent>
               </IonCard>
             ))}
           </IonList>
         )}
+        </div>
 
         {/* Decision update modal */}
         <IonModal
@@ -550,8 +510,12 @@ const ApplicationsPage: React.FC = () => {
             {selectedApplication && (
               <DecisionForm
                 applicationId={selectedApplication.id}
+                applicationTermId={selectedApplication.termId}
                 currentStatus={selectedApplication.decision?.status}
                 currentDecisionDate={selectedApplication.decision?.decisionDate}
+                currentWaitlistUntilTermId={
+                  selectedApplication.decision?.waitlistUntilTermId
+                }
                 onSuccess={handleDecisionSaveSuccess}
               />
             )}
