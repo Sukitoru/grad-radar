@@ -44,6 +44,7 @@ const RecentDecisionsPage: React.FC = () => {
     const loadRecentDecisions = async () => {
       try {
         setDecisions(await getRecentDecisions());
+        setError('');
       } catch (loadError) {
         const message =
           loadError instanceof Error
@@ -56,6 +57,12 @@ const RecentDecisionsPage: React.FC = () => {
     };
 
     void loadRecentDecisions();
+
+    const pollingInterval = window.setInterval(() => {
+      void loadRecentDecisions();
+    }, 30_000);
+
+    return () => window.clearInterval(pollingInterval);
   }, []);
 
   const getStatusIcon = (status: RecentDecision['status']) => {
