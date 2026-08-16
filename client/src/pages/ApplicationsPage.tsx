@@ -43,6 +43,7 @@ import './ApplicationsPage.css';
 
 const ApplicationsPage: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [allApplications, setAllApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>('');
@@ -52,6 +53,8 @@ const ApplicationsPage: React.FC = () => {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [applicationToDelete, setApplicationToDelete] =
+    useState<Application | null>(null);
+  const [comparisonApplication, setComparisonApplication] =
     useState<Application | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
 
@@ -75,6 +78,7 @@ const ApplicationsPage: React.FC = () => {
         (application) => application.userId === demoUserId,
       );
 
+      setAllApplications(applicationData);
       setApplications(userApplications);
     } catch (error) {
       const message =
@@ -117,6 +121,11 @@ const ApplicationsPage: React.FC = () => {
     try {
       await deleteApplication(applicationToDelete.id);
       setApplications((currentApplications) =>
+        currentApplications.filter(
+          (application) => application.id !== applicationToDelete.id,
+        ),
+      );
+      setAllApplications((currentApplications) =>
         currentApplications.filter(
           (application) => application.id !== applicationToDelete.id,
         ),
@@ -211,6 +220,26 @@ const ApplicationsPage: React.FC = () => {
 
     return matchesSearch && matchesDecision;
   });
+  const matchingCommunityApplications = comparisonApplication
+    ? allApplications.filter(
+        (application) =>
+          application.id !== comparisonApplication.id &&
+          application.schoolId === comparisonApplication.schoolId &&
+          application.programId === comparisonApplication.programId,
+      )
+    : [];
+  const communityGpas = matchingCommunityApplications
+    .filter((application) => application.gpa !== null)
+    .map((application) => Number(application.gpa));
+  const averageCommunityGpa =
+    communityGpas.length > 0
+      ? communityGpas.reduce((total, currentGpa) => total + currentGpa, 0) /
+        communityGpas.length
+      : null;
+  const countCommunityDecisions = (status: string) =>
+    matchingCommunityApplications.filter(
+      (application) => application.decision?.status === status,
+    ).length;
 
   if (loading) {
     return (
@@ -462,6 +491,16 @@ const ApplicationsPage: React.FC = () => {
                       size="small"
                       fill="clear"
                       color="medium"
+                      onClick={() => setComparisonApplication(app)}
+                    >
+                      <IonIcon slot="start" icon={statsChartOutline} />
+                      Compare
+                    </IonButton>
+
+                    <IonButton
+                      size="small"
+                      fill="clear"
+                      color="medium"
                       onClick={() => handleOpenDecisionModal(app.id)}
                     >
                       <IonIcon slot="start" icon={createOutline} />
@@ -531,6 +570,100 @@ const ApplicationsPage: React.FC = () => {
                 Cancel
               </IonButton>
             </div>
+          </IonContent>
+        </IonModal>
+
+        <IonModal
+          isOpen={comparisonApplication !== null}
+          onDidDismiss={() => setComparisonApplication(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Community Comparison</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setComparisonApplication(null)}>
+                  Close
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+
+          <IonContent className="ion-padding">
+            {comparisonApplication && (
+              <div className="application-comparison">
+                <span className="application-detail-label">
+                  Same school and program
+                </span>
+                <h2>{comparisonApplication.school?.name}</h2>
+                <p className="application-comparison-program">
+                  {comparisonApplication.program?.degreeLevel} in{' '}
+                  {comparisonApplication.program?.name}
+                </p>
+
+                <section className="application-comparison-own">
+                  <h3>Your application</h3>
+                  <div>
+                    <span>
+                      <strong>Decision:</strong>{' '}
+                      {comparisonApplication.decision?.status.toLowerCase() ??
+                        'pending'}
+                    </span>
+                    <span>
+                      <strong>GPA:</strong>{' '}
+                      {comparisonApplication.gpa === null
+                        ? 'Not listed'
+                        : Number(comparisonApplication.gpa).toFixed(2)}
+                    </span>
+                  </div>
+                </section>
+
+                {matchingCommunityApplications.length === 0 ? (
+                  <IonCard>
+                    <IonCardContent className="ion-text-center">
+                      No other community applications match this school and
+                      program yet.
+                    </IonCardContent>
+                  </IonCard>
+                ) : (
+                  <section className="application-comparison-community">
+                    <h3>
+                      {matchingCommunityApplications.length} matching community{' '}
+                      {matchingCommunityApplications.length === 1
+                        ? 'application'
+                        : 'applications'}
+                    </h3>
+                    <div className="application-comparison-metrics">
+                      <div>
+                        <strong>
+                          {countCommunityDecisions('ACCEPTED')}
+                        </strong>
+                        <span>Accepted</span>
+                      </div>
+                      <div>
+                        <strong>
+                          {countCommunityDecisions('REJECTED')}
+                        </strong>
+                        <span>Rejected</span>
+                      </div>
+                      <div>
+                        <strong>
+                          {countCommunityDecisions('WAITLISTED')}
+                        </strong>
+                        <span>Waitlisted</span>
+                      </div>
+                      <div>
+                        <strong>
+                          {averageCommunityGpa === null
+                            ? 'N/A'
+                            : averageCommunityGpa.toFixed(2)}
+                        </strong>
+                        <span>Average GPA</span>
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </div>
+            )}
           </IonContent>
         </IonModal>
 
