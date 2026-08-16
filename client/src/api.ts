@@ -72,6 +72,13 @@ export interface ApplicationInput {
   submissionDate: string | null;
 }
 
+export interface ApplicationFilters {
+  schoolId?: string;
+  programId?: string;
+  termId?: string;
+  decisionStatus?: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED' | 'PENDING';
+}
+
 export interface UserProfile {
   id: string;
   username: string;
@@ -112,7 +119,20 @@ export const getPrograms = () => apiRequest<Program[]>('/programs');
 
 export const getTerms = () => apiRequest<Term[]>('/terms');
 
-export const getApplications = () => apiRequest<Application[]>('/applications');
+export const getApplications = (filters: ApplicationFilters = {}) => {
+  const searchParameters = new URLSearchParams();
+
+  Object.entries(filters).forEach(([name, value]) => {
+    if (value) {
+      searchParameters.set(name, value);
+    }
+  });
+
+  const queryString = searchParameters.toString();
+  const path = queryString ? `/applications?${queryString}` : '/applications';
+
+  return apiRequest<Application[]>(path);
+};
 
 export const getUserProfile = (userId: string) =>
   apiRequest<UserProfile>(`/users/${userId}/profile`);
