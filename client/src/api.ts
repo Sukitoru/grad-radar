@@ -91,6 +91,12 @@ interface ApiErrorResponse {
   message?: string;
 }
 
+export const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+  return error instanceof Error && error.message
+    ? error.message
+    : fallbackMessage;
+};
+
 async function apiRequest<ResponseType>(path: string, options?: RequestInit) {
   const response = await fetch(`${API_BASE_URL}${path}`, options);
 

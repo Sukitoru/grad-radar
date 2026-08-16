@@ -19,7 +19,7 @@ import {
 } from '@ionic/react';
 import { logOutOutline, saveOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { getUserProfile, updateUserProfile } from '../api';
+import { getErrorMessage, getUserProfile, updateUserProfile } from '../api';
 import { awardOptions, maximumAwards } from '../awardOptions';
 import HeaderActions from '../components/HeaderActions';
 import './FormPages.css';
@@ -53,11 +53,9 @@ const AccountPage: React.FC = () => {
         setAwards(profile.defaultAwards);
         setPublications(String(profile.defaultPublications));
       } catch (loadError) {
-        const loadMessage =
-          loadError instanceof Error
-            ? loadError.message
-            : 'Failed to load the account profile.';
-        setError(loadMessage);
+        setError(
+          getErrorMessage(loadError, 'Failed to load the account profile.'),
+        );
       } finally {
         setLoading(false);
       }
@@ -89,11 +87,9 @@ const AccountPage: React.FC = () => {
       });
       setMessage('Account profile saved.');
     } catch (saveError) {
-      const saveMessage =
-        saveError instanceof Error
-          ? saveError.message
-          : 'Failed to save the account profile.';
-      setError(saveMessage);
+      setError(
+        getErrorMessage(saveError, 'Failed to save the account profile.'),
+      );
     } finally {
       setSaving(false);
     }

@@ -20,6 +20,7 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import {
   createApplication,
+  getErrorMessage,
   getApplications,
   getPrograms,
   getSchools,
@@ -120,11 +121,7 @@ const ApplicationForm: React.FC = () => {
           }
         }
       } catch (loadError) {
-        const loadMessage =
-          loadError instanceof Error
-            ? loadError.message
-            : 'Failed to load the form options.';
-        setError(loadMessage);
+        setError(getErrorMessage(loadError, 'Failed to load the form options.'));
       } finally {
         setLoading(false);
       }
@@ -187,11 +184,7 @@ const ApplicationForm: React.FC = () => {
 
       history.push('/applications');
     } catch (saveError) {
-      const saveMessage =
-        saveError instanceof Error
-          ? saveError.message
-          : 'Failed to save the application.';
-      setError(saveMessage);
+      setError(getErrorMessage(saveError, 'Failed to save the application.'));
     } finally {
       setSaving(false);
     }
