@@ -34,6 +34,37 @@ import { awardOptions, maximumAwards } from '../awardOptions';
 import HeaderActions from '../components/HeaderActions';
 import './FormPages.css';
 
+const applicationDraftKey = 'grad-radar-application-draft';
+
+interface ApplicationDraft {
+  schoolId: string;
+  programId: string;
+  termId: string;
+  semester: string;
+  academicYear: number | '';
+  gpa: string;
+  researchArea: string;
+  awards: string[];
+  publications: string;
+  comments: string;
+  submissionDate: string;
+}
+
+const getSavedApplicationDraft = () => {
+  const savedDraft = window.localStorage.getItem(applicationDraftKey);
+
+  if (!savedDraft) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(savedDraft) as ApplicationDraft;
+  } catch {
+    window.localStorage.removeItem(applicationDraftKey);
+    return null;
+  }
+};
+
 const ApplicationForm: React.FC = () => {
   const history = useHistory();
   const { applicationId } = useParams<{ applicationId?: string }>();
@@ -56,6 +87,7 @@ const ApplicationForm: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [draftReady, setDraftReady] = useState(false);
 
   const availablePrograms = programs.filter(
     (program) => program.schoolId === schoolId,
@@ -118,6 +150,22 @@ const ApplicationForm: React.FC = () => {
             setAwards(profile.defaultAwards);
             setPublications(String(profile.defaultPublications));
           }
+
+          const draft = getSavedApplicationDraft();
+
+          if (draft) {
+            setSchoolId(draft.schoolId);
+            setProgramId(draft.programId);
+            setTermId(draft.termId);
+            setSemester(draft.semester);
+            setAcademicYear(draft.academicYear);
+            setGpa(draft.gpa);
+            setResearchArea(draft.researchArea);
+            setAwards(draft.awards);
+            setPublications(draft.publications);
+            setComments(draft.comments);
+            setSubmissionDate(draft.submissionDate);
+          }
         }
       } catch (loadError) {
         const loadMessage =
@@ -127,11 +175,48 @@ const ApplicationForm: React.FC = () => {
         setError(loadMessage);
       } finally {
         setLoading(false);
+        setDraftReady(true);
       }
     };
 
     void loadFormOptions();
   }, [applicationId]);
+
+  useEffect(() => {
+    if (isEditing || !draftReady) {
+      return;
+    }
+
+    const draft: ApplicationDraft = {
+      schoolId,
+      programId,
+      termId,
+      semester,
+      academicYear,
+      gpa,
+      researchArea,
+      awards,
+      publications,
+      comments,
+      submissionDate,
+    };
+
+    window.localStorage.setItem(applicationDraftKey, JSON.stringify(draft));
+  }, [
+    academicYear,
+    awards,
+    comments,
+    draftReady,
+    gpa,
+    isEditing,
+    programId,
+    publications,
+    researchArea,
+    schoolId,
+    semester,
+    submissionDate,
+    termId,
+  ]);
 
   const handleSchoolChange = (newSchoolId: string) => {
     setSchoolId(newSchoolId);
@@ -170,6 +255,8 @@ const ApplicationForm: React.FC = () => {
         await updateApplication(applicationId, applicationData);
       } else {
         await createApplication(applicationData);
+        setDraftReady(false);
+        window.localStorage.removeItem(applicationDraftKey);
 
         const profile = await getUserProfile(demoUserId);
         setSchoolId('');
