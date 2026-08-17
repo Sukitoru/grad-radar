@@ -27,7 +27,11 @@ import {
   hourglassOutline,
   schoolOutline,
 } from 'ionicons/icons';
-import { getRecentDecisions, type RecentDecision } from '../api';
+import {
+  getErrorMessage,
+  getRecentDecisions,
+  type RecentDecision,
+} from '../api';
 import HeaderActions from '../components/HeaderActions';
 import './RecentDecisionsPage.css';
 
@@ -46,11 +50,9 @@ const RecentDecisionsPage: React.FC = () => {
         setDecisions(await getRecentDecisions());
         setError('');
       } catch (loadError) {
-        const message =
-          loadError instanceof Error
-            ? loadError.message
-            : 'Failed to load recent decisions.';
-        setError(message);
+        setError(
+          getErrorMessage(loadError, 'Failed to load recent decisions.'),
+        );
       } finally {
         setLoading(false);
       }

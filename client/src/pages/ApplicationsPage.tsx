@@ -36,7 +36,12 @@ import {
   trashOutline,
   addOutline,
 } from 'ionicons/icons';
-import { deleteApplication, getApplications, type Application } from '../api';
+import {
+  deleteApplication,
+  getApplications,
+  getErrorMessage,
+  type Application,
+} from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 import HeaderActions from '../components/HeaderActions';
 import './ApplicationsPage.css';
@@ -77,11 +82,7 @@ const ApplicationsPage: React.FC = () => {
 
       setApplications(userApplications);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Failed to retrieve applications.';
-      setError(message);
+      setError(getErrorMessage(error, 'Failed to retrieve applications.'));
     } finally {
       setLoading(false);
     }
@@ -123,11 +124,9 @@ const ApplicationsPage: React.FC = () => {
       );
       setApplicationToDelete(null);
     } catch (deleteError) {
-      const message =
-        deleteError instanceof Error
-          ? deleteError.message
-          : 'Failed to delete the application.';
-      setError(message);
+      setError(
+        getErrorMessage(deleteError, 'Failed to delete the application.'),
+      );
     } finally {
       setDeleting(false);
     }

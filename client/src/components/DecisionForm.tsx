@@ -14,7 +14,7 @@ import {
   IonIcon,
 } from '@ionic/react';
 import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
-import { API_BASE_URL, getTerms, type Term } from '../api';
+import { API_BASE_URL, getErrorMessage, getTerms, type Term } from '../api';
 import './DecisionForm.css';
 
 // Define the TypeScript interfaces for props
@@ -87,8 +87,10 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
           setWaitlistSemester(currentWaitlistTerm.name);
           setWaitlistYear(currentWaitlistTerm.academicYear);
         }
-      } catch {
-        setError('Failed to load semester choices.');
+      } catch (loadError) {
+        setError(
+          getErrorMessage(loadError, 'Failed to load semester choices.'),
+        );
       }
     };
 
@@ -158,8 +160,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
         onSuccess(); // Trigger parent refresh (e.g. updating stats and lists)
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
-      setError(message);
+      setError(getErrorMessage(error, 'Failed to save the decision.'));
     } finally {
       setSubmitting(false);
     }
