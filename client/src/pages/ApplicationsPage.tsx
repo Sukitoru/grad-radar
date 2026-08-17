@@ -48,6 +48,7 @@ import './ApplicationsPage.css';
 
 const ApplicationsPage: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [allApplications, setAllApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>('');
@@ -57,6 +58,8 @@ const ApplicationsPage: React.FC = () => {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [applicationToDelete, setApplicationToDelete] =
+    useState<Application | null>(null);
+  const [comparisonApplication, setComparisonApplication] =
     useState<Application | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
 
@@ -80,6 +83,7 @@ const ApplicationsPage: React.FC = () => {
         (application) => application.userId === demoUserId,
       );
 
+      setAllApplications(applicationData);
       setApplications(userApplications);
     } catch (error) {
       setError(getErrorMessage(error, 'Failed to retrieve applications.'));
@@ -118,6 +122,11 @@ const ApplicationsPage: React.FC = () => {
     try {
       await deleteApplication(applicationToDelete.id);
       setApplications((currentApplications) =>
+        currentApplications.filter(
+          (application) => application.id !== applicationToDelete.id,
+        ),
+      );
+      setAllApplications((currentApplications) =>
         currentApplications.filter(
           (application) => application.id !== applicationToDelete.id,
         ),
@@ -210,6 +219,74 @@ const ApplicationsPage: React.FC = () => {
 
     return matchesSearch && matchesDecision;
   });
+  const matchingCommunityApplications = comparisonApplication
+    ? allApplications.filter(
+        (application) =>
+          application.id !== comparisonApplication.id &&
+          application.schoolId === comparisonApplication.schoolId &&
+          application.programId === comparisonApplication.programId,
+      )
+    : [];
+  const communityGpas = matchingCommunityApplications
+    .filter((application) => application.gpa !== null)
+    .map((application) => Number(application.gpa));
+  const communityPublications = matchingCommunityApplications.map(
+    (application) => application.publications,
+  );
+  const averageCommunityGpa =
+    communityGpas.length > 0
+      ? communityGpas.reduce((total, currentGpa) => total + currentGpa, 0) /
+        communityGpas.length
+      : null;
+  const averageCommunityPublications =
+    communityPublications.length > 0
+      ? communityPublications.reduce(
+          (total, currentCount) => total + currentCount,
+          0,
+        ) / communityPublications.length
+      : null;
+  const communityAcceptedCount =
+    matchingCommunityApplications.filter(
+      (application) => application.decision?.status === 'ACCEPTED',
+    ).length;
+  const communityRejectedCount = matchingCommunityApplications.filter(
+    (application) => application.decision?.status === 'REJECTED',
+  ).length;
+  const communityWaitlistedCount = matchingCommunityApplications.filter(
+    (application) => application.decision?.status === 'WAITLISTED',
+  ).length;
+  const communityPendingCount = matchingCommunityApplications.filter(
+    (application) => !application.decision,
+  ).length;
+  const communityFinalDecisionCount =
+    communityAcceptedCount + communityRejectedCount;
+  const communityAcceptanceRate =
+    communityFinalDecisionCount === 0
+      ? null
+      : Math.round(
+          (communityAcceptedCount / communityFinalDecisionCount) * 100,
+        );
+  const getCommunityPercentage = (count: number) =>
+    matchingCommunityApplications.length === 0
+      ? 0
+      : Math.round((count / matchingCommunityApplications.length) * 100);
+  const selectedApplicationGpa =
+    comparisonApplication?.gpa === null ||
+    comparisonApplication?.gpa === undefined
+      ? null
+      : Number(comparisonApplication.gpa);
+  const gpaDifference =
+    selectedApplicationGpa === null || averageCommunityGpa === null
+      ? null
+      : selectedApplicationGpa - averageCommunityGpa;
+  const gpaComparisonText =
+    gpaDifference === null
+      ? 'Community comparison unavailable'
+      : Math.abs(gpaDifference) < 0.01
+        ? 'Matches the community average'
+        : `${Math.abs(gpaDifference).toFixed(2)} ${
+            gpaDifference > 0 ? 'above' : 'below'
+          } the community average`;
 
   if (loading) {
     return (
@@ -461,6 +538,16 @@ const ApplicationsPage: React.FC = () => {
                       size="small"
                       fill="clear"
                       color="medium"
+                      onClick={() => setComparisonApplication(app)}
+                    >
+                      <IonIcon slot="start" icon={statsChartOutline} />
+                      Compare
+                    </IonButton>
+
+                    <IonButton
+                      size="small"
+                      fill="clear"
+                      color="medium"
                       onClick={() => handleOpenDecisionModal(app.id)}
                     >
                       <IonIcon slot="start" icon={createOutline} />
@@ -530,6 +617,142 @@ const ApplicationsPage: React.FC = () => {
                 Cancel
               </IonButton>
             </div>
+          </IonContent>
+        </IonModal>
+
+        <IonModal
+          className="application-comparison-modal"
+          isOpen={comparisonApplication !== null}
+          onDidDismiss={() => setComparisonApplication(null)}
+        >
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Community Comparison</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setComparisonApplication(null)}>
+                  Close
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+
+          <IonContent className="ion-padding">
+            {comparisonApplication && (
+              <div className="application-comparison">
+                <span className="application-detail-label">
+                  Same school and program
+                </span>
+                <h2>{comparisonApplication.school?.name}</h2>
+                <p className="application-comparison-program">
+                  {comparisonApplication.program?.degreeLevel} in{' '}
+                  {comparisonApplication.program?.name}
+                </p>
+
+                <section className="application-comparison-own">
+                  <h3>Your application</h3>
+                  <div className="application-comparison-own-grid">
+                    <div>
+                      <span className="application-detail-label">Result</span>
+                      {renderDecisionBadge(comparisonApplication.decision)}
+                    </div>
+                    <div>
+                      <span className="application-detail-label">Your GPA</span>
+                      <strong>
+                        {selectedApplicationGpa === null
+                          ? 'Not listed'
+                          : selectedApplicationGpa.toFixed(2)}
+                      </strong>
+                      <small>{gpaComparisonText}</small>
+                    </div>
+                    <div>
+                      <span className="application-detail-label">
+                        Your publications
+                      </span>
+                      <strong>{comparisonApplication.publications}</strong>
+                      <small>
+                        Community average:{' '}
+                        {averageCommunityPublications === null
+                          ? 'N/A'
+                          : averageCommunityPublications.toFixed(1)}
+                      </small>
+                    </div>
+                  </div>
+                </section>
+
+                {matchingCommunityApplications.length === 0 ? (
+                  <IonCard>
+                    <IonCardContent className="ion-text-center">
+                      No other community applications match this school and
+                      program yet.
+                    </IonCardContent>
+                  </IonCard>
+                ) : (
+                  <section className="application-comparison-community">
+                    <h3>Community results</h3>
+                    <p>
+                      Based on {matchingCommunityApplications.length} other{' '}
+                      {matchingCommunityApplications.length === 1
+                        ? 'application'
+                        : 'applications'}{' '}
+                      for this school and program.
+                    </p>
+                    <div className="application-comparison-metrics">
+                      <div>
+                        <strong>
+                          {communityAcceptanceRate === null
+                            ? 'N/A'
+                            : `${communityAcceptanceRate}%`}
+                        </strong>
+                        <span>Acceptance rate from final decisions</span>
+                      </div>
+                      <div>
+                        <strong>
+                          {averageCommunityGpa === null
+                            ? 'N/A'
+                            : averageCommunityGpa.toFixed(2)}
+                        </strong>
+                        <span>Average GPA</span>
+                      </div>
+                      <div>
+                        <strong>
+                          {averageCommunityPublications === null
+                            ? 'N/A'
+                            : averageCommunityPublications.toFixed(1)}
+                        </strong>
+                        <span>Average publications</span>
+                      </div>
+                      <div>
+                        <strong>{matchingCommunityApplications.length}</strong>
+                        <span>Sample size</span>
+                      </div>
+                    </div>
+
+                    <div className="application-comparison-breakdown">
+                      {[
+                        { label: 'Accepted', count: communityAcceptedCount },
+                        { label: 'Rejected', count: communityRejectedCount },
+                        { label: 'Waitlisted', count: communityWaitlistedCount },
+                        { label: 'Pending', count: communityPendingCount },
+                      ].map(({ label, count }) => {
+                        const percentage = getCommunityPercentage(count);
+
+                        return (
+                          <div key={label} className="application-comparison-row">
+                            <span>{label}</span>
+                            <div className="application-comparison-bar">
+                              <span style={{ width: `${percentage}%` }} />
+                            </div>
+                            <strong>
+                              {count} ({percentage}%)
+                            </strong>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+              </div>
+            )}
           </IonContent>
         </IonModal>
 
