@@ -17,7 +17,7 @@ import {
 import { schoolOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { getErrorMessage, loginAccount } from '../api';
-import { saveAuthSession } from '../authSession';
+import { saveAuthSession, takeRequestedPath } from '../authSession';
 import './Login.css';
 
 const Login: React.FC = () => {
@@ -35,7 +35,7 @@ const Login: React.FC = () => {
     try {
       const response = await loginAccount({ username, password });
       saveAuthSession(response.token, response.user);
-      history.replace('/');
+      history.replace(takeRequestedPath() ?? '/');
     } catch (loginError) {
       setError(getErrorMessage(loginError, 'Unable to log in.'));
     } finally {

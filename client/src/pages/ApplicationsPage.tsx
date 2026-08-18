@@ -40,11 +40,11 @@ import {
   deleteApplication,
   getApplications,
   getErrorMessage,
+  getMyApplications,
   type Application,
 } from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 import HeaderActions from '../components/HeaderActions';
-import { getAuthenticatedUser } from '../authSession';
 import './ApplicationsPage.css';
 
 const ApplicationsPage: React.FC = () => {
@@ -70,17 +70,10 @@ const ApplicationsPage: React.FC = () => {
     setError(null);
 
     try {
-      const authenticatedUser = getAuthenticatedUser();
-
-      if (!authenticatedUser) {
-        throw new Error('Log in to view your applications.');
-      }
-
-      const applicationData = await getApplications();
-
-      const userApplications = applicationData.filter(
-        (application) => application.userId === authenticatedUser.id,
-      );
+      const [applicationData, userApplications] = await Promise.all([
+        getApplications(),
+        getMyApplications(),
+      ]);
 
       setAllApplications(applicationData);
       setApplications(userApplications);

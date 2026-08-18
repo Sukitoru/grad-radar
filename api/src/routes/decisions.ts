@@ -2,6 +2,10 @@ import express from 'express';
 import { z } from 'zod';
 import prisma from '../db.ts';
 import { updateDecisionSchema } from '../schemas/decision.ts';
+import {
+  requireAuth,
+  type AuthenticatedRequest,
+} from '../middleware/requireAuth.ts';
 
 const decisionsRouter = express.Router();
 
@@ -61,7 +65,10 @@ decisionsRouter.get('/decisions/recent', async (_request, response) => {
   }
 });
 
-decisionsRouter.put('/applications/:id/decision', async (request, response) => {
+decisionsRouter.put(
+  '/applications/:id/decision',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
   const validationResult = updateDecisionSchema.safeParse(request.body);
 
   if (!validationResult.success) {
@@ -72,7 +79,7 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
     return;
   }
 
-  const { id } = request.params;
+  const id = String(request.params.id);
   const { status, decisionDate, waitlistUntilTermId } = validationResult.data;
   const savedWaitlistTermId =
     status === 'WAITLISTED' ? waitlistUntilTermId : null;
@@ -87,7 +94,7 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
       },
     });
 
-    if (!application) {
+    if (!application || application.userId !== request.user!.id) {
       response.status(404).json({
         message: 'Application not found.',
       });
@@ -138,6 +145,7 @@ decisionsRouter.put('/applications/:id/decision', async (request, response) => {
       message: 'Failed to save decision.',
     });
   }
-});
+  },
+);
 
 export default decisionsRouter;
