@@ -21,8 +21,8 @@ if (!connectionString) {
   throw new Error('DATABASE_URL is required.');
 }
 
-const Adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter: Adapter });
+const databaseAdapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter: databaseAdapter });
 
 authRouter.post('/register', async (request, response) => {
   const validationResult = registerSchema.safeParse(request.body);
