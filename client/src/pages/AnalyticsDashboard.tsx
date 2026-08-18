@@ -23,6 +23,7 @@ import {
 import HeaderActions from '../components/HeaderActions';
 import DecisionPieChart from '../components/DecisionPieChart';
 import AcceptanceRateLineChart from '../components/AcceptanceRateLineChart';
+import ApplicationsSankeyChart from '../components/ApplicationsSankeyChart';
 import {
   useAnalyticsApplications,
   useAnalyticsPrograms,
@@ -388,6 +389,14 @@ const AnalyticsDashboard: React.FC = () => {
             )}
           </section>
           </div>
+
+          <section className = "analytics-chart-panel-analyctis-chart-panel-full">
+            <h2> Application Flow </h2>
+            <h3>
+              View submitted, reviewed, accepted, rejected, waitlisted, and pending applications.
+            </h3>
+            <ApplicationsSankeyChart applications = {filteredApplications}/>
+          </section>
 
         </main>
       </IonContent>

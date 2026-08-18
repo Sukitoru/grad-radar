@@ -157,6 +157,15 @@
   margin-top: 16px;
 }
 
+.analytics-chart-panel-full {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.analytics-chart-panel-full{
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 800px) {
   .analytics-chart-grid {
     grid-template-columns: 1fr;
