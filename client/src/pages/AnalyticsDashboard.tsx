@@ -29,6 +29,16 @@ import {
   useAnalyticsTerms,
   type AnalyticsFilters,
 } from '../analyticsData';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import './AnalyticsDashboard.css';
 
 const AnalyticsDashboard: React.FC = () => {
@@ -106,6 +116,20 @@ const AnalyticsDashboard: React.FC = () => {
     setFilters({});
     setGpaRange('ALL');
   };
+
+  const lineData = [
+    { name: 'Below 3.00', 
+      acceptanceRate: 45 
+    },
+    { name: '3.00-3.49', 
+      acceptanceRate: 62 },
+    { name: '3.50-3.74', 
+      acceptanceRate: 78 
+    },
+    { name: '3.75-4.00', 
+      acceptanceRate: 88 
+    },
+  ];
 
   return (
     <IonPage>
@@ -368,11 +392,52 @@ const AnalyticsDashboard: React.FC = () => {
                 </p>
               ) : filteredApplicationsQuery.isPending ? (
                 <IonSpinner name="crescent" />
-              ) : (
-                <DecisionPieChart applications={filteredApplications} />
-              )}
+                <span>Loading application data...</span>
+              </>
+            ) : hasError ? (
+              <span>Unable to load the application filters.</span>
+            ) : (
+              <>
+                <strong>{filteredApplications.length}</strong>
+                <span>
+                  {filteredApplications.length === 1
+                    ? 'application matches these filters'
+                    : 'applications match these filters'}
+                </span>
+              </>
+            )}
+          </section>
+
+          {!isLoading && !hasError && (
+            <section className = "analytics-chart-section">
+              <h2> Acceptance Rate by GPA Range </h2>
+              <div style= {{ width: '100%', height: 450}}> 
+              <ResponsiveContainer width = "100%" height = "100%">
+                <LineChart data = {lineData}>
+                  <CartesianGrid strokeDasharray = "33"/>
+
+                  <XAxis dataKey = "name"/>
+                  <YAxis domain = {[0, 100]}/>
+
+                  <Tooltip/>
+                  <Legend/>
+
+                  <Line 
+                    type = "monotone"
+                    dataKey = "acceptanceRate"
+                    name = "Acceptance Rate (%)"
+                    stroke = "#3880ff"
+                    strokeWidth = {3}
+                    dot = {{ r: 4 }}
+                    activeDot = {{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+              </div>
             </section>
-          </div>
+          
+          )}
+
         </main>
       </IonContent>
     </IonPage>

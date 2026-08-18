@@ -5842,6 +5842,7 @@ __metadata:
     express: "npm:5.2.1"
     jsonwebtoken: "npm:9.0.3"
     prisma: "npm:7.9.1"
+    recharts: "npm:^3.10.1"
     typescript: "npm:7.0.2"
     zod: "npm:4.4.3"
   languageName: unknown
