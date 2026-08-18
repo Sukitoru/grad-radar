@@ -35,7 +35,7 @@ const SignUp: React.FC = () => {
     try {
       const response = await registerAccount({ username, password });
       saveAuthSession(response.token, response.user);
-      history.replace('/');
+      history.push('/home');
     } catch (registerError) {
       setError(getErrorMessage(registerError, 'Unable to create the account.'));
     } finally {
