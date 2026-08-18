@@ -33,6 +33,7 @@ import {
 } from '../api';
 import { awardOptions, maximumAwards } from '../awardOptions';
 import HeaderActions from '../components/HeaderActions';
+import { getAuthenticatedUser } from '../authSession';
 import './FormPages.css';
 
 const applicationDraftKey = 'grad-radar-application-draft';
@@ -143,10 +144,10 @@ const ApplicationForm: React.FC = () => {
           setComments(application.comments ?? '');
           setSubmissionDate(application.submissionDate?.slice(0, 10) ?? '');
         } else {
-          const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+          const authenticatedUser = getAuthenticatedUser();
 
-          if (demoUserId) {
-            const profile = await getUserProfile(demoUserId);
+          if (authenticatedUser) {
+            const profile = await getUserProfile(authenticatedUser.id);
             setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
             setAwards(profile.defaultAwards);
             setPublications(String(profile.defaultPublications));
@@ -225,10 +226,10 @@ const ApplicationForm: React.FC = () => {
     setMessage('');
     setError('');
 
-    const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+    const authenticatedUser = getAuthenticatedUser();
 
-    if (!demoUserId) {
-      setError('VITE_DEMO_USER_ID is required for the local demo.');
+    if (!authenticatedUser) {
+      setError('Log in to save an application.');
       return;
     }
 
@@ -236,7 +237,7 @@ const ApplicationForm: React.FC = () => {
 
     try {
       const applicationData = {
-        userId: demoUserId,
+        userId: authenticatedUser.id,
         schoolId,
         programId,
         termId,
@@ -255,7 +256,7 @@ const ApplicationForm: React.FC = () => {
         setDraftReady(false);
         window.localStorage.removeItem(applicationDraftKey);
 
-        const profile = await getUserProfile(demoUserId);
+        const profile = await getUserProfile(authenticatedUser.id);
         setSchoolId('');
         setProgramId('');
         setTermId('');

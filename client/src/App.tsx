@@ -1,4 +1,4 @@
-import { Route } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -9,7 +9,9 @@ import ApplicationsPage from './pages/ApplicationsPage';
 import RecentDecisionsPage from './pages/RecentDecisionsPage';
 import AppNavigation from './components/AppNavigation';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
-
+import SignUp from './pages/SignUp';
+import Login from './pages/Login';
+import { isAuthenticated } from './authSession';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -44,33 +46,61 @@ setupIonicReact();
 
 const queryClient = new QueryClient();
 
+const protectedPage = (page: React.ReactNode) => {
+  return isAuthenticated() ? page : <Redirect to="/login" />;
+};
+
 const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <IonApp>
       <IonReactRouter>
         <AppNavigation />
         <IonRouterOutlet id="main-content">
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route exact path="/applications/new">
-            <ApplicationForm />
-          </Route>
-          <Route exact path="/applications/:applicationId/edit">
-            <ApplicationForm />
-          </Route>
-          <Route exact path="/applications">
-            <ApplicationsPage />
-          </Route>
-          <Route exact path="/decisions/recent">
-            <RecentDecisionsPage />
-          </Route>
-          <Route exact path="/account">
-            <AccountPage />
-          </Route>
-          <Route exact path="/analytics">
-            <AnalyticsDashboard />
-          </Route>
+          <Route exact path="/" component={Home} />
+          <Route
+            exact
+            path="/signup"
+            render={() =>
+              isAuthenticated() ? <Redirect to="/" /> : <SignUp />
+            }
+          />
+          <Route
+            exact
+            path="/login"
+            render={() =>
+              isAuthenticated() ? <Redirect to="/" /> : <Login />
+            }
+          />
+          <Route
+            exact
+            path="/applications/new"
+            render={() => protectedPage(<ApplicationForm />)}
+          />
+          <Route
+            exact
+            path="/applications/:applicationId/edit"
+            render={() => protectedPage(<ApplicationForm />)}
+          />
+          <Route
+            exact
+            path="/applications"
+            render={() => protectedPage(<ApplicationsPage />)}
+          />
+          <Route
+            exact
+            path="/decisions/recent"
+            render={() => protectedPage(<RecentDecisionsPage />)}
+          />
+          <Route
+            exact
+            path="/account"
+            render={() => protectedPage(<AccountPage />)}
+          />
+          <Route
+            exact
+            path="/analytics"
+            render={() => protectedPage(<AnalyticsDashboard />)}
+          />
         </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>

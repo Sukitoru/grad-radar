@@ -1,65 +1,128 @@
-import { 
-  IonButton, 
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
-  IonCardSubtitle, 
-  IonCardTitle ,
+import { useState } from 'react';
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonContent,
+  IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
-  IonContent,
-  IonPage
+  IonNote,
+  IonPage,
+  IonSpinner,
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; 
+import { schoolOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { getErrorMessage, registerAccount } from '../api';
+import { saveAuthSession } from '../authSession';
+import './SignUp.css';
 
-function SignUp() {
-    const history = useHistory();
+const SignUp: React.FC = () => {
+  const history = useHistory();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await registerAccount({ username, password });
+      saveAuthSession(response.token, response.user);
+      history.replace('/');
+    } catch (registerError) {
+      setError(getErrorMessage(registerError, 'Unable to create the account.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <IonPage>
-        <IonContent className = "ion-padding">
-    <IonCard>
-      <IonCardHeader>
-        <IonCardTitle> Grad Radar </IonCardTitle>
-        <IonCardSubtitle> Create Your Account </IonCardSubtitle>
-      </IonCardHeader>
+      <IonContent className="auth-page">
+        <main className="auth-page-layout">
+          <IonCard className="auth-card">
+            <IonCardHeader>
+              <div className="auth-brand">
+                <IonIcon icon={schoolOutline} />
+                <span>Grad Radar</span>
+              </div>
+              <IonCardTitle>Create your account</IonCardTitle>
+              <IonCardSubtitle>
+                Start tracking your graduate applications and decisions.
+              </IonCardSubtitle>
+            </IonCardHeader>
 
-      <IonCardContent>
+            <IonCardContent>
+            <form className="auth-form" onSubmit={handleRegister}>
+              <IonItem>
+                <IonInput
+                  label="Username"
+                  labelPlacement="stacked"
+                  value={username}
+                  minlength={3}
+                  maxlength={50}
+                  helperText="Use letters, numbers, or underscores."
+                  onIonInput={(event) =>
+                    setUsername(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-        <IonItem>
-            <IonLabel position = "stacked">
-                Full Name 
-            </IonLabel>
-            <IonInput placeholder = "Enter your name." />
-            </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Password"
+                  labelPlacement="stacked"
+                  type="password"
+                  value={password}
+                  minlength={8}
+                  maxlength={100}
+                  helperText="Use at least 8 characters."
+                  onIonInput={(event) =>
+                    setPassword(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-            <IonItem>
-                <IonLabel position = "stacked"> 
-                    Email
-                </IonLabel>
-                <IonInput type = "email" placeholder = "Enter your email."/>
-            </IonItem>
+              {error && (
+                <IonNote className="error-message" color="danger">
+                  {error}
+                </IonNote>
+              )}
 
-            <IonItem>
-                <IonLabel position = "stacked">
-                    Password
-                </IonLabel>
-                <IonInput type = "password" placeholder = "Create a password."/>
-            </IonItem>
-
-            <IonButton expand = "block" className = "ion-margin-top" onClick = { () => history.push('/grad-credentials')}>
-                Next page 
-            </IonButton>
-
-            <IonButton expand = "block" fill = "clear" onClick = { () => history.push('/login')}>
-                Already have an account? Login
-            </IonButton>
+              <div className="auth-form-actions">
+                <IonButton expand="block" type="submit" disabled={loading}>
+                  {loading ? <IonSpinner name="crescent" /> : 'Create account'}
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  fill="clear"
+                  type="button"
+                  routerLink="/login"
+                >
+                  Already have an account? Log in
+                </IonButton>
+              </div>
+            </form>
+            <div className="auth-home-link">
+              <IonButton fill="clear" routerLink="/">
+                Return to the landing page
+              </IonButton>
+            </div>
             </IonCardContent>
-        </IonCard>
-    </IonContent>
-</IonPage>
-
+          </IonCard>
+        </main>
+      </IonContent>
+    </IonPage>
   );
-}
+};
 
 export default SignUp;

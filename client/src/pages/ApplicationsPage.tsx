@@ -44,6 +44,7 @@ import {
 } from '../api';
 import DecisionForm from '../components/DecisionForm'; // Re-using our previously built form
 import HeaderActions from '../components/HeaderActions';
+import { getAuthenticatedUser } from '../authSession';
 import './ApplicationsPage.css';
 
 const ApplicationsPage: React.FC = () => {
@@ -69,18 +70,16 @@ const ApplicationsPage: React.FC = () => {
     setError(null);
 
     try {
-      const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+      const authenticatedUser = getAuthenticatedUser();
 
-      if (!demoUserId) {
-        throw new Error(
-          'VITE_DEMO_USER_ID is missing from the client environment.',
-        );
+      if (!authenticatedUser) {
+        throw new Error('Log in to view your applications.');
       }
 
       const applicationData = await getApplications();
 
       const userApplications = applicationData.filter(
-        (application) => application.userId === demoUserId,
+        (application) => application.userId === authenticatedUser.id,
       );
 
       setAllApplications(applicationData);

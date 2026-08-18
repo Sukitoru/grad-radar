@@ -1,55 +1,126 @@
-import { 
-  IonButton, 
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
-  IonCardSubtitle, 
-  IonCardTitle ,
+import { useState } from 'react';
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonContent,
+  IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
-  IonContent,
-  IonPage
+  IonNote,
+  IonPage,
+  IonSpinner,
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; 
+import { schoolOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { getErrorMessage, loginAccount } from '../api';
+import { saveAuthSession } from '../authSession';
+import './Login.css';
 
-function SignUp() {
-    const history = useHistory();
+const Login: React.FC = () => {
+  const history = useHistory();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await loginAccount({ username, password });
+      saveAuthSession(response.token, response.user);
+      history.replace('/');
+    } catch (loginError) {
+      setError(getErrorMessage(loginError, 'Unable to log in.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <IonPage>
-        <IonContent className = "ion-padding">
-    <IonCard>
-      <IonCardHeader>
-        <IonCardTitle> Grad Radar </IonCardTitle>
-        <IonCardSubtitle> Login </IonCardSubtitle>
-      </IonCardHeader>
+      <IonContent className="auth-page">
+        <main className="auth-page-layout">
+          <IonCard className="auth-card">
+            <IonCardHeader>
+              <div className="auth-brand">
+                <IonIcon icon={schoolOutline} />
+                <span>Grad Radar</span>
+              </div>
+              <IonCardTitle>Welcome back</IonCardTitle>
+              <IonCardSubtitle>
+                Log in to manage your graduate applications.
+              </IonCardSubtitle>
+            </IonCardHeader>
 
-      <IonCardContent>
+            <IonCardContent>
+            <form className="auth-form" onSubmit={handleLogin}>
+              <IonItem>
+                <IonInput
+                  label="Username"
+                  labelPlacement="stacked"
+                  value={username}
+                  minlength={3}
+                  maxlength={50}
+                  onIonInput={(event) =>
+                    setUsername(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-            <IonItem>
-                <IonLabel position = "stacked"> 
-                    Email
-                </IonLabel>
-                <IonInput type = "email" placeholder = "example@icloud.com." required/>
-            </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Password"
+                  labelPlacement="stacked"
+                  type="password"
+                  value={password}
+                  minlength={8}
+                  maxlength={100}
+                  onIonInput={(event) =>
+                    setPassword(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-            <IonItem>
-                <IonLabel position = "stacked">
-                    Password
-                </IonLabel>
-                <IonInput type = "password" placeholder = "Create a password." required/>
-            </IonItem>
+              {error && (
+                <IonNote className="error-message" color="danger">
+                  {error}
+                </IonNote>
+              )}
 
-            <IonButton expand = "block" className = "ion-margin-top" onClick = { () => history.push('/home')}>
-                Login
-            </IonButton>
-
+              <div className="auth-form-actions">
+                <IonButton expand="block" type="submit" disabled={loading}>
+                  {loading ? <IonSpinner name="crescent" /> : 'Log in'}
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  fill="clear"
+                  type="button"
+                  routerLink="/signup"
+                >
+                  Create an account
+                </IonButton>
+              </div>
+            </form>
+            <div className="auth-home-link">
+              <IonButton fill="clear" routerLink="/">
+                Return to the landing page
+              </IonButton>
+            </div>
             </IonCardContent>
-        </IonCard>
-    </IonContent>
-</IonPage>
-
+          </IonCard>
+        </main>
+      </IonContent>
+    </IonPage>
   );
-}
+};
 
-export default SignUp;
+export default Login;
