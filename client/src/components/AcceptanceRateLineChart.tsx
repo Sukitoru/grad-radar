@@ -43,6 +43,10 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
       (application) => application.decision?.status === 'REJECTED',
     ).length;
 
+    const pendingApplications = rangeApplications.filter(
+      (application) => !application.decision?.status,
+    ).length;
+
     return {
       name: range.name,
       acceptanceRate:
@@ -57,6 +61,10 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
         rangeApplications.length === 0
           ? 0
           : Math.round((rejectedApplications / rangeApplications.length) * 100),
+      pendingRate:
+        rangeApplications.length === 0
+          ? 0
+          : Math.round((pendingApplications / rangeApplications.length) * 100),
     };
   });
 
@@ -90,7 +98,7 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
           <Line
             type="monotone"
             dataKey="acceptanceRate"
-            name="Acceptance rate"
+            name="Acceptance Rate"
             stroke="var(--ion-color-success)"
             strokeWidth={3}
             dot={{ r: 4, fill: 'var(--ion-color-success)' }}
@@ -110,7 +118,7 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
           <Line
             type="monotone"
             dataKey="rejectionRate"
-            name="Rejection rate"
+            name="Rejection Rate"
             stroke="var(--ion-color-danger)"
             strokeWidth={3}
             dot={{ r: 4, fill: 'var(--ion-color-danger)' }}
@@ -120,7 +128,7 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
           <Line
             type="monotone"
             dataKey="pendingRate"
-            name="Pending rate"
+            name="Pending Rate"
             stroke="var(--ion-color-medium)"
             strokeWidth={3}
             dot={{ r: 4, fill: 'var(--ion-color-medium)' }}
