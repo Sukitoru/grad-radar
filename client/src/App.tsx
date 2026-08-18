@@ -11,7 +11,7 @@ import AppNavigation from './components/AppNavigation';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
-import { isAuthenticated } from './authSession';
+import { isAuthenticated, rememberRequestedPath } from './authSession';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -46,8 +46,13 @@ setupIonicReact();
 
 const queryClient = new QueryClient();
 
-const protectedPage = (page: React.ReactNode) => {
-  return isAuthenticated() ? page : <Redirect to="/login" />;
+const protectedPage = (page: React.ReactNode, requestedPath: string) => {
+  if (isAuthenticated()) {
+    return page;
+  }
+
+  rememberRequestedPath(requestedPath);
+  return <Redirect to="/login" />;
 };
 
 const App: React.FC = () => (
@@ -74,32 +79,44 @@ const App: React.FC = () => (
           <Route
             exact
             path="/applications/new"
-            render={() => protectedPage(<ApplicationForm />)}
+            render={({ location }) =>
+              protectedPage(<ApplicationForm />, location.pathname)
+            }
           />
           <Route
             exact
             path="/applications/:applicationId/edit"
-            render={() => protectedPage(<ApplicationForm />)}
+            render={({ location }) =>
+              protectedPage(<ApplicationForm />, location.pathname)
+            }
           />
           <Route
             exact
             path="/applications"
-            render={() => protectedPage(<ApplicationsPage />)}
+            render={({ location }) =>
+              protectedPage(<ApplicationsPage />, location.pathname)
+            }
           />
           <Route
             exact
             path="/decisions/recent"
-            render={() => protectedPage(<RecentDecisionsPage />)}
+            render={({ location }) =>
+              protectedPage(<RecentDecisionsPage />, location.pathname)
+            }
           />
           <Route
             exact
             path="/account"
-            render={() => protectedPage(<AccountPage />)}
+            render={({ location }) =>
+              protectedPage(<AccountPage />, location.pathname)
+            }
           />
           <Route
             exact
             path="/analytics"
-            render={() => protectedPage(<AnalyticsDashboard />)}
+            render={({ location }) =>
+              protectedPage(<AnalyticsDashboard />, location.pathname)
+            }
           />
         </IonRouterOutlet>
       </IonReactRouter>

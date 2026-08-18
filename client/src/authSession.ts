@@ -5,6 +5,7 @@ export interface AuthenticatedUser {
 
 const authTokenKey = 'auth_token';
 const authenticatedUserKey = 'auth_user';
+const requestedPathKey = 'requested_path';
 
 export const saveAuthSession = (
   token: string,
@@ -38,4 +39,16 @@ export const isAuthenticated = () => {
 export const clearAuthSession = () => {
   localStorage.removeItem(authTokenKey);
   localStorage.removeItem(authenticatedUserKey);
+};
+
+export const rememberRequestedPath = (path: string) => {
+  if (path !== '/login' && path !== '/signup') {
+    sessionStorage.setItem(requestedPathKey, path);
+  }
+};
+
+export const takeRequestedPath = () => {
+  const requestedPath = sessionStorage.getItem(requestedPathKey);
+  sessionStorage.removeItem(requestedPathKey);
+  return requestedPath;
 };

@@ -1,5 +1,9 @@
 import express from 'express';
 import prisma from '../db.ts';
+import {
+  requireAuth,
+  type AuthenticatedRequest,
+} from '../middleware/requireAuth.ts';
 
 const usersRouter = express.Router();
 
@@ -20,10 +24,20 @@ const profileFields = {
   defaultPublications: true,
 };
 
-usersRouter.get('/users/:id/profile', async (request, response) => {
+usersRouter.get(
+  '/users/:id/profile',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
+  const requestedUserId = String(request.params.id);
+
+  if (requestedUserId !== request.user!.id) {
+    response.status(403).json({ message: 'You can only view your own profile.' });
+    return;
+  }
+
   try {
     const user = await prisma.user.findUnique({
-      where: { id: request.params.id },
+      where: { id: requestedUserId },
       select: profileFields,
     });
 
@@ -36,9 +50,20 @@ usersRouter.get('/users/:id/profile', async (request, response) => {
   } catch {
     response.status(500).json({ message: 'Failed to retrieve account profile.' });
   }
-});
+  },
+);
 
-usersRouter.patch('/users/:id/profile', async (request, response) => {
+usersRouter.patch(
+  '/users/:id/profile',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
+  const requestedUserId = String(request.params.id);
+
+  if (requestedUserId !== request.user!.id) {
+    response.status(403).json({ message: 'You can only update your own profile.' });
+    return;
+  }
+
   const {
     username,
     defaultGpa,
@@ -71,7 +96,7 @@ usersRouter.patch('/users/:id/profile', async (request, response) => {
 
   try {
     const existingUser = await prisma.user.findUnique({
-      where: { id: request.params.id },
+      where: { id: requestedUserId },
     });
 
     if (!existingUser) {
@@ -80,7 +105,7 @@ usersRouter.patch('/users/:id/profile', async (request, response) => {
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: request.params.id },
+      where: { id: requestedUserId },
       data: {
         username: username.trim(),
         defaultGpa,
@@ -96,6 +121,7 @@ usersRouter.patch('/users/:id/profile', async (request, response) => {
       message: 'Failed to update account profile. The username may already be taken.',
     });
   }
-});
+  },
+);
 
 export default usersRouter;

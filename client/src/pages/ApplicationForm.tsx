@@ -20,8 +20,8 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import {
   createApplication,
+  getApplication,
   getErrorMessage,
-  getApplications,
   getPrograms,
   getSchools,
   getTerms,
@@ -123,14 +123,7 @@ const ApplicationForm: React.FC = () => {
         setTerms(termOptions);
 
         if (applicationId) {
-          const applications = await getApplications();
-          const application = applications.find(
-            (currentApplication) => currentApplication.id === applicationId,
-          );
-
-          if (!application) {
-            throw new Error('Application not found.');
-          }
+          const application = await getApplication(applicationId);
 
           setSchoolId(application.schoolId);
           setProgramId(application.programId);
@@ -237,7 +230,6 @@ const ApplicationForm: React.FC = () => {
 
     try {
       const applicationData = {
-        userId: authenticatedUser.id,
         schoolId,
         programId,
         termId,
