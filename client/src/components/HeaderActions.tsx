@@ -38,6 +38,7 @@ const HeaderActions: React.FC = () => {
   );
   const [signedIn, setSignedIn] = useState(isAuthenticated());
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [popoverEvent, setPopoverEvent] = useState<Event>();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -92,18 +93,20 @@ const HeaderActions: React.FC = () => {
       </IonButton>
 
       <IonButton
-        id="account-menu-trigger"
         className="header-action-button"
         aria-label={signedIn ? 'Open account menu' : 'Open login menu'}
+        aria-expanded={popoverOpen}
+        onClick={(event) => {
+          setPopoverEvent(event.nativeEvent);
+          setPopoverOpen((isOpen) => !isOpen);
+        }}
       >
         <IonIcon slot="icon-only" icon={personCircleOutline} />
       </IonButton>
 
       <IonPopover
-        trigger="account-menu-trigger"
-        triggerAction="click"
         isOpen={popoverOpen}
-        onWillPresent={() => setPopoverOpen(true)}
+        event={popoverEvent}
         onDidDismiss={() => setPopoverOpen(false)}
         className="account-popover"
       >

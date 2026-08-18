@@ -7,17 +7,21 @@ import {
   IonCardSubtitle,
   IonCardTitle,
   IonContent,
+  IonHeader,
   IonIcon,
   IonInput,
   IonItem,
   IonNote,
   IonPage,
   IonSpinner,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/react';
 import { schoolOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { getErrorMessage, registerAccount } from '../api';
 import { saveAuthSession } from '../authSession';
+import HeaderActions from '../components/HeaderActions';
 import './SignUp.css';
 
 const SignUp: React.FC = () => {
@@ -45,6 +49,12 @@ const SignUp: React.FC = () => {
 
   return (
     <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Grad Radar</IonTitle>
+          <HeaderActions />
+        </IonToolbar>
+      </IonHeader>
       <IonContent className="auth-page">
         <main className="auth-page-layout">
           <IonCard className="auth-card">
