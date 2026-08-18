@@ -11,6 +11,7 @@ import AppNavigation from './components/AppNavigation';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
+import ExamplePage from './pages/ExamplePage';
 import { isAuthenticated, rememberRequestedPath } from './authSession';
 
 /* Core CSS required for Ionic components to work properly */
@@ -116,6 +117,13 @@ const App: React.FC = () => (
             path="/analytics"
             render={({ location }) =>
               protectedPage(<AnalyticsDashboard />, location.pathname)
+            }
+          />
+          <Route
+            exact
+            path="/example-page"
+            render={({ location }) =>
+              protectedPage(<ExamplePage />, location.pathname)
             }
           />
         </IonRouterOutlet>

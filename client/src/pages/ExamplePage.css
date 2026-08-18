@@ -1,0 +1,446 @@
+.example-page-container {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+}
+
+/* 1. Page heading */
+.example-page-overview {
+  padding: 20px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+
+.example-page-overview-heading,
+.example-page-list-heading,
+.example-page-card-heading,
+.example-page-card-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.example-page-label,
+.example-page-section-label,
+.example-page-detail > span,
+.example-page-comments > span,
+.example-page-fact > span {
+  color: var(--ion-color-medium);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.example-page-overview h1 {
+  margin: 7px 0 4px;
+  font-size: 24px;
+}
+
+/* 2. Summary metrics */
+.example-page-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-step-150);
+}
+
+.example-page-metric {
+  display: grid;
+  gap: 2px;
+  padding: 0 16px;
+  border-right: 1px solid var(--ion-color-step-150);
+}
+
+.example-page-metric:first-child {
+  padding-left: 0;
+}
+
+.example-page-metric:last-child {
+  border-right: 0;
+}
+
+.example-page-metric strong {
+  color: var(--ion-text-color);
+  font-size: 20px;
+}
+
+.example-page-metric span {
+  color: var(--ion-color-medium);
+  font-size: 12px;
+}
+
+/* 3. Form sections and fields */
+.example-page-form-section,
+.example-page-state-section,
+.example-page-analytics-section {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+
+.example-page-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.example-page-section-heading > span:first-child {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid var(--ion-color-step-200);
+  border-radius: 50%;
+  color: var(--ion-color-medium);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.example-page-section-heading h2 {
+  margin: 2px 0 0;
+  font-size: 17px;
+}
+
+.example-page-form-fields {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+}
+
+.example-page-form-fields-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.example-page-form-fields ion-item {
+  --background: rgba(var(--ion-color-medium-rgb), 0.05);
+  --border-color: transparent;
+  --inner-padding-bottom: 5px;
+  --inner-padding-end: 12px;
+  --inner-padding-start: 0;
+  --inner-padding-top: 5px;
+  --padding-start: 12px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+}
+
+.example-page-field-wide {
+  grid-column: span 2;
+}
+
+/* 4. List heading and filters */
+.example-page-list-section {
+  margin-top: 24px;
+}
+
+.example-page-list-heading {
+  align-items: baseline;
+  margin: 0 2px 10px;
+}
+
+.example-page-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.example-page-list-heading h2 {
+  margin: 7px 0 0;
+  font-size: 20px;
+}
+
+.example-page-count {
+  color: var(--ion-color-medium);
+  font-size: 12px;
+}
+
+.example-page-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.example-page-search {
+  padding: 0;
+}
+
+.example-page-filter {
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+  --background: rgba(var(--ion-color-medium-rgb), 0.04);
+}
+
+/* 4. Cards */
+.example-page-card-list {
+  display: grid;
+  gap: 14px;
+}
+
+.example-page-card {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
+}
+
+.example-page-card-header {
+  padding: 16px 18px 13px;
+  border-bottom: 1px solid var(--ion-color-step-150);
+}
+
+.example-page-card ion-card-content {
+  padding: 14px 18px 16px;
+}
+
+.example-page-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.example-page-card ion-card-subtitle {
+  margin-top: 3px;
+  font-size: 14px;
+  text-transform: none;
+}
+
+.example-page-card ion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* 5. Facts */
+.example-page-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 12px 0;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+  background: rgba(var(--ion-color-medium-rgb), 0.06);
+}
+
+.example-page-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 14px;
+  border-right: 1px solid var(--ion-color-step-150);
+}
+
+.example-page-fact:last-child {
+  border-right: 0;
+}
+
+.example-page-fact strong {
+  color: var(--ion-text-color);
+  font-size: 14px;
+}
+
+/* 6. Supporting details */
+.example-page-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.example-page-detail strong {
+  color: var(--ion-text-color);
+  font-size: 14px;
+}
+
+.example-page-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.example-page-tags span {
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: rgba(var(--ion-color-medium-rgb), 0.13);
+  color: var(--ion-text-color);
+  font-size: 13px;
+}
+
+/* 7. Comments */
+.example-page-comments {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  background: rgba(var(--ion-color-medium-rgb), 0.06);
+}
+
+/* 8. Dates and actions */
+.example-page-card-footer {
+  align-items: flex-end;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ion-color-step-100);
+}
+
+.example-page-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  color: var(--ion-color-medium);
+  font-size: 12px;
+}
+
+.example-page-dates span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.example-page-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.example-page-actions ion-button {
+  margin: 0;
+}
+
+.example-page-waitlist {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(var(--ion-color-warning-rgb), 0.35);
+  border-radius: 8px;
+  color: var(--ion-text-color);
+}
+
+.example-page-waitlist ion-icon {
+  color: var(--ion-color-warning);
+}
+
+/* 10. Pagination */
+.example-page-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 20px;
+  color: var(--ion-color-medium);
+  font-size: 13px;
+}
+
+/* 11. Loading, error, and empty states */
+.example-page-state-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.example-page-state {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 8px;
+  background: rgba(var(--ion-color-medium-rgb), 0.05);
+  color: var(--ion-color-medium);
+  text-align: center;
+}
+
+.example-page-error-state {
+  color: var(--ion-color-danger);
+}
+
+/* 12. Analytics */
+.example-page-chart-placeholder {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  border: 1px dashed var(--ion-color-step-200);
+  border-radius: 8px;
+  color: var(--ion-color-medium);
+}
+
+@media (max-width: 720px) {
+  .example-page-overview-heading,
+  .example-page-card-footer {
+    flex-direction: column;
+  }
+
+  .example-page-overview-heading ion-button,
+  .example-page-actions {
+    width: 100%;
+  }
+
+  .example-page-actions ion-button {
+    flex: 1;
+  }
+
+  .example-page-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .example-page-form-fields-three,
+  .example-page-state-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .example-page-field-wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .example-page-overview,
+  .example-page-card ion-card-content {
+    padding: 15px;
+  }
+
+  .example-page-metrics,
+  .example-page-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .example-page-metric,
+  .example-page-fact {
+    padding: 9px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--ion-color-step-150);
+  }
+
+  .example-page-metric:first-child,
+  .example-page-fact:first-child {
+    padding-top: 0;
+  }
+
+  .example-page-metric:last-child,
+  .example-page-fact:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .example-page-form-section,
+  .example-page-state-section,
+  .example-page-analytics-section {
+    padding: 15px;
+  }
+}
