@@ -17,7 +17,7 @@ import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
 import {
   getErrorMessage,
   getTerms,
-  updateApplicationDecision,
+  updateDecision,
   type Term,
 } from '../api';
 import './DecisionForm.css';
@@ -140,7 +140,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
     setError(null);
 
     try {
-      await updateApplicationDecision(applicationId, {
+      await updateDecision(applicationId, {
         status,
         decisionDate: new Date(decisionDate).toISOString(),
         waitlistUntilTermId:

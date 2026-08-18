@@ -1,4 +1,8 @@
-import { getAuthToken } from './authSession';
+import {
+  clearAuthSession,
+  getAuthToken,
+  rememberRequestedPath,
+} from './authSession';
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ?? '/api';
@@ -51,7 +55,7 @@ export interface RecentDecision extends Decision {
 
 export interface Application {
   id: string;
-  userId: string;
+  userId?: string;
   schoolId: string;
   programId: string;
   termId: string;
@@ -68,7 +72,6 @@ export interface Application {
 }
 
 export interface ApplicationInput {
-  userId?: string;
   schoolId: string;
   programId: string;
   termId: string;
@@ -140,6 +143,19 @@ async function apiRequest<ResponseType>(path: string, options?: RequestInit) {
     headers,
   });
 
+  if (
+    response.status === 401 &&
+    authToken &&
+    path !== '/auth/login' &&
+    path !== '/auth/register'
+  ) {
+    rememberRequestedPath(
+      `${window.location.pathname}${window.location.search}`,
+    );
+    clearAuthSession();
+    window.location.assign('/login');
+  }
+
   if (!response.ok) {
     const errorResponse = (await response.json().catch(() => ({}))) as ApiErrorResponse;
     throw new Error(
@@ -199,15 +215,25 @@ export const getApplications = (filters: ApplicationFilters = {}) => {
   return apiRequest<Application[]>(path);
 };
 
+export const getMyApplications = () =>
+  apiRequest<Application[]>('/applications/mine');
+
+export const getApplication = (applicationId: string) =>
+  apiRequest<Application>(`/applications/${applicationId}`);
+
 export const getUserProfile = (userId: string) =>
   apiRequest<UserProfile>(`/users/${userId}/profile`);
 
 export const getRecentDecisions = () =>
   apiRequest<RecentDecision[]>('/decisions/recent');
 
-export const updateApplicationDecision = (
+export const updateDecision = (
   applicationId: string,
-  decision: DecisionInput,
+  decision: {
+    status: 'ACCEPTED' | 'REJECTED' | 'WAITLISTED';
+    decisionDate: string;
+    waitlistUntilTermId: string | null;
+  },
 ) =>
   apiRequest<Decision>(`/applications/${applicationId}/decision`, {
     method: 'PUT',

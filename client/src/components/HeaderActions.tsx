@@ -26,6 +26,7 @@ import {
   getAuthenticatedUser,
   isAuthenticated,
   saveAuthSession,
+  takeRequestedPath,
 } from '../authSession';
 import './HeaderActions.css';
 
@@ -60,6 +61,7 @@ const HeaderActions: React.FC = () => {
       setSignedIn(true);
       setPassword('');
       setPopoverOpen(false);
+      history.replace(takeRequestedPath() ?? history.location.pathname);
     } catch (error) {
       setLoginError(getErrorMessage(error, 'Unable to log in.'));
     } finally {
