@@ -5,6 +5,10 @@ import {
   createApplicationSchema,
   updateApplicationSchema,
 } from '../schemas/application.ts';
+import {
+  requireAuth,
+  type AuthenticatedRequest,
+} from '../middleware/requireAuth.ts';
 
 const router = express.Router();
 
@@ -26,7 +30,10 @@ const applicationFilterSchema = z.object({
     .optional(),
 });
 
-router.post('/applications', async (req, res) => {
+router.post(
+  '/applications',
+  requireAuth,
+  async (req: AuthenticatedRequest, res) => {
   const validationResult = createApplicationSchema.safeParse(req.body);
 
   if (!validationResult.success) {
@@ -38,7 +45,6 @@ router.post('/applications', async (req, res) => {
   }
 
   const {
-    userId,
     schoolId,
     programId,
     termId,
@@ -78,7 +84,7 @@ router.post('/applications', async (req, res) => {
   try {
     const application = await prisma.application.create({
       data: {
-        userId,
+        userId: req.user!.id,
         schoolId,
         programId,
         termId,
@@ -105,7 +111,35 @@ router.post('/applications', async (req, res) => {
       message: 'Failed to create application.',
     });
   }
-});
+  },
+);
+
+router.get(
+  '/applications/mine',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
+    try {
+      const applications = await prisma.application.findMany({
+        where: { userId: request.user!.id },
+        include: {
+          school: true,
+          program: true,
+          term: true,
+          decision: {
+            include: { waitlistUntilTerm: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      response.json(applications);
+    } catch {
+      response.status(500).json({
+        message: 'Failed to retrieve your applications.',
+      });
+    }
+  },
+);
 
 // List all applications.
 router.get('/applications', async (request, response) => {
@@ -144,7 +178,11 @@ router.get('/applications', async (request, response) => {
       },
     });
 
-    response.json(applications);
+    const communityApplications = applications.map(
+      ({ userId: _userId, ...application }) => application,
+    );
+
+    response.json(communityApplications);
   } catch {
     response.status(500).json({
       message: 'Failed to retrieve applications.',
@@ -153,11 +191,14 @@ router.get('/applications', async (request, response) => {
 });
 
 // Get one application by ID.
-router.get('/applications/:id', async (request, response) => {
+router.get(
+  '/applications/:id',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
   try {
     const application = await prisma.application.findUnique({
       where: {
-        id: request.params.id,
+        id: String(request.params.id),
       },
       include: {
         school: true,
@@ -169,7 +210,7 @@ router.get('/applications/:id', async (request, response) => {
       },
     });
 
-    if (!application) {
+    if (!application || application.userId !== request.user!.id) {
       response.status(404).json({
         message: 'Application not found.',
       });
@@ -182,10 +223,14 @@ router.get('/applications/:id', async (request, response) => {
       message: 'Failed to retrieve application.',
     });
   }
-});
+  },
+);
 
 // Update one application by ID.
-router.put('/applications/:id', async (request, response) => {
+router.put(
+  '/applications/:id',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
   const validationResult = updateApplicationSchema.safeParse(request.body);
 
   if (!validationResult.success) {
@@ -236,11 +281,11 @@ router.put('/applications/:id', async (request, response) => {
   try {
     const application = await prisma.application.findUnique({
       where: {
-        id: request.params.id,
+        id: String(request.params.id),
       },
     });
 
-    if (!application) {
+    if (!application || application.userId !== request.user!.id) {
       response.status(404).json({
         message: 'Application not found.',
       });
@@ -249,7 +294,7 @@ router.put('/applications/:id', async (request, response) => {
 
     const updatedApplication = await prisma.application.update({
       where: {
-        id: request.params.id,
+        id: String(request.params.id),
       },
       data: {
         schoolId,
@@ -278,18 +323,22 @@ router.put('/applications/:id', async (request, response) => {
       message: 'Failed to update application.',
     });
   }
-});
+  },
+);
 
 // Delete one application by ID.
-router.delete('/applications/:id', async (request, response) => {
+router.delete(
+  '/applications/:id',
+  requireAuth,
+  async (request: AuthenticatedRequest, response) => {
   try {
     const application = await prisma.application.findUnique({
       where: {
-        id: request.params.id,
+        id: String(request.params.id),
       },
     });
 
-    if (!application) {
+    if (!application || application.userId !== request.user!.id) {
       response.status(404).json({
         message: 'Application not found.',
       });
@@ -298,7 +347,7 @@ router.delete('/applications/:id', async (request, response) => {
 
     await prisma.application.delete({
       where: {
-        id: request.params.id,
+        id: String(request.params.id),
       },
     });
 
@@ -310,6 +359,7 @@ router.delete('/applications/:id', async (request, response) => {
       message: 'Failed to delete application.',
     });
   }
-});
+  },
+);
 
 export default router;

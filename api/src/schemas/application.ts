@@ -29,8 +29,6 @@ const applicationFieldsSchema = z.object({
     .nullable(),
 });
 
-export const createApplicationSchema = applicationFieldsSchema.extend({
-  userId: z.uuid({ error: 'A valid user ID is required.' }),
-});
+export const createApplicationSchema = applicationFieldsSchema;
 
 export const updateApplicationSchema = applicationFieldsSchema;
