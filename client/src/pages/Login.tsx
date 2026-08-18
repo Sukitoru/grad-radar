@@ -1,83 +1,126 @@
-//To login with the same credentials
-
-import { 
-  IonButton, 
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
-  IonCardSubtitle, 
-  IonCardTitle ,
+import { useState } from 'react';
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonContent,
+  IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
-  IonContent,
-  IonPage
+  IonNote,
+  IonPage,
+  IonSpinner,
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; 
-import { useState } from 'react';
+import { schoolOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { getErrorMessage, loginAccount } from '../api';
+import { saveAuthSession } from '../authSession';
 import './Login.css';
 
-function Login() {
-    const history = useHistory();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+const Login: React.FC = () => {
+  const history = useHistory();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const handleLogin = () => {
-        const savedEmail = localStorage.getItem('email');
-        const savedPassword = localStorage.getItem('password');
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
 
-        if (
-            email === savedEmail && password === savedPassword
-        ) {
-            localStorage.setItem('loggedIn', 'true');
-            history.push('/home');
-        } else {
-            setError('Invalid email or password.')
-        }
-    };
+    try {
+      const response = await loginAccount({ username, password });
+      saveAuthSession(response.token, response.user);
+      history.replace('/');
+    } catch (loginError) {
+      setError(getErrorMessage(loginError, 'Unable to log in.'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <IonPage>
-        <IonContent className = "ion-padding">
-    <IonCard>
-      <IonCardHeader>
-        <IonCardTitle> Grad Radar </IonCardTitle>
-        <IonCardSubtitle> Login </IonCardSubtitle>
-      </IonCardHeader>
+      <IonContent className="auth-page">
+        <main className="auth-page-layout">
+          <IonCard className="auth-card">
+            <IonCardHeader>
+              <div className="auth-brand">
+                <IonIcon icon={schoolOutline} />
+                <span>Grad Radar</span>
+              </div>
+              <IonCardTitle>Welcome back</IonCardTitle>
+              <IonCardSubtitle>
+                Log in to manage your graduate applications.
+              </IonCardSubtitle>
+            </IonCardHeader>
 
-      <IonCardContent>
+            <IonCardContent>
+            <form className="auth-form" onSubmit={handleLogin}>
+              <IonItem>
+                <IonInput
+                  label="Username"
+                  labelPlacement="stacked"
+                  value={username}
+                  minlength={3}
+                  maxlength={50}
+                  onIonInput={(event) =>
+                    setUsername(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-            <IonItem>
-                <IonLabel position = "stacked"> 
-                    Email
-                </IonLabel>
-                <IonInput type = "email" value = {email} onIonInput = { (e) => setEmail(String(e.detail.value ?? ''))} placeholder = "example@.edu" required/>
-            </IonItem>
+              <IonItem>
+                <IonInput
+                  label="Password"
+                  labelPlacement="stacked"
+                  type="password"
+                  value={password}
+                  minlength={8}
+                  maxlength={100}
+                  onIonInput={(event) =>
+                    setPassword(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-            <IonItem>
-                <IonLabel position = "stacked">
-                    Password
-                </IonLabel>
-                <IonInput type = "password" value = {password} onIonInput = { (e) => setPassword(String(e.detail.value ?? ''))} placeholder = "Enter your password." required/>
-            </IonItem>
+              {error && (
+                <IonNote className="error-message" color="danger">
+                  {error}
+                </IonNote>
+              )}
 
-            {error && (
-                <p className = "error-message">
-                    {error}
-                </p>
-            )}
-
-            <IonButton expand = "block" className = "ion-margin-top" onClick = {handleLogin}>
-                Login
-            </IonButton>
-
+              <div className="auth-form-actions">
+                <IonButton expand="block" type="submit" disabled={loading}>
+                  {loading ? <IonSpinner name="crescent" /> : 'Log in'}
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  fill="clear"
+                  type="button"
+                  routerLink="/signup"
+                >
+                  Create an account
+                </IonButton>
+              </div>
+            </form>
+            <div className="auth-home-link">
+              <IonButton fill="clear" routerLink="/">
+                Return to the landing page
+              </IonButton>
+            </div>
             </IonCardContent>
-        </IonCard>
-    </IonContent>
-</IonPage>
-
+          </IonCard>
+        </main>
+      </IonContent>
+    </IonPage>
   );
-}
+};
 
 export default Login;

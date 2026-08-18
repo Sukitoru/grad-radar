@@ -1,3 +1,5 @@
+import { getAuthToken } from './authSession';
+
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ?? '/api';
 
@@ -96,6 +98,21 @@ export interface UserProfileInput {
 
 interface ApiErrorResponse {
   message?: string;
+  error?: string;
+}
+
+export interface AuthCredentials {
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  message: string;
+  token: string;
+  user: {
+    id: string;
+    username: string;
+  };
 }
 
 export const getErrorMessage = (error: unknown, fallbackMessage: string) => {
@@ -105,11 +122,23 @@ export const getErrorMessage = (error: unknown, fallbackMessage: string) => {
 };
 
 async function apiRequest<ResponseType>(path: string, options?: RequestInit) {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const headers = new Headers(options?.headers);
+  const authToken = getAuthToken();
+
+  if (authToken) {
+    headers.set('Authorization', `Bearer ${authToken}`);
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
 
   if (!response.ok) {
     const errorResponse = (await response.json().catch(() => ({}))) as ApiErrorResponse;
-    throw new Error(errorResponse.message ?? 'The request failed.');
+    throw new Error(
+      errorResponse.message ?? errorResponse.error ?? 'The request failed.',
+    );
   }
 
   if (response.status === 204) {
@@ -118,6 +147,30 @@ async function apiRequest<ResponseType>(path: string, options?: RequestInit) {
 
   return response.json() as Promise<ResponseType>;
 }
+
+export const registerAccount = (credentials: AuthCredentials) =>
+  apiRequest<AuthResponse>('/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+
+export const loginAccount = (credentials: AuthCredentials) =>
+  apiRequest<AuthResponse>('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+
+export const changeAccountPassword = (
+  currentPassword: string,
+  newPassword: string,
+) =>
+  apiRequest<{ message: string }>('/auth/password', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
 
 export const getSchools = () => apiRequest<School[]>('/schools');
 

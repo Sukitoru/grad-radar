@@ -1,108 +1,128 @@
-//To create a new user only with a .edu email
-
-import { 
-  IonButton, 
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
-  IonCardSubtitle, 
-  IonCardTitle ,
+import { useState } from 'react';
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonContent,
+  IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
-  IonContent,
+  IonNote,
   IonPage,
+  IonSpinner,
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; 
-import { useState } from 'react'; 
+import { schoolOutline } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { getErrorMessage, registerAccount } from '../api';
+import { saveAuthSession } from '../authSession';
 import './SignUp.css';
 
+const SignUp: React.FC = () => {
+  const history = useHistory();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-function SignUp() {
-    const history = useHistory();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [accountCreated, setAccountCreated] = useState(false);
-    const [error, setError] = useState('');
-    const createAccount = () => {
-        if (!email || !password) {
-            setError('Email and Password are required.');
-            return;
-        }
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
 
-        localStorage.setItem('email', email);
-        localStorage.setItem('password', password);
-
-        if (!email.endsWith('.edu')) {
-            setError('Please enter a valid school email address.')
-            return;
-        }
-
-        setError('');
-        setAccountCreated(true);
-
-        history.push('/grad-credentials');
-    }; 
+    try {
+      const response = await registerAccount({ username, password });
+      saveAuthSession(response.token, response.user);
+      history.replace('/');
+    } catch (registerError) {
+      setError(getErrorMessage(registerError, 'Unable to create the account.'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <IonPage>
-        <IonContent className = "ion-padding">
-    <IonCard>
-      <IonCardHeader>
-        <IonCardTitle> Grad Radar </IonCardTitle>
-        <IonCardSubtitle> Create Your Account </IonCardSubtitle>
-      </IonCardHeader>
+      <IonContent className="auth-page">
+        <main className="auth-page-layout">
+          <IonCard className="auth-card">
+            <IonCardHeader>
+              <div className="auth-brand">
+                <IonIcon icon={schoolOutline} />
+                <span>Grad Radar</span>
+              </div>
+              <IonCardTitle>Create your account</IonCardTitle>
+              <IonCardSubtitle>
+                Start tracking your graduate applications and decisions.
+              </IonCardSubtitle>
+            </IonCardHeader>
 
-      <IonCardContent>
+            <IonCardContent>
+            <form className="auth-form" onSubmit={handleRegister}>
+              <IonItem>
+                <IonInput
+                  label="Username"
+                  labelPlacement="stacked"
+                  value={username}
+                  minlength={3}
+                  maxlength={50}
+                  helperText="Use letters, numbers, or underscores."
+                  onIonInput={(event) =>
+                    setUsername(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-        <IonItem>
-            <IonLabel position = "stacked">
-                First Name 
-            </IonLabel>
-            <IonInput placeholder = "Enter your First name." />
-            </IonItem>
-            
-            <IonItem>
-            <IonLabel position = "stacked">
-                Last Name 
-            </IonLabel>
-            <IonInput placeholder = "Enter your Last name." />
+              <IonItem>
+                <IonInput
+                  label="Password"
+                  labelPlacement="stacked"
+                  type="password"
+                  value={password}
+                  minlength={8}
+                  maxlength={100}
+                  helperText="Use at least 8 characters."
+                  onIonInput={(event) =>
+                    setPassword(String(event.detail.value ?? ''))
+                  }
+                  required
+                />
+              </IonItem>
 
-            </IonItem>
+              {error && (
+                <IonNote className="error-message" color="danger">
+                  {error}
+                </IonNote>
+              )}
 
-            <IonItem>
-                <IonLabel position = "stacked"> 
-                    Email
-                </IonLabel>
-                <IonInput value = {email} onIonInput = {(e) => setEmail(e.detail.value ?? '')} type = "email" placeholder = "Enter your email."/>
-            </IonItem>
-
-            <IonItem>
-                <IonLabel position = "stacked">
-                    Password
-                </IonLabel>
-                <IonInput value = {password} onIonInput = {(e) => setPassword(e.detail.value ?? '')} type = "password" placeholder = "Create a password."/>
-            </IonItem>
-
-            {error && (
-                <p className = "error-message">
-                {error}
-                </p>
-            )}
-
-            <IonButton expand = "block" onClick = {createAccount}>
-                Create Account
-            </IonButton>
-
-            <IonButton expand = "block" fill = "clear" onClick = { () => history.push('/login')}>
-                Already have an account? Login
-            </IonButton>
+              <div className="auth-form-actions">
+                <IonButton expand="block" type="submit" disabled={loading}>
+                  {loading ? <IonSpinner name="crescent" /> : 'Create account'}
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  fill="clear"
+                  type="button"
+                  routerLink="/login"
+                >
+                  Already have an account? Log in
+                </IonButton>
+              </div>
+            </form>
+            <div className="auth-home-link">
+              <IonButton fill="clear" routerLink="/">
+                Return to the landing page
+              </IonButton>
+            </div>
             </IonCardContent>
-        </IonCard>
-    </IonContent>
-</IonPage>
-
+          </IonCard>
+        </main>
+      </IonContent>
+    </IonPage>
   );
-}
+};
 
 export default SignUp;

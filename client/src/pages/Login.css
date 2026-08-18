@@ -1,5 +1,1 @@
-.error-message {
-    color: red;
-    font-weight: bold;
-    text-align: center;
-}
+@import './AuthPages.css';

@@ -16,22 +16,34 @@ import {
   IonSpinner,
   IonTitle,
   IonToolbar,
-  IonAlert
 } from '@ionic/react';
 import { logOutOutline, saveOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { getErrorMessage, getUserProfile, updateUserProfile } from '../api';
+import {
+  changeAccountPassword,
+  getErrorMessage,
+  getUserProfile,
+  updateUserProfile,
+} from '../api';
 import { awardOptions, maximumAwards } from '../awardOptions';
 import HeaderActions from '../components/HeaderActions';
+import {
+  clearAuthSession,
+  getAuthenticatedUser,
+  getAuthToken,
+  saveAuthSession,
+} from '../authSession';
 import './FormPages.css';
 
 const AccountPage: React.FC = () => {
   const history = useHistory();
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [username, setUsername] = useState('');
   const [gpa, setGpa] = useState('');
   const [awards, setAwards] = useState<string[]>([]);
   const [publications, setPublications] = useState('0');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -39,30 +51,22 @@ const AccountPage: React.FC = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
-      const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+      const authenticatedUser = getAuthenticatedUser();
 
-      if (!demoUserId) {
-        setError('VITE_DEMO_USER_ID is required for the local demo.');
+      if (!authenticatedUser) {
+        setError('Log in to view your account profile.');
         setLoading(false);
         return;
       }
 
       try {
-        const profile = await getUserProfile(demoUserId);
+        const profile = await getUserProfile(authenticatedUser.id);
 
         setUsername(profile.username);
         setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
         setAwards(profile.defaultAwards);
         setPublications(String(profile.defaultPublications));
 
-
-        const savedGPA = localStorage.getItem('gpa');
-        const savedPublications = localStorage.getItem('publications');
-        const savedAwards = localStorage.getItem('awards');
-
-        if (savedGPA) setGpa(savedGPA);
-        if(savedPublications) setPublications(savedPublications);
-        if (savedAwards) setAwards(JSON.parse(savedAwards)); 
 
       } catch (loadError) {
         setError(
@@ -81,22 +85,49 @@ const AccountPage: React.FC = () => {
     setMessage('');
     setError('');
 
-    const demoUserId = import.meta.env.VITE_DEMO_USER_ID;
+    const authenticatedUser = getAuthenticatedUser();
 
-    if (!demoUserId) {
-      setError('VITE_DEMO_USER_ID is required for the local demo.');
+    if (!authenticatedUser) {
+      setError('Log in to save your account profile.');
+      return;
+    }
+
+    if (newPassword && newPassword !== confirmPassword) {
+      setError('New password and confirmation must match.');
+      return;
+    }
+
+    if (newPassword && !currentPassword) {
+      setError('Enter your current password before choosing a new one.');
       return;
     }
 
     setSaving(true);
 
     try {
-      await updateUserProfile(demoUserId, {
+      await updateUserProfile(authenticatedUser.id, {
         username,
         defaultGpa: gpa ? Number(gpa) : null,
         defaultAwards: awards,
         defaultPublications: publications ? Number(publications) : 0,
       });
+
+      const authToken = getAuthToken();
+
+      if (authToken) {
+        saveAuthSession(authToken, {
+          id: authenticatedUser.id,
+          username,
+        });
+      }
+
+      if (newPassword) {
+        await changeAccountPassword(currentPassword, newPassword);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+
       setMessage('Account profile saved.');
     } catch (saveError) {
       setError(
@@ -108,14 +139,9 @@ const AccountPage: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    history.push('/login');
+    clearAuthSession();
+    history.replace('/');
   };
-
-  const handleDeleteAccount = () => {
-    localStorage.clear();
-    history.push('/main');
-  }
 
   return (
     <IonPage>
@@ -174,6 +200,55 @@ const AccountPage: React.FC = () => {
             <section className="form-page-section">
               <div className="form-page-section-heading">
                 <span>02</span>
+                <div>
+                  <h2>Password</h2>
+                  <p>Leave these fields empty if you do not want to change it.</p>
+                </div>
+              </div>
+              <IonList className="form-page-fields form-page-fields-three-column">
+                <IonItem>
+                  <IonInput
+                    type="password"
+                    label="Current password"
+                    labelPlacement="stacked"
+                    value={currentPassword}
+                    onIonInput={(event) =>
+                      setCurrentPassword(String(event.detail.value ?? ''))
+                    }
+                  />
+                </IonItem>
+                <IonItem>
+                  <IonInput
+                    type="password"
+                    label="New password"
+                    labelPlacement="stacked"
+                    minlength={8}
+                    maxlength={100}
+                    value={newPassword}
+                    onIonInput={(event) =>
+                      setNewPassword(String(event.detail.value ?? ''))
+                    }
+                  />
+                </IonItem>
+                <IonItem>
+                  <IonInput
+                    type="password"
+                    label="Confirm new password"
+                    labelPlacement="stacked"
+                    minlength={8}
+                    maxlength={100}
+                    value={confirmPassword}
+                    onIonInput={(event) =>
+                      setConfirmPassword(String(event.detail.value ?? ''))
+                    }
+                  />
+                </IonItem>
+              </IonList>
+            </section>
+
+            <section className="form-page-section">
+              <div className="form-page-section-heading">
+                <span>03</span>
                 <div>
                   <h2>Application defaults</h2>
                   <p>Use these values to fill new applications faster.</p>
@@ -267,27 +342,6 @@ const AccountPage: React.FC = () => {
               Log Out
             </IonButton>
 
-            <>
-            <IonButton fill = "outline" color = "danger" onClick = {() => setShowDeleteAlert(true)}> Delete Account </IonButton>
-            <IonAlert
-            isOpen = {showDeleteAlert}
-            onDidDismiss = {() => setShowDeleteAlert(false)}
-            header="Delete Account"
-            subHeader="Are you sure you want. to this this account?"
-            message="Your data will be lost forever."
-            buttons={[ 
-            {
-              text: 'Cancel',
-              role: 'cancel',
-            },
-            {
-              text: 'Delete',
-              role: 'destructive',
-              handler: handleDeleteAccount,
-            },
-            ]}
-            />
-            </>
             </div>
           </form>
         )}
