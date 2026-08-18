@@ -33,6 +33,12 @@ export interface Decision {
   waitlistUntilTerm?: Term | null;
 }
 
+export interface DecisionInput {
+  status: Decision['status'];
+  decisionDate: string;
+  waitlistUntilTermId: string | null;
+}
+
 export interface RecentDecision extends Decision {
   createdAt: string;
   application: {

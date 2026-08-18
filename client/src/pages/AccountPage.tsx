@@ -102,14 +102,34 @@ const AccountPage: React.FC = () => {
       return;
     }
 
+    const trimmedUsername = username.trim();
+    const numericGpa = gpa ? Number(gpa) : null;
+    const numericPublications = publications ? Number(publications) : 0;
+
+    if (trimmedUsername.length < 3) {
+      setError('Username must be at least 3 characters.');
+      return;
+    }
+
+    if (
+      (numericGpa !== null &&
+        (!Number.isFinite(numericGpa) || numericGpa < 0 || numericGpa > 4)) ||
+      !Number.isInteger(numericPublications) ||
+      numericPublications < 0 ||
+      numericPublications > 100
+    ) {
+      setError('Enter a GPA from 0 to 4 and 0 to 100 publications.');
+      return;
+    }
+
     setSaving(true);
 
     try {
       await updateUserProfile(authenticatedUser.id, {
-        username,
-        defaultGpa: gpa ? Number(gpa) : null,
+        username: trimmedUsername,
+        defaultGpa: numericGpa,
         defaultAwards: awards,
-        defaultPublications: publications ? Number(publications) : 0,
+        defaultPublications: numericPublications,
       });
 
       const authToken = getAuthToken();
@@ -117,7 +137,7 @@ const AccountPage: React.FC = () => {
       if (authToken) {
         saveAuthSession(authToken, {
           id: authenticatedUser.id,
-          username,
+          username: trimmedUsername,
         });
       }
 
@@ -158,7 +178,7 @@ const AccountPage: React.FC = () => {
       <IonContent className="ion-padding">
         <div className="form-page-container">
           <header className="form-page-heading">
-            <span className="form-page-label">Account profile</span>
+            <span className="form-page-label">General information</span>
             <h1>Account settings</h1>
             <p>
               Save information that can be copied into new application forms.
