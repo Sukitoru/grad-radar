@@ -1,3 +1,5 @@
+//The main login and sign up page when starting the website 
+
 import { 
   IonButton, 
   IonCard, 

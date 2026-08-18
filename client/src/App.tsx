@@ -1,4 +1,4 @@
-import { Route } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -9,7 +9,10 @@ import ApplicationsPage from './pages/ApplicationsPage';
 import RecentDecisionsPage from './pages/RecentDecisionsPage';
 import AppNavigation from './components/AppNavigation';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
-
+import NewUser from './pages/NewUser'; 
+import SignUp from './pages/SignUp';
+import Login from './pages/Login';
+import UserInfo from './pages/UserInfo';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -50,9 +53,26 @@ const App: React.FC = () => (
       <IonReactRouter>
         <AppNavigation />
         <IonRouterOutlet id="main-content">
-          <Route exact path="/">
-            <Home />
+          <Route exact path = "/">
+          <Redirect to = "/main" />
           </Route>
+          <Route exact path = "/main">
+          <NewUser/>
+          </Route>
+          <Route exact path = "/signup">
+          <SignUp/>
+          </Route>
+          <Route exact path = "/grad-credentials">
+          <UserInfo/>
+          </Route>
+          <Route exact path = "/login">
+          <Login/>
+          </Route>
+          <Route exact path = "/home" render = {() => localStorage.getItem('loggedIn') === 'true'
+          ? <Home />
+          : <Redirect to = "/login"/>
+          }
+          />
           <Route exact path="/applications/new">
             <ApplicationForm />
           </Route>
@@ -65,9 +85,11 @@ const App: React.FC = () => (
           <Route exact path="/decisions/recent">
             <RecentDecisionsPage />
           </Route>
-          <Route exact path="/account">
-            <AccountPage />
-          </Route>
+          <Route exact path="/account" render = {() => localStorage.getItem('loggedIn') === 'true'
+            ? <AccountPage/>
+            : <Redirect to = "/login"/>
+          }
+          />
           <Route exact path="/analytics">
             <AnalyticsDashboard />
           </Route>

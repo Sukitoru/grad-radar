@@ -16,6 +16,7 @@ import {
   IonSpinner,
   IonTitle,
   IonToolbar,
+  IonAlert
 } from '@ionic/react';
 import { logOutOutline, saveOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -26,6 +27,7 @@ import './FormPages.css';
 
 const AccountPage: React.FC = () => {
   const history = useHistory();
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [username, setUsername] = useState('');
   const [gpa, setGpa] = useState('');
   const [awards, setAwards] = useState<string[]>([]);
@@ -52,6 +54,16 @@ const AccountPage: React.FC = () => {
         setGpa(profile.defaultGpa === null ? '' : String(profile.defaultGpa));
         setAwards(profile.defaultAwards);
         setPublications(String(profile.defaultPublications));
+
+
+        const savedGPA = localStorage.getItem('gpa');
+        const savedPublications = localStorage.getItem('publications');
+        const savedAwards = localStorage.getItem('awards');
+
+        if (savedGPA) setGpa(savedGPA);
+        if(savedPublications) setPublications(savedPublications);
+        if (savedAwards) setAwards(JSON.parse(savedAwards)); 
+
       } catch (loadError) {
         setError(
           getErrorMessage(loadError, 'Failed to load the account profile.'),
@@ -97,8 +109,13 @@ const AccountPage: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
-    history.push('/');
+    history.push('/login');
   };
+
+  const handleDeleteAccount = () => {
+    localStorage.clear();
+    history.push('/main');
+  }
 
   return (
     <IonPage>
@@ -242,13 +259,35 @@ const AccountPage: React.FC = () => {
 
             <IonButton
               fill="outline"
-              color="danger"
+              color="primary"
               type="button"
               onClick={handleLogout}
             >
               <IonIcon slot="start" icon={logOutOutline} />
               Log Out
             </IonButton>
+
+            <>
+            <IonButton fill = "outline" color = "danger" onClick = {() => setShowDeleteAlert(true)}> Delete Account </IonButton>
+            <IonAlert
+            isOpen = {showDeleteAlert}
+            onDidDismiss = {() => setShowDeleteAlert(false)}
+            header="Delete Account"
+            subHeader="Are you sure you want. to this this account?"
+            message="Your data will be lost forever."
+            buttons={[ 
+            {
+              text: 'Cancel',
+              role: 'cancel',
+            },
+            {
+              text: 'Delete',
+              role: 'destructive',
+              handler: handleDeleteAccount,
+            },
+            ]}
+            />
+            </>
             </div>
           </form>
         )}

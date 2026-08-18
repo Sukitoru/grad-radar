@@ -22,7 +22,7 @@ import {
 } from 'ionicons/icons';
 
 const navigationItems = [
-  { label: 'Home', path: '/', icon: homeOutline },
+  { label: 'Home', path: '/home', icon: homeOutline },
 
   {
     label: 'Recent Decisions',
