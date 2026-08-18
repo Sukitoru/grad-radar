@@ -121,9 +121,9 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
             type="monotone"
             dataKey="pendingRate"
             name="Pending rate"
-            stroke="var(--ion-color-primary)"
+            stroke="var(--ion-color-medium)"
             strokeWidth={3}
-            dot={{ r: 4, fill: 'var(--ion-color-primary)' }}
+            dot={{ r: 4, fill: 'var(--ion-color-medium)' }}
             activeDot={{ r: 7 }}
           />
 
