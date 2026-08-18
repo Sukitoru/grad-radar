@@ -35,14 +35,28 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
       (application) => application.decision?.status === 'ACCEPTED',
     ).length;
 
+    const waitlistedApplications = rangeApplications.filter(
+      (application) => application.decision?.status === 'WAITLISTED',
+    ).length; 
+
+    const rejectedApplications = rangeApplications.filter(
+      (application) => application.decision?.status === 'REJECTED',
+    ).length;
+
     return {
       name: range.name,
       acceptanceRate:
         rangeApplications.length === 0
           ? 0
-          : Math.round(
-              (acceptedApplications / rangeApplications.length) * 100,
-            ),
+          : Math.round((acceptedApplications / rangeApplications.length) * 100),
+      waitlistRate:
+        rangeApplications.length === 0
+          ? 0
+          : Math.round((waitlistedApplications / rangeApplications.length) * 100),
+      rejectionRate:
+        rangeApplications.length === 0
+          ? 0
+          : Math.round((rejectedApplications / rangeApplications.length) * 100),
     };
   });
 
@@ -65,7 +79,7 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
             tickFormatter={(value) => `${value}%`}
           />
           <Tooltip
-            formatter={(value) => [`${value}%`, 'Acceptance rate']}
+            formatter={(value, name) => [`${value}%`, name]}
             contentStyle={{
               backgroundColor: 'var(--ion-card-background)',
               borderColor: 'var(--ion-color-step-200)',
@@ -77,11 +91,42 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
             type="monotone"
             dataKey="acceptanceRate"
             name="Acceptance rate"
+            stroke="var(--ion-color-success)"
+            strokeWidth={3}
+            dot={{ r: 4, fill: 'var(--ion-color-success)' }}
+            activeDot={{ r: 7 }}
+          />
+          
+          <Line
+            type="monotone"
+            dataKey="waitlistRate"
+            name="Waitlist Rate"
+            stroke="var(--ion-color-warning)"
+            strokeWidth={3}
+            dot={{ r: 4, fill: 'var(--ion-color-warning)' }}
+            activeDot={{ r: 7 }}
+          />
+          
+          <Line
+            type="monotone"
+            dataKey="rejectionRate"
+            name="Rejection rate"
+            stroke="var(--ion-color-danger)"
+            strokeWidth={3}
+            dot={{ r: 4, fill: 'var(--ion-color-danger)' }}
+            activeDot={{ r: 7 }}
+          />
+          
+          <Line
+            type="monotone"
+            dataKey="pendingRate"
+            name="Pending rate"
             stroke="var(--ion-color-primary)"
             strokeWidth={3}
             dot={{ r: 4, fill: 'var(--ion-color-primary)' }}
             activeDot={{ r: 7 }}
           />
+
         </LineChart>
       </ResponsiveContainer>
     </div>
