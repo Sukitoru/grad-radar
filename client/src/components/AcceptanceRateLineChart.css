@@ -1,0 +1,10 @@
+.acceptance-rate-line-chart {
+  width: 100%;
+  min-height: 280px;
+  margin-top: 12px;
+}
+
+.acceptance-rate-empty {
+  margin-top: 20px !important;
+  color: var(--ion-color-medium);
+}
