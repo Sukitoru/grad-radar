@@ -21,6 +21,7 @@ import {
   chevronUpOutline,
 } from 'ionicons/icons';
 import HeaderActions from '../components/HeaderActions';
+import DecisionPieChart from '../components/DecisionPieChart';
 import {
   useAnalyticsApplications,
   useAnalyticsPrograms,
@@ -331,27 +332,47 @@ const AnalyticsDashboard: React.FC = () => {
               </div>
 
             </div>
+
+            <section className="analytics-query-result" aria-live="polite">
+              {isLoading ? (
+                <>
+                  <IonSpinner name="crescent" />
+                  <span>Loading application data...</span>
+                </>
+              ) : hasError ? (
+                <span>Unable to load the application filters.</span>
+              ) : (
+                <>
+                  <strong>{filteredApplications.length}</strong>
+                  <span>
+                    {filteredApplications.length === 1
+                      ? 'application matches these filters'
+                      : 'applications match these filters'}
+                  </span>
+                </>
+              )}
+            </section>
           </section>
 
-          <section className="analytics-query-result" aria-live="polite">
-            {isLoading ? (
-              <>
+          <div className="analytics-chart-grid">
+            <section className="analytics-chart-panel">
+              <div>
+                <h2>Overall decisions</h2>
+                <p>
+                  Compare accepted, rejected, waitlisted, and pending applications.
+                </p>
+              </div>
+              {filteredApplicationsQuery.isError ? (
+                <p className="analytics-chart-message">
+                  Unable to load decision data.
+                </p>
+              ) : filteredApplicationsQuery.isPending ? (
                 <IonSpinner name="crescent" />
-                <span>Loading application data...</span>
-              </>
-            ) : hasError ? (
-              <span>Unable to load the application filters.</span>
-            ) : (
-              <>
-                <strong>{filteredApplications.length}</strong>
-                <span>
-                  {filteredApplications.length === 1
-                    ? 'application matches these filters'
-                    : 'applications match these filters'}
-                </span>
-              </>
-            )}
-          </section>
+              ) : (
+                <DecisionPieChart applications={filteredApplications} />
+              )}
+            </section>
+          </div>
         </main>
       </IonContent>
     </IonPage>

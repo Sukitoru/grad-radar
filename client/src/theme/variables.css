@@ -1,2 +1,12 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
+
+:root {
+  /* Compatibility aliases for the step colors used by our page styles. */
+  --ion-card-background: #f8fafc;
+  --ion-color-step-50: var(--ion-background-color-step-50, #f8fafc);
+  --ion-color-step-100: var(--ion-background-color-step-100, #f1f5f9);
+  --ion-color-step-150: var(--ion-background-color-step-150, #e2e8f0);
+  --ion-color-step-200: var(--ion-background-color-step-200, #cbd5e1);
+  --ion-color-step-700: var(--ion-text-color-step-700, #334155);
+}
