@@ -95,8 +95,13 @@ const RecentDecisionsPage: React.FC = () => {
     const searchValue = searchText.toLowerCase();
     const schoolName = decision.application.school.name.toLowerCase();
     const programName = decision.application.program.name.toLowerCase();
+    const researchArea = decision.application.researchArea?.toLowerCase() ?? '';
+    const awardNames = decision.application.awards.join(' ').toLowerCase();
     const matchesSearch =
-      schoolName.includes(searchValue) || programName.includes(searchValue);
+      schoolName.includes(searchValue) ||
+      programName.includes(searchValue) ||
+      researchArea.includes(searchValue) ||
+      awardNames.includes(searchValue);
     const matchesDecision =
       decisionFilter === 'ALL' || decision.status === decisionFilter;
 

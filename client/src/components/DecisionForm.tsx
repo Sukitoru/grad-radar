@@ -14,7 +14,12 @@ import {
   IonIcon,
 } from '@ionic/react';
 import { checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
-import { API_BASE_URL, getErrorMessage, getTerms, type Term } from '../api';
+import {
+  getErrorMessage,
+  getTerms,
+  updateApplicationDecision,
+  type Term,
+} from '../api';
 import './DecisionForm.css';
 
 // Define the TypeScript interfaces for props
@@ -128,32 +133,19 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm() || !status) return;
 
     setSubmitting(true);
     setSuccess(false);
     setError(null);
 
     try {
-      // API call to the backend PUT endpoint
-      const response = await fetch(`${API_BASE_URL}/applications/${applicationId}/decision`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status,
-          decisionDate: new Date(decisionDate).toISOString(), // Convert to UTC ISO format
-          waitlistUntilTermId:
-            status === 'WAITLISTED' ? waitlistUntilTermId : null,
-        }),
+      await updateApplicationDecision(applicationId, {
+        status,
+        decisionDate: new Date(decisionDate).toISOString(),
+        waitlistUntilTermId:
+          status === 'WAITLISTED' ? waitlistUntilTermId : null,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to save decision.');
-      }
 
       setSuccess(true);
       if (onSuccess) {

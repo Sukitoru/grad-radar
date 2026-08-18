@@ -29,6 +29,12 @@ export interface Decision {
   waitlistUntilTerm?: Term | null;
 }
 
+export interface DecisionInput {
+  status: Decision['status'];
+  decisionDate: string;
+  waitlistUntilTermId: string | null;
+}
+
 export interface RecentDecision extends Decision {
   createdAt: string;
   application: {
@@ -198,6 +204,16 @@ export const getUserProfile = (userId: string) =>
 
 export const getRecentDecisions = () =>
   apiRequest<RecentDecision[]>('/decisions/recent');
+
+export const updateApplicationDecision = (
+  applicationId: string,
+  decision: DecisionInput,
+) =>
+  apiRequest<Decision>(`/applications/${applicationId}/decision`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(decision),
+  });
 
 export const createApplication = (application: ApplicationInput) =>
   apiRequest<Application>('/applications', {
