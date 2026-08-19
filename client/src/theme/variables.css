@@ -1,12 +1,31 @@
-/* For information on how to create your own theme, please refer to:
-http://ionicframework.com/docs/theming/ */
-
+/* Shared light-theme surfaces and contrast tokens. */
 :root {
-  /* Compatibility aliases for the step colors used by our page styles. */
-  --ion-card-background: #f8fafc;
-  --ion-color-step-50: var(--ion-background-color-step-50, #f8fafc);
-  --ion-color-step-100: var(--ion-background-color-step-100, #f1f5f9);
-  --ion-color-step-150: var(--ion-background-color-step-150, #e2e8f0);
-  --ion-color-step-200: var(--ion-background-color-step-200, #cbd5e1);
-  --ion-color-step-700: var(--ion-text-color-step-700, #334155);
+  --ion-background-color: #f5f6f8;
+  --ion-background-color-rgb: 245, 246, 248;
+  --ion-text-color: #1d2433;
+  --ion-text-color-rgb: 29, 36, 51;
+  --ion-card-background: #ffffff;
+  --ion-item-background: #ffffff;
+  --ion-border-color: #d9dde3;
+
+  /* The page styles use these shorter aliases for borders and dividers. */
+  --ion-color-step-100: #eceff2;
+  --ion-color-step-150: #d9dde3;
+  --ion-color-step-200: #cbd1d8;
+  --ion-color-step-700: #5d6673;
+}
+
+/* The HeaderActions toggle adds this class to the document root. */
+:root.ion-palette-dark {
+  --ion-background-color: #141517;
+  --ion-background-color-rgb: 20, 21, 23;
+  --ion-text-color: #f4f5f8;
+  --ion-text-color-rgb: 244, 245, 248;
+  --ion-card-background: #1b1c1f;
+  --ion-item-background: #1b1c1f;
+  --ion-border-color: #292b30;
+  --ion-color-step-100: #1c1e21;
+  --ion-color-step-150: #292b30;
+  --ion-color-step-200: #33363c;
+  --ion-color-step-700: #a3a8b2;
 }
