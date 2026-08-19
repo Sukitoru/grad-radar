@@ -74,67 +74,78 @@ const AcceptanceRateLineChart: React.FC<AcceptanceRateLineChartProps> = ({
 
   return (
     <div className="acceptance-rate-line-chart">
-      <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={lineData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-          <CartesianGrid
-            stroke="var(--ion-color-step-150)"
-            strokeDasharray="3 3"
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart
+          data={lineData}
+          margin={{ top: 8, right: 12, left: 0, bottom: 16 }}
+        >
+          <CartesianGrid stroke="#64748b" strokeDasharray="3 3" opacity={0.25} />
+          <XAxis
+            dataKey="name"
+            stroke="var(--ion-text-color)"
+            tick={{ fill: 'var(--ion-text-color)', fontSize: 13 }}
           />
-          <XAxis dataKey="name" stroke="var(--ion-color-medium)" />
           <YAxis
-            domain={[0, 100]}
-            stroke="var(--ion-color-medium)"
+            domain={[0, 'dataMax + 10']}
+            stroke="var(--ion-text-color)"
+            tick={{ fill: 'var(--ion-text-color)', fontSize: 13 }}
             tickFormatter={(value) => `${value}%`}
           />
           <Tooltip
             formatter={(value, name) => [`${value}%`, name]}
+            cursor={{ stroke: '#94a3b8', strokeDasharray: '3 3' }}
             contentStyle={{
               backgroundColor: 'var(--ion-card-background)',
               borderColor: 'var(--ion-color-step-200)',
               color: 'var(--ion-text-color)',
             }}
           />
-          <Legend />
+          <Legend
+            iconType="line"
+            verticalAlign="bottom"
+            height={42}
+            wrapperStyle={{
+              color: 'var(--ion-text-color)',
+              fontSize: '12px',
+              lineHeight: '20px',
+            }}
+          />
           <Line
             type="monotone"
             dataKey="acceptanceRate"
             name="Acceptance Rate"
-            stroke="var(--ion-color-success)"
-            strokeWidth={3}
-            dot={{ r: 4, fill: 'var(--ion-color-success)' }}
+            stroke="#22c55e"
+            strokeWidth={2.5}
+            dot={{ r: 5, fill: '#22c55e' }}
             activeDot={{ r: 7 }}
           />
-          
           <Line
             type="monotone"
             dataKey="waitlistRate"
             name="Waitlist Rate"
-            stroke="var(--ion-color-warning)"
-            strokeWidth={3}
-            dot={{ r: 4, fill: 'var(--ion-color-warning)' }}
+            stroke="#fbbf24"
+            strokeWidth={2.5}
+            dot={{ r: 5, fill: '#fbbf24' }}
             activeDot={{ r: 7 }}
           />
-          
           <Line
             type="monotone"
             dataKey="rejectionRate"
             name="Rejection Rate"
-            stroke="var(--ion-color-danger)"
-            strokeWidth={3}
-            dot={{ r: 4, fill: 'var(--ion-color-danger)' }}
+            stroke="#fb7185"
+            strokeWidth={2.5}
+            dot={{ r: 5, fill: '#fb7185' }}
             activeDot={{ r: 7 }}
           />
-          
           <Line
             type="monotone"
             dataKey="pendingRate"
             name="Pending Rate"
-            stroke="var(--ion-color-medium)"
-            strokeWidth={3}
-            dot={{ r: 4, fill: 'var(--ion-color-medium)' }}
+            stroke="#94a3b8"
+            strokeWidth={2.5}
+            dot={{ r: 5, fill: '#94a3b8' }}
             activeDot={{ r: 7 }}
           />
-
         </LineChart>
       </ResponsiveContainer>
     </div>

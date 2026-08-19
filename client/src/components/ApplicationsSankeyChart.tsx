@@ -2,15 +2,14 @@ import {
   ResponsiveContainer,
   Sankey,
   Tooltip,
-  useChartWidth,
   Layer,
   Rectangle,
-  SankeyNodeProps,
+  useChartWidth,
+  type SankeyNodeProps,
+  type SankeyLinkProps,
 } from 'recharts';
 import type { Application } from '../api';
-import AcceptanceRateLineChart from './AcceptanceRateLineChart';
-import DecisionPieChart from './DecisionPieChart';
-import ApplicationSankeyChart from './AcceptanceRateLineChart';
+import './ApplicationsSankeyChart.css';
 
 
 interface ApplicationsSankeyChartProps {
@@ -20,19 +19,19 @@ interface ApplicationsSankeyChartProps {
 const getNodeColor = (name: string = '') => {
   switch (name) {
     case 'Submitted':
-      return 'var(--ion-color-primary)';
+      return '#4f8cff';
     case 'Pending':
-      return 'var(--ion-color-medium)';
+      return '#94a3b8';
     case 'Reviewed':
-      return 'var(--ion-color-tertiary)';
+      return '#8b7cf6';
     case 'Accepted':
-      return 'var(--ion-color-success)';
+      return '#22c55e';
     case 'Rejected':
-      return 'var(--ion-color-danger)';
+      return '#fb7185';
     case 'Waitlisted':
-      return 'var(--ion-color-warning)';
+      return '#fbbf24';
     default:
-      return 'var(--ion-color-medium)';
+      return '#94a3b8';
   }
 };
 
@@ -54,14 +53,20 @@ function CustomSankeyNode({
 
   return (
     <Layer key={`CustomNode${index}`}>
-      <Rectangle x={x} y={y} width={width} height={height} fill= {getNodeColor(payload.name)} />
+      <Rectangle
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={getNodeColor(payload.name)}
+      />
 
       <text
         textAnchor={isOut ? 'end' : 'start'}
         x={isOut ? x - 6 : x + width + 6}
         y={y + height / 2}
         fontSize={14}
-        fill="#333"
+        className="sankey-node-label"
       >
         {payload.name}
       </text>
@@ -71,11 +76,37 @@ function CustomSankeyNode({
         x={isOut ? x - 6 : x + width + 6}
         y={y + height / 2 + 18}
         fontSize={12}
-        fill="#666"
+        className="sankey-node-count"
       >
         {payload.value ?? 0} applications
       </text>
     </Layer>
+  );
+}
+
+function CustomSankeyLink({
+  sourceX,
+  sourceY,
+  sourceControlX,
+  targetX,
+  targetY,
+  targetControlX,
+  linkWidth,
+  payload,
+}: SankeyLinkProps) {
+  const linkColor = getNodeColor(payload.target.name);
+  const isPendingLink = payload.target.name === 'Pending';
+  const path = `M${sourceX},${sourceY} C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}`;
+
+  return (
+    <path
+      d={path}
+      fill="none"
+      stroke={linkColor}
+      strokeOpacity={isPendingLink ? 0.25 : 0.52}
+      strokeWidth={Math.max(linkWidth, 4)}
+      className="sankey-flow-link"
+    />
   );
 }
 
@@ -85,17 +116,17 @@ export default function ApplicationsSankeyChart({ applications }: ApplicationsSa
   ).length;
 
   const rejectedCount = applications.filter(
-    (a: Application) => 
-        a.decision?.status === 'REJECTED').length;
+    (application: Application) => application.decision?.status === 'REJECTED',
+  ).length;
 
   const waitlistedCount = applications.filter(
-    (a: Application) => a
-    .decision?.status === 'WAITLISTED'
-).length;
+    (application: Application) =>
+      application.decision?.status === 'WAITLISTED',
+  ).length;
 
   const pendingCount = applications.filter(
-    (a: Application) => 
-        (a.decision?.status ?? 'PENDING') === 'PENDING',
+    (application: Application) =>
+      (application.decision?.status ?? 'PENDING') === 'PENDING',
   ).length;
 
   const reviewedCount = acceptedCount + rejectedCount + waitlistedCount;
@@ -126,67 +157,44 @@ export default function ApplicationsSankeyChart({ applications }: ApplicationsSa
         source: 0, 
         target: 1, 
         value: pendingCount, 
-        fill: 'var(--ion-color-medium)',
     },
     { 
         source: 0, 
         target: 2, 
         value: reviewedCount,
-        fill: 'var(--ion-color-tertiary)',
     },
     { 
         source: 2, 
         target: 3, 
         value: acceptedCount,
-        fill: 'var(--ion-color-success)',
     },
     { 
         source: 2, 
         target: 4, 
         value: rejectedCount,
-        fill: 'var(--ion-color-danger)',
     },
     { 
         source: 2, 
         target: 5, 
         value: waitlistedCount,
-        fill: 'var(--ion-color-warning)',
     },
     ],
   };
 
-  const getNodeColor = (name: string = '') => {
-    switch (name) {
-      case 'Submitted':
-        return 'var(--ion-color-primary)';
-      case 'Pending':
-        return 'var(--ion-color-medium)';
-      case 'Reviewed':
-        return 'var(--ion-color-tertiary)';
-      case 'Accepted':
-        return 'var(--ion-color-success)';
-      case 'Rejected':
-        return 'var(--ion-color-danger)';
-      case 'Waitlisted':
-        return 'var(--ion-color-warning)';
-      default:
-        return 'var(--ion-color-medium)';
-    }
-  };
-
   return (
-    <div className = "applications-sankey-chart">
-        <ResponsiveContainer width="100%" height={360}>
-          <Sankey
-            data={sankeyData}
-            nodePadding={24}
-            node={CustomSankeyNode}
-            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-          >
-            <Tooltip />
-          </Sankey>
-        </ResponsiveContainer>
+    <div className="applications-sankey-chart">
+      <ResponsiveContainer width="100%" height={340}>
+        <Sankey
+          data={sankeyData}
+          nodePadding={22}
+          nodeWidth={16}
+          node={CustomSankeyNode}
+          link={CustomSankeyLink}
+          margin={{ top: 16, right: 160, bottom: 16, left: 12 }}
+        >
+          <Tooltip />
+        </Sankey>
+      </ResponsiveContainer>
     </div>
-    
-  ); 
+  );
 }

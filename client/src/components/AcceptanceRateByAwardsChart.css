@@ -1,0 +1,10 @@
+.acceptance-awards-chart {
+  width: 100%;
+  min-height: 300px;
+  margin-top: 12px;
+}
+
+.acceptance-awards-empty {
+  margin-top: 20px !important;
+  color: var(--ion-color-medium);
+}

@@ -21,7 +21,8 @@ import {
   chevronUpOutline,
 } from 'ionicons/icons';
 import HeaderActions from '../components/HeaderActions';
-import DecisionPieChart from '../components/DecisionPieChart';
+import DecisionProfileBarChart from '../components/DecisionProfileBarChart';
+import AcceptanceRateByAwardsChart from '../components/AcceptanceRateByAwardsChart';
 import AcceptanceRateLineChart from '../components/AcceptanceRateLineChart';
 import ApplicationsSankeyChart from '../components/ApplicationsSankeyChart';
 import {
@@ -356,12 +357,20 @@ const AnalyticsDashboard: React.FC = () => {
             </section>
           </section>
 
+          <section className="analytics-chart-panel analytics-chart-panel-full">
+            <h2>Application flow</h2>
+            <p>
+              View submitted, reviewed, accepted, rejected, waitlisted, and pending applications.
+            </p>
+            <ApplicationsSankeyChart applications={filteredApplications} />
+          </section>
+
           <div className="analytics-chart-grid">
             <section className="analytics-chart-panel">
               <div>
-                <h2>Overall decisions</h2>
+                <h2>Acceptance by publications</h2>
                 <p>
-                  Compare accepted, rejected, waitlisted, and pending applications.
+                  Compare accepted, rejected, and waitlisted applications by publication count.
                 </p>
               </div>
               {filteredApplicationsQuery.isError ? (
@@ -371,32 +380,37 @@ const AnalyticsDashboard: React.FC = () => {
               ) : filteredApplicationsQuery.isPending ? (
                 <IonSpinner name="crescent" />
               ) : (
-                <DecisionPieChart applications={filteredApplications} />
+                <DecisionProfileBarChart applications={filteredApplications} />
               )}
-          </section>
+            </section>
 
-          <section className="analytics-chart-panel">
-            <h2>Acceptance rate by GPA range</h2>
-            <p>Compare accepted applications across GPA ranges.</p>
-            {filteredApplicationsQuery.isError ? (
-              <p className="analytics-chart-message">
-                Unable to load GPA data.
-              </p>
-            ) : filteredApplicationsQuery.isPending ? (
-              <IonSpinner name="crescent" />
-            ) : (
-              <AcceptanceRateLineChart applications={filteredApplications} />
-            )}
-          </section>
+            <section className="analytics-chart-panel">
+              <h2>Decisions by awards</h2>
+              <p>Compare accepted, rejected, and waitlisted applications by award count.</p>
+              {filteredApplicationsQuery.isError ? (
+                <p className="analytics-chart-message">
+                  Unable to load awards data.
+                </p>
+              ) : filteredApplicationsQuery.isPending ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <AcceptanceRateByAwardsChart applications={filteredApplications} />
+              )}
+            </section>
+
+            <section className="analytics-chart-panel analytics-line-chart-panel">
+              <h2>Acceptance rate by GPA range</h2>
+              <p>Compare accepted applications across GPA ranges.</p>
+              {filteredApplicationsQuery.isError ? (
+                <p className="analytics-chart-message">Unable to load GPA data.</p>
+              ) : filteredApplicationsQuery.isPending ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <AcceptanceRateLineChart applications={filteredApplications} />
+              )}
+            </section>
+
           </div>
-
-          <section className = "analytics-chart-panel-analyctis-chart-panel-full">
-            <h2> Application Flow </h2>
-            <h3>
-              View submitted, reviewed, accepted, rejected, waitlisted, and pending applications.
-            </h3>
-            <ApplicationsSankeyChart applications = {filteredApplications}/>
-          </section>
 
         </main>
       </IonContent>
