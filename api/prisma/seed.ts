@@ -98,6 +98,15 @@ const RESEARCH_AREAS = [
   'Computational neuroscience',
 ];
 
+const AWARD_NAMES = [
+  "Dean's List",
+  'Academic Excellence',
+  'Outstanding Student',
+  'Research Award',
+  'Merit Scholarship',
+  'Undergraduate Research Award',
+];
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -123,6 +132,11 @@ function addDays(base: Date, days: number): Date {
 /** GPA that fits Decimal(3, 2). Returned as a string so no float rounding creeps in. */
 function randomGpa(): string {
   return faker.number.float({ min: 2.9, max: 4.0, fractionDigits: 2 }).toFixed(2);
+}
+
+function randomAwards(): string[] {
+  const awardCount = faker.number.int({ min: 0, max: 4 });
+  return faker.helpers.arrayElements(AWARD_NAMES, awardCount);
 }
 
 // ---------------------------------------------------------------------------
@@ -327,6 +341,7 @@ type SeededApplication = {
   termId: string;
   gpa: string;
   researchArea: string;
+  awards: string[];
   publications: number;
   comments: string | null;
   submissionDate: Date;
@@ -369,9 +384,7 @@ async function seedApplicationsAndDecisions(
       );
       if (submissionDate > today) continue;
 
-      const publications = faker.datatype.boolean({ probability: 0.6 })
-        ? user.defaultPublications
-        : faker.number.int({ min: 0, max: 4 });
+      const publications = faker.number.int({ min: 0, max: 12 });
 
       const applicationId = randomUUID();
 
@@ -387,6 +400,7 @@ async function seedApplicationsAndDecisions(
           ? user.defaultGpa
           : randomGpa(),
         researchArea: faker.helpers.arrayElement(RESEARCH_AREAS),
+        awards: randomAwards(),
         publications,
         comments: faker.datatype.boolean({ probability: 0.4 })
           ? faker.lorem.sentence({ min: 8, max: 20 })

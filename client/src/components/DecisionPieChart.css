@@ -1,0 +1,64 @@
+.decision-pie-chart {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+}
+
+.decision-pie-center {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  width: 100px;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.decision-pie-center strong {
+  color: var(--ion-text-color);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.decision-pie-center span {
+  color: var(--ion-color-medium);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.decision-pie-hover-detail {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  min-width: 112px;
+  padding: 8px 10px;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid
+    var(--ion-background-color-step-350, var(--ion-color-medium));
+  border-radius: 9px;
+  background: var(--ion-background-color);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 20%);
+}
+
+.decision-pie-hover-detail strong {
+  color: var(--ion-text-color);
+  font-size: 12px;
+}
+
+.decision-pie-hover-detail span {
+  color: var(--ion-color-medium);
+  font-size: 11px;
+}
+
+.decision-pie-empty {
+  margin: 0;
+  color: var(--ion-color-medium);
+}

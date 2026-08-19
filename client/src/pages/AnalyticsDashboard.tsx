@@ -21,6 +21,10 @@ import {
   chevronUpOutline,
 } from 'ionicons/icons';
 import HeaderActions from '../components/HeaderActions';
+import DecisionProfileBarChart from '../components/DecisionProfileBarChart';
+import AcceptanceRateByAwardsChart from '../components/AcceptanceRateByAwardsChart';
+import AcceptanceRateLineChart from '../components/AcceptanceRateLineChart';
+import ApplicationsSankeyChart from '../components/ApplicationsSankeyChart';
 import {
   useAnalyticsApplications,
   useAnalyticsPrograms,
@@ -331,27 +335,83 @@ const AnalyticsDashboard: React.FC = () => {
               </div>
 
             </div>
+
+            <section className="analytics-query-result" aria-live="polite">
+              {isLoading ? (
+                <>
+                  <IonSpinner name="crescent" />
+                  <span>Loading application data...</span>
+                </>
+              ) : hasError ? (
+                <span>Unable to load the application filters.</span>
+              ) : (
+                <>
+                  <strong>{filteredApplications.length}</strong>
+                  <span>
+                    {filteredApplications.length === 1
+                      ? 'application matches these filters'
+                      : 'applications match these filters'}
+                  </span>
+                </>
+              )}
+            </section>
           </section>
 
-          <section className="analytics-query-result" aria-live="polite">
-            {isLoading ? (
-              <>
-                <IonSpinner name="crescent" />
-                <span>Loading application data...</span>
-              </>
-            ) : hasError ? (
-              <span>Unable to load the application filters.</span>
-            ) : (
-              <>
-                <strong>{filteredApplications.length}</strong>
-                <span>
-                  {filteredApplications.length === 1
-                    ? 'application matches these filters'
-                    : 'applications match these filters'}
-                </span>
-              </>
-            )}
+          <section className="analytics-chart-panel analytics-chart-panel-full">
+            <h2>Application flow</h2>
+            <p>
+              View submitted, reviewed, accepted, rejected, waitlisted, and pending applications.
+            </p>
+            <ApplicationsSankeyChart applications={filteredApplications} />
           </section>
+
+          <div className="analytics-chart-grid">
+            <section className="analytics-chart-panel">
+              <div>
+                <h2>Acceptance by publications</h2>
+                <p>
+                  Compare accepted, rejected, and waitlisted applications by publication count.
+                </p>
+              </div>
+              {filteredApplicationsQuery.isError ? (
+                <p className="analytics-chart-message">
+                  Unable to load decision data.
+                </p>
+              ) : filteredApplicationsQuery.isPending ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <DecisionProfileBarChart applications={filteredApplications} />
+              )}
+            </section>
+
+            <section className="analytics-chart-panel">
+              <h2>Decisions by awards</h2>
+              <p>Compare accepted, rejected, and waitlisted applications by award count.</p>
+              {filteredApplicationsQuery.isError ? (
+                <p className="analytics-chart-message">
+                  Unable to load awards data.
+                </p>
+              ) : filteredApplicationsQuery.isPending ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <AcceptanceRateByAwardsChart applications={filteredApplications} />
+              )}
+            </section>
+
+            <section className="analytics-chart-panel analytics-line-chart-panel">
+              <h2>Acceptance rate by GPA range</h2>
+              <p>Compare accepted applications across GPA ranges.</p>
+              {filteredApplicationsQuery.isError ? (
+                <p className="analytics-chart-message">Unable to load GPA data.</p>
+              ) : filteredApplicationsQuery.isPending ? (
+                <IonSpinner name="crescent" />
+              ) : (
+                <AcceptanceRateLineChart applications={filteredApplications} />
+              )}
+            </section>
+
+          </div>
+
         </main>
       </IonContent>
     </IonPage>
